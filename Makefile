@@ -5,9 +5,6 @@ SOURCES    = ./CommonFiles/blas.c          \
 	     ./CommonFiles/matrix.c        \
 	     ./CommonFiles/linked_list.c   \
 	     ./CommonFiles/graph.c         \
-	     ./Solvers/gmres.c             \
-	     ./Preconditioners/ilup.c      \
-	     ./Preconditioners/ilut.c      \
 	     ./Reorderings/rcm.c           \
              ./Reorderings/sloan.c         \
              ./Reorderings/spectral.c      \
