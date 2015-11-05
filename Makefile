@@ -12,7 +12,7 @@ SOURCES    = ./CommonFiles/blas.c          \
              ./Reorderings/sloan.c         \
              ./Reorderings/spectral.c      \
 	     program.c
-OBJECTS    = $(SOURCES:.c=.o)
+OBJECTS    = $(SOURCES:rail_5177.mtx.c=.o)
 EXECUTABLE = program 
 
 all: 	$(SOURCES) $(EXECUTABLE)
@@ -22,5 +22,8 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
+
+run:
+	./$(EXECUTABLE) Matrices/rail_5177.mtx
 
 
