@@ -23,6 +23,6 @@ clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
 
 run:
-	./$(EXECUTABLE) Matrices/rail_5177.mtx
+	./$(EXECUTABLE) Matrices/sample.mtx
 
 

@@ -35,8 +35,9 @@ int main (int argc, char* argv[]){
 	printf("  - Bandwidth/Envelope before = %ld    / %ld\n", bandwidth,envelope);
 	
 	/*---START TIME---------------> */ time = get_time(); 
-	REORDERING_SPECTRAL(A,&p);
-// 	REORDERING_RCM_opt(A,&p);
+// 	UNORDERED_RCM(A, &p);
+// 	REORDERING_SPECTRAL(A,&p);
+	REORDERING_RCM_opt(A,&p);
 // 	REORDERING_SLOAN(A,&p);
 	MATRIX_permutation(A,p); 
 	/*---FINAL TIME---------------> */ time = (get_time() - time)/100.0;

@@ -8,5 +8,7 @@
  *--------------------------------------------------------------------------*/
 void UNORDERED_RCM (MAT* A, int** Fp)
 { 
-  printf("ok\n");
+  int s;
+  int* q = calloc (A->n,sizeof(int));
+  graph_unordered_bfs(A, s, q);
 }
