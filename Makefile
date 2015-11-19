@@ -5,7 +5,9 @@ SOURCES    = ./CommonFiles/blas.c          \
 	     ./CommonFiles/matrix.c        \
 	     ./CommonFiles/linked_list.c   \
 	     ./CommonFiles/graph.c         \
+	     ./CommonFiles/graph_parallel.c\
 	     ./Reorderings/rcm.c           \
+	     ./Reorderings/rcm_unordered.c \
              ./Reorderings/sloan.c         \
              ./Reorderings/spectral.c      \
 	     program.c
