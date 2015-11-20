@@ -54,6 +54,7 @@ extern int      GRAPH_LS_depth           (int* LS, int n);
 extern int      GRAPH_LS_width           (int* LS, int n);
 extern LIST*    GRAPH_LS_last_level      (MAT* A, int* LS, int n);
 extern int*     GRAPH_LS_peripheral      (MAT* A, int *node_s, int* node_e);
+extern int* 	GRAPH_unordered_bfs	 (MAT* adjacency, int root, int* levels);
 
 /*----------------------------------------------------------------------------
  * LINKED LIST FUNCTIONS PROTOTYPE
@@ -97,3 +98,4 @@ extern void     REORDERING_RCM           (MAT* A, int** p);
 extern void     REORDERING_SLOAN         (MAT* A, int** p);
 extern void     REORDERING_SPECTRAL      (MAT* A, int** p);
 extern void     REORDERING_SPECTRAL_WGT  (MAT* A, int** p);
+extern void	REORDERING_RCM_parallel	 (MAT* A, int** p);

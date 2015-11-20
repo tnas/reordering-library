@@ -6,9 +6,9 @@
 /*----------------------------------------------------------------------------
  * Unordered RCM reordering from the LEVEL STRUCTURE 
  *--------------------------------------------------------------------------*/
-void UNORDERED_RCM (MAT* A, int** Fp)
+void REORDERING_RCM_parallel(MAT* A, int** Fp)
 { 
-  //int s;
-  //int* q = calloc (A->n,sizeof(int));
-  //graph_unordered_bfs(A, s, q);
+  int s;
+  int* q = calloc (A->n,sizeof(int));
+  GRAPH_unordered_bfs(A, s, q);
 }
