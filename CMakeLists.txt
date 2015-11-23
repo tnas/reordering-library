@@ -9,7 +9,7 @@ add_executable(reordering-library program.c ./CommonFiles/blas.c ./CommonFiles/m
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
 
-set(CMAKE_C_FLAGS "-lm -Wall -lgfortran -lblas")
+set(CMAKE_C_FLAGS "-lm -Wall -lgfortran -lblas -fopenmp")
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
 
 add_subdirectory(CommonFiles)
