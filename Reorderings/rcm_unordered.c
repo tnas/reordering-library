@@ -6,9 +6,26 @@
 /*----------------------------------------------------------------------------
  * Unordered RCM reordering from the LEVEL STRUCTURE 
  *--------------------------------------------------------------------------*/
-void REORDERING_RCM_parallel(MAT* A, int** Fp)
+void REORDERING_RCM_parallel(MAT* A, int** perm)
 { 
-  int s;
-  int* q = calloc (A->n,sizeof(int));
-  GRAPH_unordered_bfs(A, s, q);
+	int n_nodes, root, e, count_nodes;
+	int* tperm;
+	
+	n_nodes = A->n;
+	tperm = calloc (n_nodes, sizeof(int));
+	
+// 	int* g = GRAPH_LS_peripheral (A, &root, &e);
+	
+	root = 4;
+	tperm = GRAPH_parallel_fixedpoint_bfs(A, root, tperm);
+	
+	/* Reverse order */
+	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
+	
+	
+// 	for (node = 0; node < n_nodes; ++node) 
+// 		printf("Node: %d is in level %d\n", node+1, (*perm)[node]);
+	
+// 	free(g);
 }
