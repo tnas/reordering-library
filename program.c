@@ -33,21 +33,34 @@ int main (int argc, char* argv[]){
 	bandwidth = MATRIX_bandwidth(A);
 	envelope  = MATRIX_envelope(A);
 	printf("\n  [ REORDERING ]\n");
-	printf("  - Bandwidth/Envelope before = %ld    / %ld\n", bandwidth,envelope);
+// 	printf("  - Bandwidth/Envelope before = %ld    / %ld\n", bandwidth,envelope);
 	
 	/*---START TIME---------------> */ time = get_time(); 
-	REORDERING_RCM_parallel(A, &p);
 // 	REORDERING_SPECTRAL(A,&p);
 	REORDERING_RCM_opt(A,&p);
 // 	REORDERING_SLOAN(A,&p);
-	MATRIX_permutation(A,p); 
+// 	MATRIX_permutation(A,p); 
 	/*---FINAL TIME---------------> */ time = (get_time() - time)/100.0;
 	
-	bandwidth = MATRIX_bandwidth(A);
-	envelope  = MATRIX_envelope(A);	
-	printf("  - Bandwidth/Envelope after  = %ld    / %ld\n", bandwidth,envelope);
+// 	bandwidth = MATRIX_bandwidth(A);
+// 	envelope  = MATRIX_envelope(A);	
+// 	printf("  - Bandwidth/Envelope after  = %ld    / %ld\n", bandwidth,envelope);
 	printf("  - Elapsed time: %.6f sec\n\n", time);
 
+	
+	
+	/*---START TIME---------------> */ time = get_time(); 
+	
+	REORDERING_RCM_parallel(A, &p);
+	
+	/*---FINAL TIME---------------> */ time = (get_time() - time)/100.0;
+	printf("  - Elapsed time: %.6f sec\n\n", time);
+	
+	
+	
+	
+	
+	
 	/*---------------------------------------------*/
 	/*---WRITING OUTPUT----------------------------*/
 	/*---------------------------------------------*/
