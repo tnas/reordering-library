@@ -106,7 +106,7 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
   
   omp_set_num_threads(64);
   count_visited_nodes = 0;
-  
+//   tentar a matriz bcspwr01 com 64 threads: o problema aparece
   #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
   {
 	while (count_visited_nodes < n_nodes) 
