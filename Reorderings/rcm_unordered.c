@@ -17,15 +17,20 @@ void REORDERING_RCM_parallel(MAT* A, int** perm)
 // 	int* g = GRAPH_LS_peripheral (A, &root, &e);
 	
 	root = 4;
-	tperm = GRAPH_parallel_fixedpoint_bfs(A, root, tperm);
+	tperm = GRAPH_parallel_fixedpoint_bfs2(A, root, tperm);
 	
 	/* Reverse order */
 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 	
 	
-// 	for (node = 0; node < n_nodes; ++node) 
-// 		printf("Node: %d is in level %d\n", node+1, (*perm)[node]);
+// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+// 		printf("Node: %d is in level %d\n", count_nodes, tperm[count_nodes]);
+	
+	printf("******************************************\n");
+	
+	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+		if (tperm[count_nodes] == 2147483647) printf("Node: %d is in level %d\n", count_nodes, tperm[count_nodes]);
 	
 // 	free(g);
 }

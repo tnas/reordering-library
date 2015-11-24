@@ -73,6 +73,8 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
   
   omp_set_num_threads(4);
   
+  count_visited_nodes = 0;
+  
   #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
   {
 	while (count_visited_nodes < n_nodes) 
@@ -111,6 +113,77 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
 					}
 				}
 			}
+		}
+	}
+  }
+  
+  return levels;
+}
+
+
+
+int* GRAPH_parallel_fixedpoint_bfs2(MAT* adjacency, int root, int* levels)
+{
+  int node, n_nodes, adj_node, node_degree, count_nodes, count_visited_nodes, level;
+  int* neighboors;
+  
+  n_nodes = adjacency->n;
+  levels = calloc(n_nodes, sizeof(int));
+  
+  for (node = 0; node < n_nodes; ++node) levels[node] = INFINITY;
+  levels[root] = 0;
+  
+  LIST* work_set = NULL;
+  work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
+  
+  omp_set_num_threads(4);
+//   omp_set_dynamic(1);
+  
+  #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level, count_visited_nodes)	
+  {
+	#pragma omp for
+	for (count_visited_nodes = 0; count_visited_nodes < n_nodes; ++count_visited_nodes) 
+	{
+		
+		while (work_set == NULL && count_visited_nodes < n_nodes) { }
+		
+		node = -1;
+		
+		#pragma omp critical
+		{
+			if (work_set != NULL)
+			{
+			node = LIST_first(work_set);
+			work_set = LIST_remove(work_set, node);
+//			printf("Thread: %d got node %d -> count_visited_nodes: ** %d **\n", omp_get_thread_num(), node, count_visited_nodes);
+			} 
+			else 
+			{
+				--count_visited_nodes;
+			}
+		}
+		
+		if (node != -1)
+		{
+		
+		neighboors = GRAPH_adjacent(adjacency, node);
+		node_degree = GRAPH_degree(adjacency, node);
+		
+		for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
+		{
+			adj_node = neighboors[count_nodes];
+				
+			#pragma omp critical
+			{
+				level = levels[node] + 1;
+				if (level < levels[adj_node])
+				{
+// 					printf("Thread: %d setting level %d for node %d\n", omp_get_thread_num(), level, adj_node);
+					levels[adj_node] = level;
+					work_set = LIST_insert_IF_NOT_EXIST(work_set, adj_node);
+				}
+			}
+		}
 		}
 	}
   }
