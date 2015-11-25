@@ -20,8 +20,8 @@ void REORDERING_RCM_parallel(MAT* A, int** perm)
 	tperm = GRAPH_parallel_fixedpoint_bfs(A, root, tperm);
 	
 	/* Reverse order */
-	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
+// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+// 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 	
 	
 // 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 

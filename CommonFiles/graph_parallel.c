@@ -104,11 +104,12 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
   LIST* work_set = NULL;
   work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
   
-  omp_set_num_threads(64);
+  omp_set_num_threads(1);
   count_visited_nodes = 0;
-//   tentar a matriz bcspwr01 com 64 threads: o problema aparece
+  
   #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
   {
+	#pragma omp flush (count_visited_nodes)
 	while (count_visited_nodes < n_nodes) 
 	{
 		node = -1;
@@ -121,15 +122,21 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
 			printf("[out]Thread: %d processing node %d\n", omp_get_thread_num(), node);
 			
 			#pragma omp flush (count_visited_nodes)
-			#pragma omp atomic
-			++count_visited_nodes;
-			printf("[out]Thread: %d processing node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
-			
-			neighboors = GRAPH_adjacent(adjacency, node);
-			node_degree = GRAPH_degree(adjacency, node);
+			#pragma omp critical
+			{
+				
+				++count_visited_nodes;
+				neighboors = GRAPH_adjacent(adjacency, node);
+				node_degree = GRAPH_degree(adjacency, node);
+
+				printf("[out]Thread: %d processing node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
+				printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
+				printf("[out]Thread: %d showing neighboors of node %d: [ ", omp_get_thread_num(), node);
+				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes) printf("%d, ", neighboors[count_nodes]);
+				printf("]\n");
+			}
 		
-			printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
-			
+		
 			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
 			{
 				adj_node = neighboors[count_nodes];
