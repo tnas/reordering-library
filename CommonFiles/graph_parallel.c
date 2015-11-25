@@ -71,24 +71,44 @@ void inline update_work_set(const OPERATION op, LIST** ws, int* node)
 				{
 					*node = LIST_first(*ws);
 					(*ws) = LIST_remove(*ws, *node);
-					printf("Thread: %d reading node %d from work_set\n", omp_get_thread_num(), *node);
+// 					printf("Thread: %d reading node %d from work_set\n", omp_get_thread_num(), *node);
 				}
 				else 
 				{
-					printf("Thread: %d has done anything over work_set.\n", omp_get_thread_num());
+// 					printf("Thread: %d has done anything over work_set.\n", omp_get_thread_num());
 				}
 				
 				break;
 			case WRITE :
-				printf("Thread: %d writing level to node %d\n", omp_get_thread_num(), *node);
+// 				printf("Thread: %d writing level to node %d\n", omp_get_thread_num(), *node);
 				*ws = LIST_insert_IF_NOT_EXIST(*ws, *node);
 				break;
 		}
 		
-		printf("Thread: %d has finished updating work_set\n", omp_get_thread_num());
+// 		printf("Thread: %d has finished updating work_set\n", omp_get_thread_num());
 	}
 	
 }
+
+int inline get_count_nodes(const OPERATION op, int* count_nodes)
+{
+	#pragma omp critical (countnodes)
+	{
+		#pragma omp flush (count_nodes)
+		
+		switch (op)
+		{
+			case READ :
+				break;
+			case WRITE :
+				++(*count_nodes);
+				break;
+		}
+		
+	}
+}
+
+
 
 int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
 {
@@ -104,56 +124,61 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
   LIST* work_set = NULL;
   work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
   
-  omp_set_num_threads(1);
+  omp_set_num_threads(4);
   count_visited_nodes = 0;
   
   #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
   {
-	#pragma omp flush (count_visited_nodes)
+	
+	get_count_nodes(READ, &count_nodes);  
+	
+	
 	while (count_visited_nodes < n_nodes) 
 	{
 		node = -1;
 		update_work_set(READ, &work_set, &node);
 		
-		printf("[out]Thread: %d got node %d -> count_visited_nodes: ** %d **\n", omp_get_thread_num(), node, count_visited_nodes);
+// 		printf("[out]Thread: %d got node %d -> count_visited_nodes: ** %d **\n", omp_get_thread_num(), node, count_visited_nodes);
 		
 		if (node != -1) 
 		{
-			printf("[out]Thread: %d processing node %d\n", omp_get_thread_num(), node);
+// 			printf("[out]Thread: %d processing node %d\n", omp_get_thread_num(), node);
 			
 			#pragma omp flush (count_visited_nodes)
 			#pragma omp critical
 			{
 				
-				++count_visited_nodes;
+// 				++count_visited_nodes;
+				get_count_nodes(WRITE, &count_visited_nodes);
 				neighboors = GRAPH_adjacent(adjacency, node);
 				node_degree = GRAPH_degree(adjacency, node);
 
-				printf("[out]Thread: %d processing node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
-				printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
-				printf("[out]Thread: %d showing neighboors of node %d: [ ", omp_get_thread_num(), node);
-				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes) printf("%d, ", neighboors[count_nodes]);
-				printf("]\n");
+// 				printf("[out]Thread: %d processing node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
+// 				printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
+// 				printf("[out]Thread: %d showing neighboors of node %d: [ ", omp_get_thread_num(), node);
+// 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes) printf("%d, ", neighboors[count_nodes]);
+// 				printf("]\n");
 			}
 		
 		
 			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
 			{
 				adj_node = neighboors[count_nodes];
-				printf("[out]Thread: %d processing node %d neighboor [%d/%d] of node %d\n", omp_get_thread_num(), adj_node, count_nodes+1, node_degree, node);
+// 				printf("[out]Thread: %d processing node %d neighboor [%d/%d] of node %d\n", omp_get_thread_num(), adj_node, count_nodes+1, node_degree, node);
 				#pragma omp flush (levels)
 				#pragma omp critical
 				{
 					level = levels[node] + 1;
 					if (level < levels[adj_node])
 					{
-						printf("[out]Thread: %d setting level %d for node %d\n", omp_get_thread_num(), level, adj_node);
+// 						printf("[out]Thread: %d setting level %d for node %d\n", omp_get_thread_num(), level, adj_node);
 						levels[adj_node] = level;
 						update_work_set(WRITE, &work_set, &adj_node);
 					}
 				}
 			}
 		}
+
 	}
   }
   
