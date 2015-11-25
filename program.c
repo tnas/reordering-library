@@ -11,6 +11,34 @@ double get_time ()
 	return (double)(tv.tv_sec * 100.0 + tv.tv_usec / 10000.0);
 }
 
+
+/*---------------------------------------------*/
+/*---WRITING OUTPUT----------------------------*/
+/*---------------------------------------------*/
+void write_output(const MAT *A)
+{
+	int i,j;
+	
+	FILE *f = fopen("output.mtx", "w");
+	fprintf(f,"%d %d %d\n", A->n, A->m, A->nz);
+	for (i = 0; i < A->n; ++i)
+	{
+		for (j = A->IA[i]; j <= A->IA[i+1]-1; j++)
+			fprintf (f,"%d %d %le\n",A->JA[j],i,A->AA[j]); 
+	}
+	fclose(f);
+	FILE *g = fopen("plot.plt", "w");
+	fprintf(g,"#!/bin/sh\n");
+	fprintf(g,"set xrange [0:%d]\n", A->n);
+	fprintf(g,"set yrange [0:%d] reverse\n", A->n);
+	fprintf(g,"set size square\n");
+	fprintf(g,"set terminal png\n");
+	fprintf(g,"set output \"output.png\"\n");
+	fprintf(g,"plot \"output.mtx\" using 1:2 notitle with dots linecolor rgb \"#000000\"\n");
+	fclose(g);
+}
+
+
 int main (int argc, char* argv[]){
   
 	if (argc != 2)
@@ -56,34 +84,7 @@ int main (int argc, char* argv[]){
 	/*---FINAL TIME---------------> */ time = (get_time() - time)/100.0;
 	printf("  - Elapsed time: %.6f sec\n\n", time);
 	
-	
-	
-	
-	
-	
-	/*---------------------------------------------*/
-	/*---WRITING OUTPUT----------------------------*/
-	/*---------------------------------------------*/
-	int i,j;
-	
-	FILE *f = fopen("output.mtx", "w");
-	fprintf(f,"%d %d %d\n", A->n, A->m, A->nz);
-	for (i = 0; i < A->n; ++i)
-	{
-		for (j = A->IA[i]; j <= A->IA[i+1]-1; j++)
-			fprintf (f,"%d %d %le\n",A->JA[j],i,A->AA[j]); 
-	}
-	fclose(f);
-	FILE *g = fopen("plot.plt", "w");
-	fprintf(g,"#!/bin/sh\n");
-	fprintf(g,"set xrange [0:%d]\n", A->n);
-	fprintf(g,"set yrange [0:%d] reverse\n", A->n);
-	fprintf(g,"set size square\n");
-	fprintf(g,"set terminal png\n");
-	fprintf(g,"set output \"output.png\"\n");
-	fprintf(g,"plot \"output.mtx\" using 1:2 notitle with dots linecolor rgb \"#000000\"\n");
-	fclose(g);
-	
+
 	free(p);
 	MATRIX_clean(A);    
 	return 0;
