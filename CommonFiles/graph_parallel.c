@@ -5,365 +5,16 @@
 #include <time.h>
 #include <omp.h>
 
-/*----------------------------------------------------------------------------
- * Perform an unordered Breadth-First Search for the RCM reordering
- * 
- * param adjacency: adjacency matrix of graph
- * param root: start node
- * param levels: vector of levels of nodes
- *--------------------------------------------------------------------------*/
-int* GRAPH_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
-{
-  int node, n_nodes, adj_node, node_degree, count_nodes, count_visited_nodes, level;
-  int* neighboors;
-  
-  n_nodes = adjacency->n;
-  levels = calloc(n_nodes, sizeof(int));
-  
-  for (node = 0; node < n_nodes; ++node) levels[node] = INFINITY;
-  levels[root] = 0;
-  
-//   printf("Number of nodes: %d, some node: %d\n", n_nodes, rand() % n_nodes);
-//   srand(time(NULL));
-  
-  LIST* work_set = NULL;
-  work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
-  
-  while (count_visited_nodes != n_nodes) 
-  {
-	  node = LIST_first(work_set);
-// 	  TODO: work_set = LIST_remove_first(work_set);
-	  work_set = LIST_remove(work_set, node);
-	  neighboors = GRAPH_adjacent(adjacency, node);
-	  node_degree = GRAPH_degree(adjacency, node);
-    
-	  for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
-	  {
-		adj_node = neighboors[count_nodes];
-		level = levels[node] + 1;
-		if (level < levels[adj_node])
-		{
-			levels[adj_node] = level;
-			work_set = LIST_insert_IF_NOT_EXIST(work_set, adj_node);
-		}
-		
-	  }
-	  
-	  ++count_visited_nodes;
-  }
-  
-  return levels;
-}
-
+#define NUM_THREADS 8
 
 typedef enum OPERATION {READ, WRITE} OPERATION;
 
-void inline update_work_set_antes(const OPERATION op, LIST** ws, int* node)
-{
-	#pragma omp critical (workset)
-	{
-		#pragma omp flush (ws)
-		
-		switch (op)
-		{
-			case READ :
-				if ((*ws) != NULL)
-				{
-					*node = LIST_first(*ws);
-					(*ws) = LIST_remove(*ws, *node);
-// 					printf("Thread: %d reading node %d from work_set\n", omp_get_thread_num(), *node);
-				}
-				else 
-				{
-// 					printf("Thread: %d has done anything over work_set.\n", omp_get_thread_num());
-				}
-				
-				break;
-			case WRITE :
-// 				printf("Thread: %d writing level to node %d\n", omp_get_thread_num(), *node);
-				*ws = LIST_insert_IF_NOT_EXIST(*ws, *node);
-				break;
-		}
-		
-// 		printf("Thread: %d has finished updating work_set\n", omp_get_thread_num());
-	}
-	
-}
 
-void inline get_count_nodes(const OPERATION op, int* count_nodes)
-{
-	#pragma omp critical (countnodes)
-	{
-		#pragma omp flush (count_nodes)
-		
-		switch (op)
-		{
-			case READ :
-				break;
-			case WRITE :
-				++(*count_nodes);
-				break;
-		}
-		
-	}
-}
-
-
-
-int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
-{
-  int node, n_nodes, adj_node, node_degree, count_nodes, count_visited_nodes, level;
-  int* neighboors;
-  
-  n_nodes = adjacency->n;
-  levels = calloc(n_nodes, sizeof(int));
-  
-  for (node = 0; node < n_nodes; ++node) levels[node] = INFINITY;
-  levels[root] = 0;
-  
-  LIST* work_set = NULL;
-  work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
-  
-  omp_set_num_threads(4);
-  count_visited_nodes = 0;
-  
-  #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
-  {
-	
-	get_count_nodes(READ, &count_nodes);  
-	
-	
-	while (count_visited_nodes < n_nodes) 
-	{
-		node = -1;
-		update_work_set_antes(READ, &work_set, &node);
-		
-// 		printf("[out]Thread: %d got node %d -> count_visited_nodes: ** %d **\n", omp_get_thread_num(), node, count_visited_nodes);
-		
-		if (node != -1) 
-		{
-// 			printf("[out]Thread: %d processing node %d\n", omp_get_thread_num(), node);
-			
-			#pragma omp flush (count_visited_nodes)
-			#pragma omp critical
-			{
-				
-// 				++count_visited_nodes;
-				get_count_nodes(WRITE, &count_visited_nodes);
-				neighboors = GRAPH_adjacent(adjacency, node);
-				node_degree = GRAPH_degree(adjacency, node);
-
-// 				printf("[out]Thread: %d processing node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
-// 				printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
-// 				printf("[out]Thread: %d showing neighboors of node %d: [ ", omp_get_thread_num(), node);
-// 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes) printf("%d, ", neighboors[count_nodes]);
-// 				printf("]\n");
-			}
-		
-		
-			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
-			{
-				adj_node = neighboors[count_nodes];
-// 				printf("[out]Thread: %d processing node %d neighboor [%d/%d] of node %d\n", omp_get_thread_num(), adj_node, count_nodes+1, node_degree, node);
-				#pragma omp flush (levels)
-				#pragma omp critical
-				{
-					level = levels[node] + 1;
-					if (level < levels[adj_node])
-					{
-// 						printf("[out]Thread: %d setting level %d for node %d\n", omp_get_thread_num(), level, adj_node);
-						levels[adj_node] = level;
-						update_work_set_antes(WRITE, &work_set, &adj_node);
-					}
-				}
-			}
-		}
-
-	}
-  }
-  
-  return levels;
-}
-
-
-
-
-
-
-
-int* GRAPH_parallel_fixedpoint_bfs2(MAT* adjacency, int root, int* levels)
-{
-  int node, n_nodes, adj_node, node_degree, count_nodes, count_visited_nodes, level;
-  int* neighboors;
-  
-  n_nodes = adjacency->n;
-  levels = calloc(n_nodes, sizeof(int));
-  
-  for (node = 0; node < n_nodes; ++node) levels[node] = INFINITY;
-  levels[root] = 0;
-  
-  LIST* work_set = NULL;
-  work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
-  
-  omp_set_num_threads(3);
-  
-  #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level, count_visited_nodes)	
-  {
-	#pragma omp for
-	for (count_visited_nodes = 0; count_visited_nodes < n_nodes; ++count_visited_nodes) 
-	{
-		
-		while (work_set == NULL && count_visited_nodes < n_nodes) {
-			printf("Thread: %d waiting at count_visited_nodes: %d\n", omp_get_thread_num(), count_visited_nodes);
-		}
-		
-		node = -1;
-		
-		#pragma omp critical
-		{
-			if (work_set != NULL)
-			{
-		
-			node = LIST_first(work_set);
-			work_set = LIST_remove(work_set, node);
-			
-			printf("Thread: %d got node %d -> count_visited_nodes: ** %d **\n", omp_get_thread_num(), node, count_visited_nodes);
-			} 
-			else 
-			{
-				--count_visited_nodes;
-				printf("Thread: %d decrementing count_visited_nodes to: ** %d **\n", omp_get_thread_num(), count_visited_nodes);
-			}
-		}
-		
-		
-		if (node != -1)
-		{
-		
-			neighboors = GRAPH_adjacent(adjacency, node);
-			node_degree = GRAPH_degree(adjacency, node);
-			
-			printf("[out]Thread: %d processing node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
-			printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
-			printf("[out]Thread: %d showing neighboors of node %d: [ ", omp_get_thread_num(), node);
-			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes) printf("%d, ", neighboors[count_nodes]);
-			printf("]\n");
-		
-			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
-			{
-				adj_node = neighboors[count_nodes];
-				
-				printf("[out]Thread: %d processing node %d neighboor [%d/%d] of node %d\n", omp_get_thread_num(), adj_node, count_nodes+1, node_degree, node);
-				
-				#pragma omp critical
-				{
-					level = levels[node] + 1;
-					if (level < levels[adj_node])
-					{
-						printf("Thread: %d setting level %d for node %d\n", omp_get_thread_num(), level, adj_node);
-						levels[adj_node] = level;
-						work_set = LIST_insert_IF_NOT_EXIST(work_set, adj_node);
-					}
-				}
-				
-				#pragma omp flush (work_set)
-			}
-		}
-	}
-  }
-  
-  return levels;
-}
-
-
-
-
-
-
-
-
-
-int* GRAPH_parallel_fixedpoint_bfs3(MAT* adjacency, int root, int* levels)
-{
-  int node, n_nodes, adj_node, node_degree, count_nodes, count_visited_nodes, level;
-  int* neighboors;
-  
-  n_nodes = adjacency->n;
-  levels = calloc(n_nodes, sizeof(int));
-  
-  for (node = 0; node < n_nodes; ++node) levels[node] = INFINITY;
-  levels[root] = 0;
-  
-  LIST* work_set = NULL;
-  work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
-  
-
-  
-  #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level, count_visited_nodes)	
-  {
-	#pragma omp for
-	for (count_visited_nodes = 0; count_visited_nodes < n_nodes; ++count_visited_nodes) 
-	{
-		node = -1;
-		update_work_set(READ, &work_set, &node);
-		
-		if (node != -1)
-		{
-			neighboors  = GRAPH_adjacent(adjacency, node);
-			node_degree = GRAPH_degree(adjacency, node);
-		
-			printf("[out]Thread: %d got node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
-			printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
-			printf("[out]Thread: %d showing neighboors of node %d: [ ", omp_get_thread_num(), node);
-			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes) printf("%d, ", neighboors[count_nodes]);
-			printf("]\n");
-			
-			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
-			{
-				adj_node = neighboors[count_nodes];
-				
-				printf("[out]Thread: %d processing node %d neighboor [%d/%d] of node %d\n", omp_get_thread_num(), adj_node, count_nodes+1, node_degree, node);
-				
-				#pragma omp critical
-				{
-					#pragma omp flush (levels)
-					
-					level = levels[node] + 1;
-					if (level < levels[adj_node])
-					{
-						printf("[out]Thread: %d setting level %d for node %d\n", omp_get_thread_num(), level, adj_node);
-						levels[adj_node] = level;
-						update_work_set(WRITE, &work_set, &adj_node);
-					}
-				}
-			}
-		}
-		else 
-		{
-			--count_visited_nodes;
-		}
-	}
-  }
-  
-  if (work_set != NULL)
-	  printf("WORK_SET has not been complete processed!!!\n.");
-  
-  return levels;
-}
-
-
-
-
-#define NUM_THREADS 4
 
 int inline has_work(const int* status_th)
 {
 	int working_ok, count;
-	
-	working_ok = 0;
-	
-	for (count = 0; count < NUM_THREADS; working_ok |= status_th[count++]);
-		
+	for (count = 0, working_ok = 0; count < NUM_THREADS; working_ok |= status_th[count++]);
 	return working_ok;
 }
 
@@ -381,31 +32,27 @@ void inline update_work_set(const OPERATION op, LIST** ws, int* node)
 				{
 					*node = LIST_first(*ws);
 					(*ws) = LIST_remove(*ws, *node);
-// 					printf("Thread: %d reading node %d from work_set\n", omp_get_thread_num(), *node);
 				}
-				else 
-				{
-// 					printf("Thread: %d has done anything over work_set.\n", omp_get_thread_num());
-				}
-				
 				break;
 			case WRITE :
-// 				printf("Thread: %d writing level to node %d\n", omp_get_thread_num(), *node);
 				*ws = LIST_insert_IF_NOT_EXIST(*ws, *node);
 				break;
 		}
-		
-// 		printf("Thread: %d has finished updating work_set\n", omp_get_thread_num());
 	}
-	
 }
 
 
 
-
-int* GRAPH_parallel_fixedpoint_bfs4(MAT* adjacency, int root, int* levels)
+/*----------------------------------------------------------------------------
+ * Perform an unordered Breadth-First Search for the RCM reordering
+ * 
+ * param adjacency: adjacency matrix of graph
+ * param root: start node
+ * param levels: vector of levels of nodes
+ --------------------------------------------------------------------------*/
+int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
 {
-  int node, n_nodes, adj_node, node_degree, count_nodes, count_visited_nodes, level, count;
+  int node, n_nodes, adj_node, node_degree, count_nodes, level, count;
   int* neighboors;
   int status_threads[NUM_THREADS];
   
@@ -421,7 +68,7 @@ int* GRAPH_parallel_fixedpoint_bfs4(MAT* adjacency, int root, int* levels)
   omp_set_num_threads(NUM_THREADS);
   for (count = 0; count < NUM_THREADS; status_threads[count++] = 1);
   
-  #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level, count_visited_nodes)	
+  #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
   {
 	while (has_work(status_threads)) 
 	{
@@ -435,17 +82,9 @@ int* GRAPH_parallel_fixedpoint_bfs4(MAT* adjacency, int root, int* levels)
 			neighboors  = GRAPH_adjacent(adjacency, node);
 			node_degree = GRAPH_degree(adjacency, node);
 		
-// 			printf("[out]Thread: %d got node %d setting count_visited_nodes to %d\n", omp_get_thread_num(), node, count_visited_nodes);
-// 			printf("[out]Thread: %d processing %d neighboors of node %d\n", omp_get_thread_num(), node_degree, node);
-// 			printf("[out]Thread: %d showing neighboors of node %d: [ ", omp_get_thread_num(), node);
-// 			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes) printf("%d, ", neighboors[count_nodes]);
-// 			printf("]\n");
-			
 			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
 			{
 				adj_node = neighboors[count_nodes];
-				
-// 				printf("[out]Thread: %d processing node %d neighboor [%d/%d] of node %d\n", omp_get_thread_num(), adj_node, count_nodes+1, node_degree, node);
 				
 				#pragma omp critical
 				{
@@ -454,7 +93,6 @@ int* GRAPH_parallel_fixedpoint_bfs4(MAT* adjacency, int root, int* levels)
 					level = levels[node] + 1;
 					if (level < levels[adj_node])
 					{
-// 						printf("[out]Thread: %d setting level %d for node %d\n", omp_get_thread_num(), level, adj_node);
 						levels[adj_node] = level;
 						update_work_set(WRITE, &work_set, &adj_node);
 					}
@@ -468,8 +106,11 @@ int* GRAPH_parallel_fixedpoint_bfs4(MAT* adjacency, int root, int* levels)
 	}
   }
   
-  if (work_set != NULL)
-	  printf("WORK_SET has not been complete processed!!!\n.");
+  if (work_set != NULL) 
+  {
+	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
+	exit(0);
+  }
   
   return levels;
 }
