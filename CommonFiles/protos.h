@@ -58,6 +58,7 @@ extern int* 	GRAPH_fixedpoint_bfs	 (MAT* adjacency, int root, int* levels);
 extern int*	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels);
 extern int*	GRAPH_parallel_fixedpoint_bfs2(MAT* adjacency, int root, int* levels);
 extern int*	GRAPH_parallel_fixedpoint_bfs3(MAT* adjacency, int root, int* levels);
+extern int*	GRAPH_parallel_fixedpoint_bfs4(MAT* adjacency, int root, int* levels);
 
 /*----------------------------------------------------------------------------
  * LINKED LIST FUNCTIONS PROTOTYPE
