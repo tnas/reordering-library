@@ -6,6 +6,8 @@
 #include <omp.h>
 
 #define NUM_THREADS 8
+#define THREAD_ON 1
+#define THREAD_OFF 0
 
 typedef enum OPERATION {READ, WRITE} OPERATION;
 
@@ -66,7 +68,7 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
   work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
   
   omp_set_num_threads(NUM_THREADS);
-  for (count = 0; count < NUM_THREADS; status_threads[count++] = 1);
+  for (count = 0; count < NUM_THREADS; status_threads[count++] = THREAD_ON);
   
   #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
   {
@@ -101,7 +103,7 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
 		}
 		else 
 		{
-			status_threads[omp_get_thread_num()] = 0;
+			status_threads[omp_get_thread_num()] = THREAD_OFF;
 		}
 	}
   }
