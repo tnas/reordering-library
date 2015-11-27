@@ -55,7 +55,7 @@ extern int      GRAPH_LS_width           (int* LS, int n);
 extern LIST*    GRAPH_LS_last_level      (MAT* A, int* LS, int n);
 extern int*     GRAPH_LS_peripheral      (MAT* A, int *node_s, int* node_e);
 extern int* 	GRAPH_fixedpoint_bfs	 (MAT* adjacency, int root, int* levels);
-extern int*	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels);
+
 
 /*----------------------------------------------------------------------------
  * LINKED LIST FUNCTIONS PROTOTYPE

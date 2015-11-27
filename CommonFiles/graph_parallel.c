@@ -1,16 +1,7 @@
 /*----------------------------------------------------------------------------
  * PARALLEL GRAPH FUNCTIONS
  *--------------------------------------------------------------------------*/
-#include "protos.h"
-#include <time.h>
-#include <omp.h>
-
-#define NUM_THREADS 8
-#define THREAD_ON 1
-#define THREAD_OFF 0
-
-typedef enum OPERATION {READ, WRITE} OPERATION;
-
+#include "protos_parallel.h"
 
 
 int inline has_work(const int* status_th)
