@@ -4,50 +4,7 @@
 #include "../CommonFiles/protos_parallel.h"
 
 
-void count_nodes_by_level(const int* levels, const int n_nodes, int** counts);
-
-/*----------------------------------------------------------------------------
- * Unordered RCM reordering from the LEVEL STRUCTURE 
- *--------------------------------------------------------------------------*/
-void REORDERING_RCM_parallel(MAT* A, int** perm)
-{ 
-	int n_nodes, root, count_nodes;
-	int* levels;
-	int* counts;
-	
-	n_nodes = A->n;
-	levels = calloc (n_nodes, sizeof(int));
-	
-// 	int* g = GRAPH_LS_peripheral (A, &root, &e);
-	
-	root = 1;
-	levels = GRAPH_parallel_fixedpoint_bfs(A, root, levels);
-	
-	count_nodes_by_level(levels, n_nodes, &counts);
-	
-	/* Reverse order */
-// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-// 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
-	
-	
-	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-		printf("Node: %d is in level %d\n", count_nodes, levels[count_nodes]);
-	
-	printf("******************************************\n");
-	
-	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-		if (levels[count_nodes] == 2147483647) printf("Node: %d is in level %d\n", count_nodes, levels[count_nodes]);
-	printf("******************************************\n");
-	
-	free(levels);
-	free(counts);
-	
-		
-// 	free(g);
-}
-
-
-void count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
+int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 {
 	int node, count_thread, max_level, level;
 	int** local_count;
@@ -105,4 +62,85 @@ void count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 		#pragma omp single nowait
 		free(local_max);
 	}
+	
+	return max_level;
 }
+
+
+void prefix_sum(const int* counts, int** sums, int max_level)
+{
+	int level, chunk_size;
+	
+// 	*sums = calloc(max_level + 1, sizeof(int));
+// 	(*sums)[0] = 0;
+	
+	max_level = 15;
+	*sums = calloc(15, sizeof(int));
+	
+	int tcounts[15] = { 9, 8, 3, 2, 7, 1, 6, 4, 5, 5, 8, 3, 4, 9, 1}; 
+	
+	#pragma omp parallel private (level)
+	{
+		#pragma omp single
+		chunk_size = iseven(max_level) ? max_level/NUM_THREADS : max_level/NUM_THREADS + 1;
+		
+		#pragma omp for
+		for (level = 0; level < max_level; level+=chunk_size)
+			(*sums)[level] = tcounts[level];
+		
+		#pragma omp for schedule(static, chunk_size)
+		for (level = 0; level < max_level; ++level)
+		{
+			printf("Thread %d processing position %d with value %d\n", omp_get_thread_num(), level, tcounts[level]);
+			(*sums)[level+1] = (*sums)[level] + tcounts[level+1];
+		}
+	}
+}
+
+/*----------------------------------------------------------------------------
+ * Unordered RCM reordering from the LEVEL STRUCTURE 
+ *--------------------------------------------------------------------------*/
+void REORDERING_RCM_parallel(MAT* A, int** perm)
+{ 
+	int n_nodes, root, count_nodes, max_level;
+	int* levels;
+	int* counts;
+	int* sums;
+	
+	n_nodes = A->n;
+	levels = calloc (n_nodes, sizeof(int));
+	
+// 	int* g = GRAPH_LS_peripheral (A, &root, &e);
+	
+	root = 1;
+	levels = GRAPH_parallel_fixedpoint_bfs(A, root, levels);
+	
+	max_level = count_nodes_by_level(levels, n_nodes, &counts);
+	
+	prefix_sum(counts, &sums, max_level);
+	
+	/* Reverse order */
+// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+// 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
+	
+	printf("Sums vector: ");
+	for (count_nodes = 0; count_nodes < 15; ++count_nodes) 
+		printf("%d ", sums[count_nodes]);
+	printf("\n");
+// 	
+// 	printf("******************************************\n");
+// 	
+// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+// 		if (levels[count_nodes] == 2147483647) printf("Node: %d is in level %d\n", count_nodes, levels[count_nodes]);
+// 	printf("******************************************\n");
+	
+	free(levels);
+	free(counts);
+	free(sums);
+	
+		
+// 	free(g);
+}
+
+
+
