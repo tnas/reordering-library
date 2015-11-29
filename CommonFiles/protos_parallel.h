@@ -9,5 +9,12 @@
 
 typedef enum OPERATION {READ, WRITE} OPERATION;
 
+typedef struct 
+{
+	int initial_ps;
+	int final_ps;
+	int total_ps;
+} status_prefix_sum;
+
 
 extern int*	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels);
