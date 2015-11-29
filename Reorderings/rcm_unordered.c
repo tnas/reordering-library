@@ -70,9 +70,9 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 void prefix_sum(const int* counts, int** sums, int max_level)
 {
 	int level, local_level, chunk_size;
-	
-// 	*sums = calloc(max_level + 1, sizeof(int));
-// 	(*sums)[0] = 0;
+/*	
+	*sums = calloc(max_level + 1, sizeof(int));
+	(*sums)[0] = 0;*/
 	
 	max_level = 15;
 	*sums = calloc(15, sizeof(int));
@@ -84,7 +84,7 @@ void prefix_sum(const int* counts, int** sums, int max_level)
 		#pragma omp single
 		chunk_size = iseven(max_level) ? max_level/NUM_THREADS : max_level/NUM_THREADS + 1;
 		
-		#pragma omp for schedule(static, chunk_size)
+		#pragma omp for schedule(dynamic, chunk_size)
 		for (level = 0; level < max_level; level+=chunk_size)
 		{		
 			(*sums)[level] = tcounts[level];
