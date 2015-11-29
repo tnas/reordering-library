@@ -69,7 +69,7 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 
 void prefix_sum(const int* counts, int** sums, int max_level)
 {
-	int level, chunk_size;
+	int level, local_level, chunk_size;
 	
 // 	*sums = calloc(max_level + 1, sizeof(int));
 // 	(*sums)[0] = 0;
@@ -79,21 +79,28 @@ void prefix_sum(const int* counts, int** sums, int max_level)
 	
 	int tcounts[15] = { 9, 8, 3, 2, 7, 1, 6, 4, 5, 5, 8, 3, 4, 9, 1}; 
 	
-	#pragma omp parallel private (level)
+	#pragma omp parallel private (level, local_level)
 	{
 		#pragma omp single
 		chunk_size = iseven(max_level) ? max_level/NUM_THREADS : max_level/NUM_THREADS + 1;
 		
-		#pragma omp for
-		for (level = 0; level < max_level; level+=chunk_size)
-			(*sums)[level] = tcounts[level];
-		
 		#pragma omp for schedule(static, chunk_size)
-		for (level = 0; level < max_level; ++level)
-		{
-			printf("Thread %d processing position %d with value %d\n", omp_get_thread_num(), level, tcounts[level]);
-			(*sums)[level+1] = (*sums)[level] + tcounts[level+1];
+		for (level = 0; level < max_level; level+=chunk_size)
+		{		
+			(*sums)[level] = tcounts[level];
+			
+			for (local_level = level+1; local_level < level+chunk_size; ++local_level)
+			{
+				(*sums)[local_level] = (*sums)[local_level-1] + tcounts[local_level];
+			}
 		}
+		
+// 		#pragma omp for schedule(static, chunk_size)
+// 		for (level = 0; level < max_level; ++level)
+// 		{
+// 			printf("Thread %d processing position %d with value %d\n", omp_get_thread_num(), level, tcounts[level]);
+// 			(*sums)[level+1] = (*sums)[level] + tcounts[level+1];
+// 		}
 	}
 }
 
