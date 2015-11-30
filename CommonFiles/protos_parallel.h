@@ -12,8 +12,10 @@ typedef enum OPERATION {READ, WRITE} OPERATION;
 typedef struct 
 {
 	int initial_prefix_sum;
-	int final_prefix_sum;
-	int total_sum;
+	int curr_prefix_sum;
+	int curr_total_sum;
+	int last_prefix_sum;
+	int last_total_sum;
 } status_prefix_sum;
 
 
