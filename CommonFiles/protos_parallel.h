@@ -21,3 +21,4 @@ typedef struct
 
 
 extern int*	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels);
+extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

@@ -3,7 +3,7 @@
 #include <sys/time.h>
 
 #include "./CommonFiles/protos.h"
-
+// #include "./UnitTests/rcm_parallel_test.h"
 
 double get_time ()
 {
@@ -78,7 +78,7 @@ int main (int argc, char* argv[]){
 	
 	
 	/*---START TIME---------------> */ time = get_time(); 
-	
+// 	test_prefix_sum();
 	Unordered_RCM(A, &p);
 	
 	/*---FINAL TIME---------------> */ time = (get_time() - time)/100.0;

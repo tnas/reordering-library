@@ -1,7 +1,8 @@
 /*----------------------------------------------------------------------------
  * UNORDERED RCM REORDERING SOLVER
  *--------------------------------------------------------------------------*/
-#include "../CommonFiles/protos_parallel.h"
+// #include "../CommonFiles/protos_parallel.h"
+#include "../UnitTests/rcm_parallel_test.h"
 
 
 int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
@@ -11,7 +12,8 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 	int* local_max;
 	
 	max_level = 0;
-		
+	omp_set_num_threads(NUM_THREADS);
+	
 	#pragma omp parallel private(node, count_thread, level)
 	{
 		#pragma omp single nowait
@@ -80,10 +82,10 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 	int level, local_level, chunk_size, index_processors, id_proc, offset_level, 
 		coef_target_proc, target_proc, count_thread;
 	status_prefix_sum status_ps[NUM_THREADS];
+// 	int temp;
 	
 	*sums = calloc(max_level, sizeof(int));
 	
-// 	chunk_size = iseven(max_level) ? max_level/NUM_THREADS : max_level/NUM_THREADS + 1;
 	if (NUM_THREADS > max_level)
 	{
 		omp_set_num_threads(max_level);
@@ -95,9 +97,11 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 	
 	offset_level = -chunk_size;
 	count_thread = 0;
+	omp_set_num_threads(NUM_THREADS);
 	
 	#pragma omp parallel private (level, local_level, id_proc, coef_target_proc, target_proc)
 	{
+		
 		#pragma omp single
 		index_processors = ceil(log2f(NUM_THREADS));
 		
@@ -199,37 +203,44 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 
 void place(MAT* graph, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
 {
-	int threads_per_level, level, node, degree, count;
+	int level, node, degree, count;
 	int* read_offset;
 	int* write_offset;
 	GRAPH* children;
 	
-	#pragma omp parallel sections num_threads(3)
-	{
-		#pragma omp section
-		{
-			read_offset  = calloc(max_dist, sizeof(int));
-			bcopy(sums, read_offset, max_dist * sizeof(int));
-		}
-		
-		#pragma omp section
-		{
-			write_offset = calloc(max_dist, sizeof(int));
-			bcopy(sums, write_offset, max_dist * sizeof(int));
-			write_offset[0] = 1;
-		}
-		
-		#pragma omp section
-		(*perm)[0] =  source_node;
-	}
+// 	#pragma omp parallel sections num_threads(3)
+// 	{
+// 		#pragma omp section
+// 		{
+// 			read_offset  = calloc(max_dist, sizeof(int));
+// 			bcopy(sums, read_offset, max_dist * sizeof(int));
+// 		}
+// 		
+// 		#pragma omp section
+// 		{
+// 			write_offset = calloc(max_dist, sizeof(int));
+// 			bcopy(sums, write_offset, max_dist * sizeof(int));
+// 			write_offset[0] = 1;
+// 		}
+// 		
+// 		#pragma omp section
+// 		(*perm)[0] =  source_node;
+// 	}
 	
-	threads_per_level = max_dist - 2;
+	read_offset  = calloc(max_dist, sizeof(int));
+	bcopy(sums, read_offset, max_dist * sizeof(int));
+	write_offset = calloc(max_dist, sizeof(int));
+	bcopy(sums, write_offset, max_dist * sizeof(int));
+	write_offset[0] = 1;
+	(*perm)[0] =  source_node;
+	
 	
 // 	#pragma omp parallel for private(count)
 // 	for (count = 1; count < graph->n; ++count)
 // 		(*perm)[count] = -1;
+	omp_set_num_threads(max_dist - 2);
 	
-	#pragma omp parallel num_threads(threads_per_level) private (level, node, children, degree, count)
+	#pragma omp parallel private (level, node, children, degree, count)
 	{
 		level = omp_get_thread_num();
 		
@@ -307,13 +318,15 @@ void Unordered_RCM(MAT* A, int** perm)
 		printf("%d ", tcounts[count_nodes]); fflush(stdout);
 	printf("\n\n");fflush(stdout);
 	
-	
 	prefix_sum(tcounts, &sums, max_level);
 	
 	printf("Vetor de sums:\n"); fflush(stdout);
 	for (count_nodes = 0; count_nodes < max_level; ++count_nodes) 
 		printf("%d ", sums[count_nodes]); fflush(stdout);
 	printf("\n\n");fflush(stdout);
+	
+	
+	test_prefix_sum_parallel_serial(tcounts, max_level);
 	
 	place(A, root, sums, max_level, perm, levels);
 	
