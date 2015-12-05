@@ -79,7 +79,7 @@ int main (int argc, char* argv[]){
 	
 	/*---START TIME---------------> */ time = get_time(); 
 	
-	REORDERING_RCM_parallel(A, &p);
+	Unordered_RCM(A, &p);
 	
 	/*---FINAL TIME---------------> */ time = (get_time() - time)/100.0;
 	printf("  - Elapsed time: %.6f sec\n\n", time);

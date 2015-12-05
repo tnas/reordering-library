@@ -42,6 +42,7 @@ int GRAPH_degree (MAT* A, int x)
 	return A->IA[x+1] - A->IA[x]  /*Diagonal*/ - 1;
 }
 
+
 /*----------------------------------------------------------------------------
  * Return all vertices adjacents to x in graph (i.e. matrix) A
  *--------------------------------------------------------------------------*/
@@ -74,6 +75,70 @@ int* GRAPH_adjacent (MAT* A, int x)
 	
 	return adj;
 }
+
+
+/*-------------------------------------------------------------------------------------
+ * Return the degree of the vertex x in graph (i.e. matrix) A at level adjacency_level
+ *-------------------------------------------------------------------------------------*/
+int GRAPH_degree_per_level (MAT* A, int x, const int* levels, const int adjacency_level)
+{
+	if (A->n == 0)
+	{
+		printf("error: GRAPH does not exist. Exiting.. [GRAPH_degree]\n");
+		exit(0);
+	}
+	if (x > A->n - 1 || x < 0)
+	{
+		printf("error: Vertex %d does not exist in this GRAPH. Exiting.. [GRAPH_degree]\n", x);
+		exit(0);
+	}
+	
+	int i, k = 0;
+	
+	for (i = A->IA[x]; i < A->IA[x+1]; ++i)
+	{
+		if (A->JA[i] != x && levels[A->JA[i]] == adjacency_level) ++k;
+	}
+	
+	return k;
+}
+
+
+/*-----------------------------------------------------------------------------------
+ * Return all vertices adjacents x in graph (i.e. matrix) A at level adjacency_level
+ *-----------------------------------------------------------------------------------*/
+GRAPH* GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level)
+{
+	if (A->n == 0)
+	{
+		printf("error: GRAPH does not exist. Exiting.. [GRAPH_degree]\n");
+		exit(0);
+	}
+	if (x > A->n - 1 || x < 0)
+	{
+		printf("error: Vertex %d does not exist in this GRAPH. Exiting.. [GRAPH_adjacent]\n", x);
+		exit(0);
+	}
+	
+	int i, k = 0;
+	
+	int  degree = GRAPH_degree_per_level(A, x, levels, adjacency_level);
+	GRAPH* adj  = malloc(degree * sizeof(GRAPH));
+
+	for (i = A->IA[x]; i < A->IA[x+1]; ++i)
+	{
+		if (A->JA[i] != x && levels[A->JA[i]] == adjacency_level)
+		{
+			adj[k].label = A->JA[i];
+			adj[k].degree = GRAPH_degree(A, A->JA[i]);
+			k++;
+		}
+	}
+	
+	return adj;
+}
+
+
 
 
 /*----------------------------------------------------------------------------

@@ -48,6 +48,8 @@ extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int
  *--------------------------------------------------------------------------*/
 extern int      GRAPH_degree             (MAT* A, int x);
 extern int*     GRAPH_adjacent           (MAT* A, int x);
+extern int 	GRAPH_degree_per_level   (MAT* A, int x, const int* levels, const int adjacency_level);
+extern GRAPH* 	GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level);
 extern void     GRAPH_bfs                (MAT* A, int x, int* dist);
 extern int*     GRAPH_bfs_RCM            (MAT* A, int x, int* dist);
 extern int      GRAPH_LS_depth           (int* LS, int n);
@@ -99,4 +101,4 @@ extern void     REORDERING_RCM           (MAT* A, int** p);
 extern void     REORDERING_SLOAN         (MAT* A, int** p);
 extern void     REORDERING_SPECTRAL      (MAT* A, int** p);
 extern void     REORDERING_SPECTRAL_WGT  (MAT* A, int** p);
-extern void	REORDERING_RCM_parallel	 (MAT* A, int** p);
+extern void	Unordered_RCM	 	 (MAT* A, int** p);
