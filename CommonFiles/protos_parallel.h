@@ -20,5 +20,13 @@ typedef struct
 } status_prefix_sum;
 
 
+typedef struct
+{
+	int* mem;
+	int size;
+	int free_position;
+} mem_write_next_level;
+
+
 extern int*	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels);
 extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

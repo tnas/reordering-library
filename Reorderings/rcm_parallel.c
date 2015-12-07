@@ -199,6 +199,25 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 }
 
 
+void init_mem(mem_write_next_level* mem_write, const int* sums, const int level)
+{
+	int pos;
+	
+	mem_write->size = sums[level+1]-sums[level];
+	mem_write->mem = calloc(mem_write->size, sizeof(int));
+	mem_write->free_position = 0;
+	
+	for (pos = 0; pos < mem_write->size; ++pos)
+		mem_write->mem[pos] = -1;
+}
+
+int is_in_mem(const mem_write_next_level mem_write, const int val)
+{
+	int pos;
+	for (pos = 0; pos < mem_write.size; ++pos)
+		if (mem_write.mem[pos] == val) return 1;
+	return 0;
+}
 
 
 void place(MAT* graph, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
@@ -207,8 +226,9 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 	int* read_offset;
 	int* write_offset;
 	GRAPH* children;
+	mem_write_next_level mem_write;
 	
-// 	#pragma omp parallel sections num_threads(3)
+// 	#pragma omp parallel sections 
 // 	{
 // 		#pragma omp section
 // 		{
@@ -229,20 +249,21 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 	
 	read_offset  = calloc(max_dist, sizeof(int));
 	bcopy(sums, read_offset, max_dist * sizeof(int));
+	
 	write_offset = calloc(max_dist, sizeof(int));
 	bcopy(sums, write_offset, max_dist * sizeof(int));
 	write_offset[0] = 1;
+	
 	(*perm)[0] =  source_node;
 	
 	
-// 	#pragma omp parallel for private(count)
-// 	for (count = 1; count < graph->n; ++count)
-// 		(*perm)[count] = -1;
 	omp_set_num_threads(max_dist - 2);
 	
-	#pragma omp parallel private (level, node, children, degree, count)
+	#pragma omp parallel private (level, node, children, degree, count, mem_write)
 	{
 		level = omp_get_thread_num();
+		
+		init_mem(&mem_write, sums, level);
 		
 		while (read_offset[level] != sums[level+1]) // There are nodes to read
 		{
@@ -255,32 +276,51 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 			++read_offset[level];
 			
 			#pragma omp flush (write_offset)
-			printf("Thread level %d read node %d => read: %d, write %d\n", level, node, read_offset[level], write_offset[level]); fflush(stdout);
+			printf("Thread level %d read node %d of degree %d => read: %d, write %d\n", level, node, GRAPH_degree(graph, node), read_offset[level], write_offset[level]); fflush(stdout);
 			
 			// Edges of node with dist == level + 1
 			degree = GRAPH_degree_per_level(graph, node, levels, level+1);
 			children = GRAPH_adjacent_per_level(graph, node, levels, level+1);
+// 			degree = GRAPH_degree(graph, node);
+// 			child = GRAPH_adjacent(graph, node);
+// 			children = malloc(degree * sizeof(GRAPH));
+// 			for (count = 0; count < degree; ++count)
+// 			{
+// 				children[count].label = child[count];
+// 				children[count].degree = GRAPH_degree(graph, child[count]);
+// 			}
 			
 			// Sorting children by degree
 			qsort(children, degree, sizeof(GRAPH), COMPARE_degr_ASC);
 			
 			for (count = 0; count < degree; ++count)
 			{
-				(*perm)[write_offset[level+1]] = children[count].label;
-				printf("Thread level %d writing node %d\n", level, children[count].label); fflush(stdout);
-				++write_offset[level+1];
+				if (!is_in_mem(mem_write, children[count].label))
+				{
+					(*perm)[write_offset[level+1]] = mem_write.mem[mem_write.free_position] = children[count].label;
+					printf("Thread level %d writing node %d\n", level, children[count].label); fflush(stdout);
+					++write_offset[level+1];
+					++mem_write.free_position;
+				}
+				else 
+				{
+					printf("Thread level %d discarding write node %d\n", level, children[count].label); fflush(stdout);
+				}
 			}
 			
 			printf("Thread level %d finishing node %d with: read %d, write %d, sums+1 %d\n", level, node, read_offset[level], write_offset[level], sums[level+1]); fflush(stdout);
 			
-			free(children);
+// 			free(children);
 		}
 		
-		printf("Thread level %d finish\n", level); fflush(stdout);
+		printf("Thread level %d finish!\n", level); fflush(stdout);
+// 		free(mem_write);
 	}
 	
-	free(read_offset);
-	free(write_offset);
+	printt("Place has been done!);
+	
+// 	free(read_offset);
+// 	free(write_offset);
 }
 
 /*----------------------------------------------------------------------------
@@ -295,8 +335,8 @@ void Unordered_RCM(MAT* A, int** perm)
 	int* tcounts;
 	
 	n_nodes = A->n;
-	levels = calloc (n_nodes, sizeof(int));
-	(*perm) = calloc (n_nodes, sizeof(int));
+	levels = calloc(n_nodes, sizeof(int));
+	(*perm) = calloc(n_nodes, sizeof(int));
 	
 // 	int* g = GRAPH_LS_peripheral (A, &root, &e);
 	
@@ -340,10 +380,10 @@ void Unordered_RCM(MAT* A, int** perm)
 // 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 	
 	
-	free(levels);
-	free(counts);
-	free(tcounts);
-	free(sums);
+// 	free(levels);
+// 	free(counts);
+// 	free(tcounts);
+// 	free(sums);
 	
 		
 // 	free(g);
