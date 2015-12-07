@@ -42,10 +42,12 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 		#pragma omp single	
 		++max_level;
 		
+		#pragma omp flush(max_level)
+		
 		#pragma omp single
 		*counts = calloc(max_level, sizeof(int));
 		
-		#pragma omp flush(max_level, counts, local_count)
+		#pragma omp flush(counts, local_count)
 		
 		#pragma omp for 
 		for (level = 0; level < max_level; ++level) 
@@ -54,7 +56,7 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 				(*counts)[level] += local_count[count_thread][level];
 		}
 		
-		#pragma omp for nowait			
+		#pragma omp for			
 		for (count_thread = 0; count_thread < NUM_THREADS; ++count_thread) 
 			free(local_count[count_thread]);
 		
@@ -82,7 +84,6 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 	int level, local_level, chunk_size, index_processors, id_proc, offset_level, 
 		coef_target_proc, target_proc, count_thread;
 	status_prefix_sum status_ps[NUM_THREADS];
-// 	int temp;
 	
 	*sums = calloc(max_level, sizeof(int));
 	
@@ -119,16 +120,6 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 			(*sums)[local_level] = (*sums)[local_level-1] + counts[local_level];
 		
 		
-//  		#pragma omp barrier
-//  		#pragma omp single 
-//  		{
-// 			printf("Sums vector after Step 1: "); fflush(stdout);
-// 			for (temp = 0; temp < max_level; ++temp) 
-// 				printf("%d ", (*sums)[temp]);fflush(stdout);
-// 			printf("\n");fflush(stdout);
-//  		}
-		
-		
 		status_ps[id_proc].initial_prefix_sum 
 			= status_ps[id_proc].curr_prefix_sum 
 			= status_ps[id_proc].curr_total_sum 
@@ -136,43 +127,21 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 			= status_ps[id_proc].last_total_sum
 			= (*sums)[local_level-1];
 		
-			
-// 		printf("Init step 2 => id_proc: %d, curr_prefix_sum: %d, curr_total_sum: %d\n",
-// 			id_proc,
-// 			status_ps[id_proc].curr_prefix_sum,
-// 			status_ps[id_proc].curr_total_sum);fflush(stdout);
-		
 		#pragma omp barrier
 		
-			
-			
-			
 		for (coef_target_proc = 0; coef_target_proc < index_processors; ++coef_target_proc)
 		{
 			target_proc = id_proc ^ pow_uint(2, coef_target_proc);
 			
 			if (target_proc < NUM_THREADS && target_proc != id_proc)
 			{
-				
-	// 			 printf("id_proc %d sending to target_proc %d because coef_target_proc: %d and pow_uint is %d\n", id_proc, target_proc, coef_target_proc, pow_uint(2, coef_target_proc)); fflush(stdout);
-				
 				if (id_proc < target_proc) {
-// 					#pragma omp critical
-// 					{
-						status_ps[target_proc].last_prefix_sum += status_ps[id_proc].curr_total_sum;
-						status_ps[target_proc].last_total_sum += status_ps[id_proc].curr_total_sum;
-// 						printf("proc: %d updating by proc %d => cpsum: %d, ctsum: %d, lpsum: %d, ltsum: %d\n",
-// 							id_proc, target_proc, status_ps[target_proc].curr_prefix_sum, status_ps[target_proc].curr_total_sum, status_ps[target_proc].last_prefix_sum, status_ps[target_proc].last_total_sum);fflush(stdout);
-// 					}
+					status_ps[target_proc].last_prefix_sum += status_ps[id_proc].curr_total_sum;
+					status_ps[target_proc].last_total_sum += status_ps[id_proc].curr_total_sum;
 				}
 				else  
 				{
-// 					#pragma omp critical
-// 					{
-						status_ps[target_proc].last_total_sum += status_ps[id_proc].curr_total_sum;
-// 						printf("proc: %d updating by proc %d => cpsum: %d, ctsum: %d, lpsum: %d, ltsum: %d\n",
-// 							id_proc, target_proc, status_ps[target_proc].curr_prefix_sum, status_ps[target_proc].curr_total_sum, status_ps[target_proc].last_prefix_sum, status_ps[target_proc].last_total_sum);fflush(stdout);
-// 					}
+					status_ps[target_proc].last_total_sum += status_ps[id_proc].curr_total_sum;
 				}
 			}
 			
@@ -182,9 +151,6 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 			status_ps[id_proc].curr_total_sum  = status_ps[id_proc].last_total_sum;
 			
 			#pragma omp barrier
-			
-// 			#pragma omp single
-// 			printf("**** finish coef_target_proc %d\n", coef_target_proc);
 		}
 		
 		status_ps[id_proc].last_prefix_sum -= status_ps[id_proc].initial_prefix_sum;
@@ -222,13 +188,13 @@ inline int is_in_mem(const mem_write_next_level mem_write, const int val)
 
 void place(MAT* graph, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
 {
-	int level, node, degree, count, i;
+	int level, node, degree, count;
 	int* read_offset;
 	int* write_offset;
 	GRAPH* children;
 	mem_write_next_level mem_write;
 	
-// 	#pragma omp parallel sections 
+// 	#pragma omp parallel sections num_threads(3)
 // 	{
 // 		#pragma omp section
 // 		{
@@ -258,7 +224,7 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 	
 	omp_set_num_threads(max_dist - 2);
 	
-	#pragma omp parallel private (level, node, children, degree, count, mem_write, i)
+	#pragma omp parallel private (level, node, children, degree, count, mem_write)
 	{
 		level = omp_get_thread_num();
 		
@@ -267,15 +233,11 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 		while (read_offset[level] != sums[level+1]) // There are nodes to read
 		{
 			#pragma omp flush (write_offset)
-// 			printf("SPIN Thread level %d read: %d, write %d\n", level, read_offset[level], write_offset[level]); fflush(stdout);
 			
 			while (read_offset[level] == write_offset[level]) { } // Spin
 			
 			node = (*perm)[read_offset[level]];
 			++read_offset[level];
-			
-// 			#pragma omp flush (write_offset)
-// 			printf("Thread level %d read node %d of degree %d => read: %d, write %d\n", level, node, GRAPH_degree(graph, node), read_offset[level], write_offset[level]); fflush(stdout);
 			
 			// Edges of node with dist == level + 1
 			degree = GRAPH_degree_per_level(graph, node, levels, level+1);
@@ -286,40 +248,25 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 			
 			for (count = 0; count < degree; ++count)
 			{
-// 				#pragma omp critical
-// 				{
 				if (!is_in_mem(mem_write, children[count].label))
 				{
 					
 					(*perm)[write_offset[level+1]] = mem_write.mem[mem_write.free_position] = children[count].label;
-// 					printf("Thread level %d writing node %d\n", level, children[count].label); fflush(stdout);
-// 					printf("Thread level %d memory: ", level);
-// 					for (i = 0; i < mem_write.size; ++i) printf("%d ", mem_write.mem[i]);
-// 					printf("\n");
 					++write_offset[level+1];
 					++mem_write.free_position;
 				}
-// 				else 
-// 				{
-// 					printf("Thread level %d discarding write node %d\n", level, children[count].label); fflush(stdout);
-// 				}
-// 				}
 			}
-			
-// 			printf("Thread level %d finishing node %d with: read %d, write %d, sums+1 %d\n", level, node, read_offset[level], write_offset[level], sums[level+1]); fflush(stdout);
 			
 			free(children);
 		}
 		
-// 		printf("Thread level %d finish!\n", level); fflush(stdout);
 		free(mem_write.mem);
 	}
-	
-// 	printf("Place has been done!\n");
 	
 	free(read_offset);
 	free(write_offset);
 }
+
 
 /*----------------------------------------------------------------------------
  * Unordered RCM reordering from the LEVEL STRUCTURE 
@@ -377,10 +324,10 @@ void Unordered_RCM(MAT* A, int** perm)
 // 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 	
 	
-// 	free(levels);
-// 	free(counts);
-// 	free(tcounts);
-// 	free(sums);
+	free(levels);
+	free(counts);
+	free(tcounts);
+	free(sums);
 	
 		
 // 	free(g);
