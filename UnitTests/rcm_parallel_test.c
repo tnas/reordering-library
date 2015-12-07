@@ -28,8 +28,8 @@ void test_prefix_sum_parallel_serial(int* counts, int max_level)
 	// Serial prefix sum
 	s_sums = calloc(max_level, sizeof(int));
 	s_sums[0] = counts[0];
-	for (i = 0; i < max_level; ++i)
-		s_sums[i+1] = s_sums[i] + counts[i+1];
+	for (i = 1; i < max_level; ++i)
+		s_sums[i] = s_sums[i-1] + counts[i];
 	
 	// Comparing parallel and serial prefix sum
 	for (i = 0; i < max_level; ++i) 
