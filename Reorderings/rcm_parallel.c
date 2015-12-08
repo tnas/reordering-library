@@ -85,36 +85,45 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 		coef_target_proc, target_proc, count_thread;
 	status_prefix_sum status_ps[NUM_THREADS];
 	
-	*sums = calloc(max_level, sizeof(int));
-	
 	if (NUM_THREADS > max_level)
 	{
-		omp_set_num_threads(max_level);
 		chunk_size = 1;
-	} else
+		omp_set_num_threads(max_level);
+	} 
+	else
 	{
 		chunk_size = isdivisor(NUM_THREADS, max_level) ? max_level/NUM_THREADS : max_level/NUM_THREADS + 1;	
+		
+		for (count_thread = 1, offset_level = 0; 
+		     count_thread <= NUM_THREADS && offset_level < max_level; 
+		    ++count_thread, offset_level += chunk_size);
+			
+		omp_set_num_threads(count_thread-1);
 	}
 	
 	offset_level = -chunk_size;
 	count_thread = 0;
-	omp_set_num_threads(NUM_THREADS);
 	
 	#pragma omp parallel private (level, local_level, id_proc, coef_target_proc, target_proc)
 	{
+		#pragma omp single nowait
+		index_processors = ceil(log2(omp_get_num_threads()));
 		
 		#pragma omp single
-		index_processors = ceil(log2f(NUM_THREADS));
+		*sums = calloc(max_level, sizeof(int));
 		
 		#pragma omp critical
 		{
 			#pragma omp flush (offset_level, count_thread)
+			
 			offset_level += chunk_size;
 			level = offset_level;
 			id_proc = count_thread++;
 		}
-	
+
+		
 		(*sums)[level] = counts[level];
+
 		
 		for (local_level = level+1; local_level < level+chunk_size && local_level < max_level; ++local_level)
 			(*sums)[local_level] = (*sums)[local_level-1] + counts[local_level];
