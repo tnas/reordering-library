@@ -25,11 +25,11 @@ int main (int argc, char* argv[]){
 	/*---------------------------------------------*/
 	bandwidth = MATRIX_bandwidth(matrix);
 	envelope  = MATRIX_envelope(matrix);
-	printf("\n  [ REORDERING ]\n");
-	printf("  - Bandwidth/Envelope before = %ld    / %ld\n\n", bandwidth,envelope);
+	printf("\n  [ REORDERING ]\n"); 
+	printf("  - Bandwidth/Envelope before = %ld    / %ld\n\n", bandwidth,envelope); 
 	
 	
-	printf("REORDERING SERIAL RCM\n");
+	printf("REORDERING SERIAL RCM\n"); fflush(stdout);
 	/*---START TIME---------------> */ time = get_time(); 
 	REORDERING_RCM_opt(matrix, &permutation);
 	MATRIX_permutation(matrix, permutation); 
@@ -37,8 +37,8 @@ int main (int argc, char* argv[]){
 	
 	bandwidth = MATRIX_bandwidth(matrix);
 	envelope  = MATRIX_envelope(matrix);	
-	printf("  - Bandwidth/Envelope after  = %ld    / %ld\n", bandwidth,envelope);
-	printf("  - Elapsed time: %.6f sec\n\n", time);
+	printf("  - Bandwidth/Envelope after  = %ld    / %ld\n", bandwidth,envelope); 
+	printf("  - Elapsed time: %.6f sec\n\n", time); 
 	
 	free(permutation);
 	MATRIX_clean(matrix);
@@ -46,7 +46,7 @@ int main (int argc, char* argv[]){
 	matrix = (MAT*) malloc (sizeof(MAT));
 	MATRIX_readCSR (matrix, argv[1]);
 	
-	printf("REORDERING PARALLEL UNORDERED RCM\n");
+	printf("REORDERING PARALLEL UNORDERED RCM\n"); fflush(stdout);
 	/*---START TIME---------------> */ time = get_time(); 
 	Unordered_RCM(matrix, &permutation);
 	MATRIX_permutation(matrix, permutation); 
