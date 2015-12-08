@@ -28,5 +28,5 @@ typedef struct
 } mem_write_next_level;
 
 
-extern int*	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels);
+extern void	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels);
 extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

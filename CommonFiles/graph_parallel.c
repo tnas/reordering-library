@@ -43,17 +43,17 @@ void inline update_work_set(const OPERATION op, LIST** ws, int* node)
  * param root: start node
  * param levels: vector of levels of nodes
  --------------------------------------------------------------------------*/
-int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
+void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 {
   int node, n_nodes, adj_node, node_degree, count_nodes, level, count;
   int* neighboors;
   int status_threads[NUM_THREADS];
   
   n_nodes = adjacency->n;
-  levels = calloc(n_nodes, sizeof(int));
+  *levels = calloc(n_nodes, sizeof(int));
   
-  for (node = 0; node < n_nodes; ++node) levels[node] = INFINITY;
-  levels[root] = 0;
+  for (node = 0; node < n_nodes; ++node) (*levels)[node] = INFINITY;
+  (*levels)[root] = 0;
   
   LIST* work_set = NULL;
   work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
@@ -83,14 +83,16 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
 				{
 					#pragma omp flush (levels)
 					
-					level = levels[node] + 1;
-					if (level < levels[adj_node])
+					level = (*levels)[node] + 1;
+					if (level < (*levels)[adj_node])
 					{
-						levels[adj_node] = level;
+						(*levels)[adj_node] = level;
 						update_work_set(WRITE, &work_set, &adj_node);
 					}
 				}
 			}
+			
+			free(neighboors);
 		}
 		else 
 		{
@@ -104,7 +106,5 @@ int* GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int* levels)
 	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
 	exit(0);
   }
-  
-  return levels;
 }
 

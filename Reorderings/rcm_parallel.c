@@ -289,13 +289,12 @@ void Unordered_RCM(MAT* A, int** perm)
 	int* tcounts;
 	
 	n_nodes = A->n;
-	levels = calloc(n_nodes, sizeof(int));
 	(*perm) = calloc(n_nodes, sizeof(int));
 	
 // 	int* g = GRAPH_LS_peripheral (A, &root, &e);
 	
 	root = 1;
-	levels = GRAPH_parallel_fixedpoint_bfs(A, root, levels);
+	GRAPH_parallel_fixedpoint_bfs(A, root, &levels);
 	
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
 	++max_level;
