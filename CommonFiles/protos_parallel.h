@@ -1,7 +1,8 @@
 #include <omp.h>
 #include "protos.h"
+#include "util.h"
 
-#define NUM_THREADS 4
+#define NUM_THREADS 8
 #define THREAD_ON 1
 #define THREAD_OFF 0
 

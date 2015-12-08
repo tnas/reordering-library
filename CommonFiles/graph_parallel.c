@@ -101,10 +101,10 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 	}
   }
   
-  if (work_set != NULL) 
-  {
-	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
-	exit(0);
-  }
+//   if (work_set != NULL) 
+//   {
+// 	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
+// 	exit(0);
+//   }
 }
 

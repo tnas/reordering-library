@@ -1,8 +1,7 @@
 /*----------------------------------------------------------------------------
  * UNORDERED RCM REORDERING SOLVER
  *--------------------------------------------------------------------------*/
-// #include "../CommonFiles/protos_parallel.h"
-#include "../UnitTests/rcm_parallel_test.h"
+ #include "../CommonFiles/protos_parallel.h"
 
 
 int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
@@ -70,14 +69,7 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 	return max_level;
 }
 
-int pow_uint(int base, const int exp)
-{
-	int count;
-	if (exp == 0) return 1;
-	for (count = 1; count < exp; ++count)
-		base *= base;
-	return base;
-}
+
 
 void prefix_sum(const int* counts, int** sums, const int max_level)
 {
@@ -203,33 +195,24 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 	GRAPH* children;
 	mem_write_next_level mem_write;
 	
-// 	#pragma omp parallel sections num_threads(3)
-// 	{
-// 		#pragma omp section
-// 		{
-// 			read_offset  = calloc(max_dist, sizeof(int));
-// 			bcopy(sums, read_offset, max_dist * sizeof(int));
-// 		}
-// 		
-// 		#pragma omp section
-// 		{
-// 			write_offset = calloc(max_dist, sizeof(int));
-// 			bcopy(sums, write_offset, max_dist * sizeof(int));
-// 			write_offset[0] = 1;
-// 		}
-// 		
-// 		#pragma omp section
-// 		(*perm)[0] =  source_node;
-// 	}
-	
-	read_offset  = calloc(max_dist, sizeof(int));
-	bcopy(sums, read_offset, max_dist * sizeof(int));
-	
-	write_offset = calloc(max_dist, sizeof(int));
-	bcopy(sums, write_offset, max_dist * sizeof(int));
-	write_offset[0] = 1;
-	
-	(*perm)[0] =  source_node;
+	#pragma omp parallel sections num_threads(3)
+	{
+		#pragma omp section
+		{
+			read_offset  = calloc(max_dist, sizeof(int));
+			bcopy(sums, read_offset, max_dist * sizeof(int));
+		}
+		
+		#pragma omp section
+		{
+			write_offset = calloc(max_dist, sizeof(int));
+			bcopy(sums, write_offset, max_dist * sizeof(int));
+			write_offset[0] = 1;
+		}
+		
+		#pragma omp section
+		(*perm)[0] =  source_node;
+	}
 	
 	omp_set_num_threads(max_dist - 2);
 	
@@ -282,18 +265,20 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
  *--------------------------------------------------------------------------*/
 void Unordered_RCM(MAT* A, int** perm)
 { 
-	int n_nodes, root, max_level, index, count_nodes;
+	int n_nodes, root, max_level, index, count_nodes, e;
 	int* levels;
 	int* counts;
 	int* sums;
 	int* tcounts;
+	int* tperm;
+	int* graph_ls;
 	
 	n_nodes = A->n;
 	(*perm) = calloc(n_nodes, sizeof(int));
+	tperm = calloc(n_nodes, sizeof(int));
 	
-// 	int* g = GRAPH_LS_peripheral (A, &root, &e);
-	
-	root = 1;
+	graph_ls = GRAPH_LS_peripheral (A, &root, &e);
+// 	root = get_random_integer(n_nodes);
 	GRAPH_parallel_fixedpoint_bfs(A, root, &levels);
 	
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
@@ -302,43 +287,39 @@ void Unordered_RCM(MAT* A, int** perm)
 	tcounts = calloc(max_level, sizeof(int));
 	tcounts[0] = 0;
 	
-	#pragma omp parallel for private (index)
-	for (index = 1; index < max_level; ++index)
-		tcounts[index] = counts[index-1];
+	#pragma omp parallel for num_threads(NUM_THREADS) private (index)
+	for (index = 1; index < max_level; ++index) tcounts[index] = counts[index-1];
 	
-	printf("Vetor de tcounts:\n"); fflush(stdout);
-	for (count_nodes = 0; count_nodes < max_level; ++count_nodes) 
-		printf("%d ", tcounts[count_nodes]); fflush(stdout);
-	printf("\n\n");fflush(stdout);
+// 	printf("Vetor de tcounts:\n"); fflush(stdout);
+// 	for (count_nodes = 0; count_nodes < max_level; ++count_nodes) 
+// 		printf("%d ", tcounts[count_nodes]); fflush(stdout);
+// 	printf("\n\n");fflush(stdout);
 	
 	prefix_sum(tcounts, &sums, max_level);
 	
-	printf("Vetor de sums:\n"); fflush(stdout);
-	for (count_nodes = 0; count_nodes < max_level; ++count_nodes) 
-		printf("%d ", sums[count_nodes]); fflush(stdout);
-	printf("\n\n");fflush(stdout);
+// 	printf("Vetor de sums:\n"); fflush(stdout);
+// 	for (count_nodes = 0; count_nodes < max_level; ++count_nodes) 
+// 		printf("%d ", sums[count_nodes]); fflush(stdout);
+// 	printf("\n\n");fflush(stdout);
 	
-	test_prefix_sum_parallel_serial(tcounts, max_level);
+	place(A, root, sums, max_level, &tperm, levels);
 	
-	place(A, root, sums, max_level, perm, levels);
-	
-	printf("Vetor de permutação:\n"); fflush(stdout);
-	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-		printf("%d ", (*perm)[count_nodes]); fflush(stdout);
-	printf("\n\n"); fflush(stdout);
+// 	printf("Vetor de permutação:\n"); fflush(stdout);
+// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+// 		printf("%d ", tperm[count_nodes]); fflush(stdout);
+// 	printf("\n\n"); fflush(stdout);
 	
 	/* Reverse order */
-// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-// 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
+	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 	
 	
 	free(levels);
 	free(counts);
 	free(tcounts);
 	free(sums);
-	
-		
-// 	free(g);
+	free(tperm);
+	free(graph_ls);
 }
 
 
