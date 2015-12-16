@@ -214,7 +214,7 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 		(*perm)[0] =  source_node;
 	}
 	
-	omp_set_num_threads(max_dist - 2);
+ 	omp_set_num_threads(max_dist - 2);
 	
 	#pragma omp parallel private (level, node, children, degree, count, mem_write)
 	{
@@ -232,7 +232,7 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 			++read_offset[level];
 			
 			// Edges of node with dist == level + 1
-			degree = GRAPH_degree_per_level(graph, node, levels, level+1);
+			degree   = GRAPH_degree_per_level(graph, node, levels, level+1);
 			children = GRAPH_adjacent_per_level(graph, node, levels, level+1);
 			
 			// Sorting children by degree
@@ -260,6 +260,86 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 }
 
 
+
+void place2(MAT* graph, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
+{
+	int level, node, degree, count, level_guard;
+	int* read_offset;
+	int* write_offset;
+	GRAPH* children;
+	mem_write_next_level mem_write;
+	
+	#pragma omp parallel sections num_threads(3)
+	{
+		#pragma omp section
+		{
+			read_offset  = calloc(max_dist, sizeof(int));
+			bcopy(sums, read_offset, max_dist * sizeof(int));
+		}
+		
+		#pragma omp section
+		{
+			write_offset = calloc(max_dist, sizeof(int));
+			bcopy(sums, write_offset, max_dist * sizeof(int));
+			write_offset[0] = 1;
+		}
+		
+		#pragma omp section
+		(*perm)[0] =  source_node;
+	}
+
+	level_guard = 0;
+	
+	#pragma omp parallel private (level, node, children, degree, count, mem_write) num_threads(NUM_THREADS)
+	{
+		while (level_guard < max_dist - 1) 
+		{
+			#pragma omp single
+			level = level_guard++;
+			
+			init_mem(&mem_write, sums, level);
+			
+			while (read_offset[level] != sums[level+1]) // There are nodes to read
+			{
+				#pragma omp flush (write_offset)
+				
+				while (read_offset[level] == write_offset[level]) { } // Spin
+				
+				node = (*perm)[read_offset[level]];
+				++read_offset[level];
+				
+				// Edges of node with dist == level + 1
+				degree   = GRAPH_degree_per_level(graph, node, levels, level+1);
+				children = GRAPH_adjacent_per_level(graph, node, levels, level+1);
+				
+				// Sorting children by degree
+				qsort(children, degree, sizeof(GRAPH), COMPARE_degr_ASC);
+				
+				for (count = 0; count < degree; ++count)
+				{
+					if (!is_in_mem(mem_write, children[count].label))
+					{
+						
+						(*perm)[write_offset[level+1]] = mem_write.mem[mem_write.free_position] = children[count].label;
+						++write_offset[level+1];
+						++mem_write.free_position;
+					}
+				}
+				
+				free(children);
+			}
+			
+			free(mem_write.mem);
+		}
+	}
+	
+	free(read_offset);
+	free(write_offset);
+}
+
+
+
+
 /*----------------------------------------------------------------------------
  * Unordered RCM reordering from the LEVEL STRUCTURE 
  *--------------------------------------------------------------------------*/
@@ -273,17 +353,23 @@ void Unordered_RCM(MAT* A, int** perm)
 	int* tperm;
 	int* graph_ls;
 	
+	
+// 	printf("Alocando vetor de permutacao e inverso permutacao\n"); fflush(stdout);
 	n_nodes = A->n;
 	(*perm) = calloc(n_nodes, sizeof(int));
 	tperm = calloc(n_nodes, sizeof(int));
 	
+// 	printf("Iniciando GRAPH_LS_peripheral\n"); fflush(stdout);
 	graph_ls = GRAPH_LS_peripheral (A, &root, &e);
 // 	root = get_random_integer(n_nodes);
+	
+// 	printf("Iniciando GRAPH_parallel_fixedpoint_bfs\n"); fflush(stdout);
 	GRAPH_parallel_fixedpoint_bfs(A, root, &levels);
 	
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
 	++max_level;
 	
+// 	printf("Alocando vetor tcounts e redimensionando\n"); fflush(stdout);
 	tcounts = calloc(max_level, sizeof(int));
 	tcounts[0] = 0;
 	
@@ -295,6 +381,7 @@ void Unordered_RCM(MAT* A, int** perm)
 // 		printf("%d ", tcounts[count_nodes]); fflush(stdout);
 // 	printf("\n\n");fflush(stdout);
 	
+// 	printf("Iniciando prefix_sum\n"); fflush(stdout);
 	prefix_sum(tcounts, &sums, max_level);
 	
 // 	printf("Vetor de sums:\n"); fflush(stdout);
@@ -302,24 +389,27 @@ void Unordered_RCM(MAT* A, int** perm)
 // 		printf("%d ", sums[count_nodes]); fflush(stdout);
 // 	printf("\n\n");fflush(stdout);
 	
-	place(A, root, sums, max_level, &tperm, levels);
+// 	printf("Iniciando place\n"); fflush(stdout);
+	place2(A, root, sums, max_level, &tperm, levels);
 	
 // 	printf("Vetor de permutação:\n"); fflush(stdout);
 // 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
 // 		printf("%d ", tperm[count_nodes]); fflush(stdout);
 // 	printf("\n\n"); fflush(stdout);
 	
+// 	printf("Invertendo vetor de permutacao\n"); fflush(stdout);
 	/* Reverse order */
 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 	
-	
+// 	printf("Liberando memoria final\n"); fflush(stdout);
 	free(levels);
 	free(counts);
 	free(tcounts);
 	free(sums);
 	free(tperm);
 	free(graph_ls);
+// 	printf("Finalizando Unordered_RCM\n"); fflush(stdout);
 }
 
 

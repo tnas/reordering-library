@@ -2,37 +2,37 @@ Flat profile:
 
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
- time   seconds   seconds    calls  ms/call  ms/call  name    
- 95.99      0.95     0.95        3   316.77   324.91  Unordered_RCM
-  2.02      0.97     0.02       10     2.00     2.54  GRAPH_bfs
-  1.01      0.98     0.01   192128     0.00     0.00  GRAPH_degree
-  1.01      0.99     0.01     9147     0.00     0.00  update_work_set
-  0.00      0.99     0.00    61786     0.00     0.00  GRAPH_adjacent
-  0.00      0.99     0.00    61660     0.00     0.00  LIST_remove
-  0.00      0.99     0.00    61444     0.00     0.00  LIST_insert_IF_NOT_EXIST
-  0.00      0.99     0.00    61407     0.00     0.00  LIST_first
-  0.00      0.99     0.00     9019     0.00     0.00  GRAPH_degree_per_level
-  0.00      0.99     0.00     8060     0.00     0.00  is_in_mem
-  0.00      0.99     0.00     4993     0.00     0.00  has_work
-  0.00      0.99     0.00     4444     0.00     0.00  GRAPH_adjacent_per_level
-  0.00      0.99     0.00      157     0.00     0.00  init_mem
-  0.00      0.99     0.00       24     0.00     0.00  GRAPH_LS_depth
-  0.00      0.99     0.00        8     0.00     0.00  GRAPH_LS_width
-  0.00      0.99     0.00        5     0.00     0.00  pow_uint
-  0.00      0.99     0.00        4     0.00     0.27  GRAPH_LS_last_level
-  0.00      0.99     0.00        4     0.00     0.00  MATRIX_clean
-  0.00      0.99     0.00        4     0.00     0.00  get_time
-  0.00      0.99     0.00        3     0.00     0.00  MATRIX_bandwidth
-  0.00      0.99     0.00        3     0.00     0.00  MATRIX_envelope
-  0.00      0.99     0.00        2     0.00    13.50  GRAPH_LS_peripheral
-  0.00      0.99     0.00        2     0.00     0.00  MATRIX_permutation
-  0.00      0.99     0.00        2     0.00     0.00  MATRIX_readCSR
-  0.00      0.99     0.00        1     0.00     2.10  GRAPH_bfs_RCM
-  0.00      0.99     0.00        1     0.00    10.49  GRAPH_parallel_fixedpoint_bfs
-  0.00      0.99     0.00        1     0.00    15.61  REORDERING_RCM_opt
-  0.00      0.99     0.00        1     0.00     0.00  count_nodes_by_level
-  0.00      0.99     0.00        1     0.00     0.00  place
-  0.00      0.99     0.00        1     0.00     0.00  prefix_sum
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 84.85      3.52     3.52        4     0.88     1.02  Unordered_RCM
+ 10.36      3.95     0.43   699773     0.00     0.00  LIST_insert_IF_NOT_EXIST
+  0.96      3.99     0.04   708979     0.00     0.00  GRAPH_adjacent
+  0.96      4.03     0.04        6     0.01     0.08  GRAPH_bfs
+  0.72      4.06     0.03        1     0.03     0.03  MATRIX_permutation
+  0.72      4.09     0.03                             COMPARE_dist_degr_DES
+  0.48      4.11     0.02        1     0.02     0.02  MATRIX_readCSR
+  0.24      4.12     0.01  1914899     0.00     0.00  GRAPH_degree
+  0.24      4.13     0.01        5     0.00     0.00  GRAPH_LS_width
+  0.24      4.14     0.01        1     0.01     0.07  GRAPH_parallel_fixedpoint_bfs
+  0.24      4.15     0.01                             COMPARE_array
+  0.00      4.15     0.00   705768     0.00     0.00  LIST_remove
+  0.00      4.15     0.00   702896     0.00     0.00  LIST_first
+  0.00      4.15     0.00   202196     0.00     0.00  GRAPH_degree_per_level
+  0.00      4.15     0.00   196741     0.00     0.00  is_in_mem
+  0.00      4.15     0.00   177277     0.00     0.00  update_work_set
+  0.00      4.15     0.00   101064     0.00     0.00  GRAPH_adjacent_per_level
+  0.00      4.15     0.00    94989     0.00     0.00  has_work
+  0.00      4.15     0.00      610     0.00     0.00  init_mem
+  0.00      4.15     0.00       15     0.00     0.00  GRAPH_LS_depth
+  0.00      4.15     0.00        4     0.00     0.00  pow_uint
+  0.00      4.15     0.00        2     0.00     0.00  GRAPH_LS_last_level
+  0.00      4.15     0.00        2     0.00     0.00  MATRIX_bandwidth
+  0.00      4.15     0.00        2     0.00     0.00  MATRIX_clean
+  0.00      4.15     0.00        2     0.00     0.00  MATRIX_envelope
+  0.00      4.15     0.00        2     0.00     0.00  get_time
+  0.00      4.15     0.00        1     0.00     0.47  GRAPH_LS_peripheral
+  0.00      4.15     0.00        1     0.00     0.00  count_nodes_by_level
+  0.00      4.15     0.00        1     0.00     0.00  place
+  0.00      4.15     0.00        1     0.00     0.00  prefix_sum
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -70,175 +70,161 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 2 byte(s) for 1.01% of 0.99 seconds
+granularity: each sample hit covers 2 byte(s) for 0.24% of 4.15 seconds
 
 index % time    self  children    called     name
                                                  <spontaneous>
-[1]    100.0    0.00    0.99                 main [1]
-                0.95    0.02       1/1           Unordered_RCM <cycle 1> [3]
-                0.00    0.02       1/1           REORDERING_RCM_opt [6]
-                0.00    0.00       4/4           get_time [25]
-                0.00    0.00       3/3           MATRIX_bandwidth [26]
-                0.00    0.00       3/3           MATRIX_envelope [27]
-                0.00    0.00       2/2           MATRIX_readCSR [29]
-                0.00    0.00       2/2           MATRIX_permutation [28]
-                0.00    0.00       2/4           MATRIX_clean [24]
+[1]     99.0    0.00    4.11                 main [1]
+                3.52    0.54       1/1           Unordered_RCM <cycle 1> [3]
+                0.03    0.00       1/1           MATRIX_permutation [10]
+                0.02    0.00       1/1           MATRIX_readCSR [12]
+                0.00    0.00       2/2           MATRIX_bandwidth [26]
+                0.00    0.00       2/2           MATRIX_envelope [28]
+                0.00    0.00       2/2           get_time [29]
+                0.00    0.00       1/2           MATRIX_clean [27]
 -----------------------------------------------
-[2]     98.4    0.95    0.02       1+3       <cycle 1 as a whole> [2]
-                0.95    0.02       3+1           Unordered_RCM <cycle 1> [3]
+[2]     97.8    3.52    0.54       1+5       <cycle 1 as a whole> [2]
+                3.52    0.54       4             Unordered_RCM <cycle 1> [3]
                 0.00    0.00       1             place <cycle 1> [31]
+                0.00    0.00       1             prefix_sum <cycle 1> [32]
 -----------------------------------------------
-                                   1             Unordered_RCM <cycle 1> [3]
+                                   1             prefix_sum <cycle 1> [32]
                                    2             place <cycle 1> [31]
-                0.95    0.02       1/1           main [1]
-[3]     98.4    0.95    0.02       3+1       Unordered_RCM <cycle 1> [3]
-                0.00    0.01       1/2           GRAPH_LS_peripheral [4]
-                0.00    0.01       1/1           GRAPH_parallel_fixedpoint_bfs [7]
-                0.00    0.00    4444/4444        GRAPH_adjacent_per_level [13]
-                0.00    0.00    8060/8060        is_in_mem [18]
-                0.00    0.00    4487/9019        GRAPH_degree_per_level [17]
-                0.00    0.00     157/157         init_mem [20]
-                0.00    0.00       5/5           pow_uint [23]
+                3.52    0.54       1/1           main [1]
+[3]     97.8    3.52    0.54       4         Unordered_RCM <cycle 1> [3]
+                0.00    0.47       1/1           GRAPH_LS_peripheral [4]
+                0.01    0.06       1/1           GRAPH_parallel_fixedpoint_bfs [7]
+                0.00    0.00  101064/101064      GRAPH_adjacent_per_level [17]
+                0.00    0.00  196741/196741      is_in_mem [21]
+                0.00    0.00  101015/202196      GRAPH_degree_per_level [20]
+                0.00    0.00     610/610         init_mem [23]
+                0.00    0.00       4/4           pow_uint [25]
                 0.00    0.00       1/1           count_nodes_by_level [30]
-                0.00    0.00       1/1           prefix_sum [32]
+                                   1             prefix_sum <cycle 1> [32]
                                    1             place <cycle 1> [31]
-                                   1             Unordered_RCM <cycle 1> [3]
 -----------------------------------------------
-                0.00    0.01       1/2           REORDERING_RCM_opt [6]
-                0.00    0.01       1/2           Unordered_RCM <cycle 1> [3]
-[4]      2.7    0.00    0.03       2         GRAPH_LS_peripheral [4]
-                0.02    0.01      10/10          GRAPH_bfs [5]
-                0.00    0.00       4/4           GRAPH_LS_last_level [12]
-                0.00    0.00   10354/192128      GRAPH_degree [8]
-                0.00    0.00      12/24          GRAPH_LS_depth [21]
-                0.00    0.00       8/8           GRAPH_LS_width [22]
-                0.00    0.00       6/61407       LIST_first [16]
-                0.00    0.00       6/61660       LIST_remove [14]
+                0.00    0.47       1/1           Unordered_RCM <cycle 1> [3]
+[4]     11.3    0.00    0.47       1         GRAPH_LS_peripheral [4]
+                0.04    0.42       6/6           GRAPH_bfs [5]
+                0.01    0.00       5/5           GRAPH_LS_width [14]
+                0.00    0.00       2/2           GRAPH_LS_last_level [16]
+                0.00    0.00  102158/1914899     GRAPH_degree [13]
+                0.00    0.00       8/15          GRAPH_LS_depth [24]
+                0.00    0.00       4/702896      LIST_first [19]
+                0.00    0.00       4/705768      LIST_remove [18]
 -----------------------------------------------
-                0.02    0.01      10/10          GRAPH_LS_peripheral [4]
-[5]      2.6    0.02    0.01      10         GRAPH_bfs [5]
-                0.00    0.00   51770/192128      GRAPH_degree [8]
-                0.00    0.00   51770/61786       GRAPH_adjacent [10]
-                0.00    0.00   51770/61444       LIST_insert_IF_NOT_EXIST [15]
-                0.00    0.00   51770/61407       LIST_first [16]
-                0.00    0.00   51770/61660       LIST_remove [14]
+                0.04    0.42       6/6           GRAPH_LS_peripheral [4]
+[5]     11.0    0.04    0.42       6         GRAPH_bfs [5]
+                0.38    0.00  612948/699773      LIST_insert_IF_NOT_EXIST [6]
+                0.03    0.00  612948/708979      GRAPH_adjacent [9]
+                0.00    0.00  612948/1914899     GRAPH_degree [13]
+                0.00    0.00  612948/702896      LIST_first [19]
+                0.00    0.00  612948/705768      LIST_remove [18]
 -----------------------------------------------
-                0.00    0.02       1/1           main [1]
-[6]      1.6    0.00    0.02       1         REORDERING_RCM_opt [6]
-                0.00    0.01       1/2           GRAPH_LS_peripheral [4]
-                0.00    0.00       1/1           GRAPH_bfs_RCM [11]
+                0.00    0.00       1/699773      GRAPH_parallel_fixedpoint_bfs [7]
+                0.00    0.00       4/699773      GRAPH_LS_last_level [16]
+                0.05    0.00   86820/699773      update_work_set [8]
+                0.38    0.00  612948/699773      GRAPH_bfs [5]
+[6]     10.4    0.43    0.00  699773         LIST_insert_IF_NOT_EXIST [6]
 -----------------------------------------------
-                0.00    0.01       1/1           Unordered_RCM <cycle 1> [3]
-[7]      1.1    0.00    0.01       1         GRAPH_parallel_fixedpoint_bfs [7]
-                0.01    0.00    9147/9147        update_work_set [9]
-                0.00    0.00    4839/61786       GRAPH_adjacent [10]
-                0.00    0.00    4433/192128      GRAPH_degree [8]
-                0.00    0.00    4993/4993        has_work [19]
-                0.00    0.00       1/61444       LIST_insert_IF_NOT_EXIST [15]
+                0.01    0.06       1/1           Unordered_RCM <cycle 1> [3]
+[7]      1.7    0.01    0.06       1         GRAPH_parallel_fixedpoint_bfs [7]
+                0.00    0.05  177277/177277      update_work_set [8]
+                0.01    0.00   96031/708979      GRAPH_adjacent [9]
+                0.00    0.00   92071/1914899     GRAPH_degree [13]
+                0.00    0.00       1/699773      LIST_insert_IF_NOT_EXIST [6]
+                0.00    0.00   94989/94989       has_work [22]
 -----------------------------------------------
-                0.00    0.00    4433/192128      GRAPH_parallel_fixedpoint_bfs [7]
-                0.00    0.00    8019/192128      GRAPH_adjacent_per_level [13]
-                0.00    0.00   10354/192128      GRAPH_LS_peripheral [4]
-                0.00    0.00   20708/192128      GRAPH_LS_last_level [12]
-                0.00    0.00   35185/192128      GRAPH_bfs_RCM [11]
-                0.00    0.00   51770/192128      GRAPH_bfs [5]
-                0.00    0.00   61659/192128      GRAPH_adjacent [10]
-[8]      1.0    0.01    0.00  192128         GRAPH_degree [8]
+                0.00    0.05  177277/177277      GRAPH_parallel_fixedpoint_bfs [7]
+[8]      1.3    0.00    0.05  177277         update_work_set [8]
+                0.05    0.00   86820/699773      LIST_insert_IF_NOT_EXIST [6]
+                0.00    0.00   92816/705768      LIST_remove [18]
+                0.00    0.00   89944/702896      LIST_first [19]
 -----------------------------------------------
-                0.01    0.00    9147/9147        GRAPH_parallel_fixedpoint_bfs [7]
-[9]      1.0    0.01    0.00    9147         update_work_set [9]
-                0.00    0.00    4707/61660       LIST_remove [14]
-                0.00    0.00    4490/61444       LIST_insert_IF_NOT_EXIST [15]
-                0.00    0.00    4454/61407       LIST_first [16]
+                0.01    0.00   96031/708979      GRAPH_parallel_fixedpoint_bfs [7]
+                0.03    0.00  612948/708979      GRAPH_bfs [5]
+[9]      1.1    0.04    0.00  708979         GRAPH_adjacent [9]
+                0.00    0.00  706841/1914899     GRAPH_degree [13]
 -----------------------------------------------
-                0.00    0.00    4839/61786       GRAPH_parallel_fixedpoint_bfs [7]
-                0.00    0.00    5177/61786       GRAPH_bfs_RCM [11]
-                0.00    0.00   51770/61786       GRAPH_bfs [5]
-[10]     0.3    0.00    0.00   61786         GRAPH_adjacent [10]
-                0.00    0.00   61659/192128      GRAPH_degree [8]
+                0.03    0.00       1/1           main [1]
+[10]     0.7    0.03    0.00       1         MATRIX_permutation [10]
+                0.00    0.00       1/2           MATRIX_clean [27]
 -----------------------------------------------
-                0.00    0.00       1/1           REORDERING_RCM_opt [6]
-[11]     0.2    0.00    0.00       1         GRAPH_bfs_RCM [11]
-                0.00    0.00   35185/192128      GRAPH_degree [8]
-                0.00    0.00    5177/61786       GRAPH_adjacent [10]
-                0.00    0.00    5177/61444       LIST_insert_IF_NOT_EXIST [15]
-                0.00    0.00    5177/61407       LIST_first [16]
-                0.00    0.00    5177/61660       LIST_remove [14]
+                                                 <spontaneous>
+[11]     0.7    0.03    0.00                 COMPARE_dist_degr_DES [11]
 -----------------------------------------------
-                0.00    0.00       4/4           GRAPH_LS_peripheral [4]
-[12]     0.1    0.00    0.00       4         GRAPH_LS_last_level [12]
-                0.00    0.00   20708/192128      GRAPH_degree [8]
-                0.00    0.00       6/61444       LIST_insert_IF_NOT_EXIST [15]
-                0.00    0.00       4/24          GRAPH_LS_depth [21]
+                0.02    0.00       1/1           main [1]
+[12]     0.5    0.02    0.00       1         MATRIX_readCSR [12]
 -----------------------------------------------
-                0.00    0.00    4444/4444        Unordered_RCM <cycle 1> [3]
-[13]     0.0    0.00    0.00    4444         GRAPH_adjacent_per_level [13]
-                0.00    0.00    8019/192128      GRAPH_degree [8]
-                0.00    0.00    4532/9019        GRAPH_degree_per_level [17]
+                0.00    0.00   92071/1914899     GRAPH_parallel_fixedpoint_bfs [7]
+                0.00    0.00  102158/1914899     GRAPH_LS_peripheral [4]
+                0.00    0.00  196565/1914899     GRAPH_adjacent_per_level [17]
+                0.00    0.00  204316/1914899     GRAPH_LS_last_level [16]
+                0.00    0.00  612948/1914899     GRAPH_bfs [5]
+                0.00    0.00  706841/1914899     GRAPH_adjacent [9]
+[13]     0.2    0.01    0.00 1914899         GRAPH_degree [13]
 -----------------------------------------------
-                0.00    0.00       6/61660       GRAPH_LS_peripheral [4]
-                0.00    0.00    4707/61660       update_work_set [9]
-                0.00    0.00    5177/61660       GRAPH_bfs_RCM [11]
-                0.00    0.00   51770/61660       GRAPH_bfs [5]
-[14]     0.0    0.00    0.00   61660         LIST_remove [14]
+                0.01    0.00       5/5           GRAPH_LS_peripheral [4]
+[14]     0.2    0.01    0.00       5         GRAPH_LS_width [14]
+                0.00    0.00       5/15          GRAPH_LS_depth [24]
 -----------------------------------------------
-                0.00    0.00       1/61444       GRAPH_parallel_fixedpoint_bfs [7]
-                0.00    0.00       6/61444       GRAPH_LS_last_level [12]
-                0.00    0.00    4490/61444       update_work_set [9]
-                0.00    0.00    5177/61444       GRAPH_bfs_RCM [11]
-                0.00    0.00   51770/61444       GRAPH_bfs [5]
-[15]     0.0    0.00    0.00   61444         LIST_insert_IF_NOT_EXIST [15]
+                                                 <spontaneous>
+[15]     0.2    0.01    0.00                 COMPARE_array [15]
 -----------------------------------------------
-                0.00    0.00       6/61407       GRAPH_LS_peripheral [4]
-                0.00    0.00    4454/61407       update_work_set [9]
-                0.00    0.00    5177/61407       GRAPH_bfs_RCM [11]
-                0.00    0.00   51770/61407       GRAPH_bfs [5]
-[16]     0.0    0.00    0.00   61407         LIST_first [16]
+                0.00    0.00       2/2           GRAPH_LS_peripheral [4]
+[16]     0.0    0.00    0.00       2         GRAPH_LS_last_level [16]
+                0.00    0.00  204316/1914899     GRAPH_degree [13]
+                0.00    0.00       4/699773      LIST_insert_IF_NOT_EXIST [6]
+                0.00    0.00       2/15          GRAPH_LS_depth [24]
 -----------------------------------------------
-                0.00    0.00    4487/9019        Unordered_RCM <cycle 1> [3]
-                0.00    0.00    4532/9019        GRAPH_adjacent_per_level [13]
-[17]     0.0    0.00    0.00    9019         GRAPH_degree_per_level [17]
+                0.00    0.00  101064/101064      Unordered_RCM <cycle 1> [3]
+[17]     0.0    0.00    0.00  101064         GRAPH_adjacent_per_level [17]
+                0.00    0.00  196565/1914899     GRAPH_degree [13]
+                0.00    0.00  101181/202196      GRAPH_degree_per_level [20]
 -----------------------------------------------
-                0.00    0.00    8060/8060        Unordered_RCM <cycle 1> [3]
-[18]     0.0    0.00    0.00    8060         is_in_mem [18]
+                0.00    0.00       4/705768      GRAPH_LS_peripheral [4]
+                0.00    0.00   92816/705768      update_work_set [8]
+                0.00    0.00  612948/705768      GRAPH_bfs [5]
+[18]     0.0    0.00    0.00  705768         LIST_remove [18]
 -----------------------------------------------
-                0.00    0.00    4993/4993        GRAPH_parallel_fixedpoint_bfs [7]
-[19]     0.0    0.00    0.00    4993         has_work [19]
+                0.00    0.00       4/702896      GRAPH_LS_peripheral [4]
+                0.00    0.00   89944/702896      update_work_set [8]
+                0.00    0.00  612948/702896      GRAPH_bfs [5]
+[19]     0.0    0.00    0.00  702896         LIST_first [19]
 -----------------------------------------------
-                0.00    0.00     157/157         Unordered_RCM <cycle 1> [3]
-[20]     0.0    0.00    0.00     157         init_mem [20]
+                0.00    0.00  101015/202196      Unordered_RCM <cycle 1> [3]
+                0.00    0.00  101181/202196      GRAPH_adjacent_per_level [17]
+[20]     0.0    0.00    0.00  202196         GRAPH_degree_per_level [20]
 -----------------------------------------------
-                0.00    0.00       4/24          GRAPH_LS_last_level [12]
-                0.00    0.00       8/24          GRAPH_LS_width [22]
-                0.00    0.00      12/24          GRAPH_LS_peripheral [4]
-[21]     0.0    0.00    0.00      24         GRAPH_LS_depth [21]
+                0.00    0.00  196741/196741      Unordered_RCM <cycle 1> [3]
+[21]     0.0    0.00    0.00  196741         is_in_mem [21]
 -----------------------------------------------
-                0.00    0.00       8/8           GRAPH_LS_peripheral [4]
-[22]     0.0    0.00    0.00       8         GRAPH_LS_width [22]
-                0.00    0.00       8/24          GRAPH_LS_depth [21]
+                0.00    0.00   94989/94989       GRAPH_parallel_fixedpoint_bfs [7]
+[22]     0.0    0.00    0.00   94989         has_work [22]
 -----------------------------------------------
-                0.00    0.00       5/5           Unordered_RCM <cycle 1> [3]
-[23]     0.0    0.00    0.00       5         pow_uint [23]
+                0.00    0.00     610/610         Unordered_RCM <cycle 1> [3]
+[23]     0.0    0.00    0.00     610         init_mem [23]
 -----------------------------------------------
-                0.00    0.00       2/4           main [1]
-                0.00    0.00       2/4           MATRIX_permutation [28]
-[24]     0.0    0.00    0.00       4         MATRIX_clean [24]
+                0.00    0.00       2/15          GRAPH_LS_last_level [16]
+                0.00    0.00       5/15          GRAPH_LS_width [14]
+                0.00    0.00       8/15          GRAPH_LS_peripheral [4]
+[24]     0.0    0.00    0.00      15         GRAPH_LS_depth [24]
 -----------------------------------------------
-                0.00    0.00       4/4           main [1]
-[25]     0.0    0.00    0.00       4         get_time [25]
------------------------------------------------
-                0.00    0.00       3/3           main [1]
-[26]     0.0    0.00    0.00       3         MATRIX_bandwidth [26]
------------------------------------------------
-                0.00    0.00       3/3           main [1]
-[27]     0.0    0.00    0.00       3         MATRIX_envelope [27]
+                0.00    0.00       4/4           Unordered_RCM <cycle 1> [3]
+[25]     0.0    0.00    0.00       4         pow_uint [25]
 -----------------------------------------------
                 0.00    0.00       2/2           main [1]
-[28]     0.0    0.00    0.00       2         MATRIX_permutation [28]
-                0.00    0.00       2/4           MATRIX_clean [24]
+[26]     0.0    0.00    0.00       2         MATRIX_bandwidth [26]
+-----------------------------------------------
+                0.00    0.00       1/2           main [1]
+                0.00    0.00       1/2           MATRIX_permutation [10]
+[27]     0.0    0.00    0.00       2         MATRIX_clean [27]
 -----------------------------------------------
                 0.00    0.00       2/2           main [1]
-[29]     0.0    0.00    0.00       2         MATRIX_readCSR [29]
+[28]     0.0    0.00    0.00       2         MATRIX_envelope [28]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[29]     0.0    0.00    0.00       2         get_time [29]
 -----------------------------------------------
                 0.00    0.00       1/1           Unordered_RCM <cycle 1> [3]
 [30]     0.0    0.00    0.00       1         count_nodes_by_level [30]
@@ -247,8 +233,9 @@ index % time    self  children    called     name
 [31]     0.0    0.00    0.00       1         place <cycle 1> [31]
                                    2             Unordered_RCM <cycle 1> [3]
 -----------------------------------------------
-                0.00    0.00       1/1           Unordered_RCM <cycle 1> [3]
-[32]     0.0    0.00    0.00       1         prefix_sum [32]
+                                   1             Unordered_RCM <cycle 1> [3]
+[32]     0.0    0.00    0.00       1         prefix_sum <cycle 1> [32]
+                                   1             Unordered_RCM <cycle 1> [3]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -341,14 +328,14 @@ notice and this notice are preserved.
 
 Index by function name
 
-  [21] GRAPH_LS_depth         [16] LIST_first             [25] get_time
-  [12] GRAPH_LS_last_level    [15] LIST_insert_IF_NOT_EXIST [19] has_work
-   [4] GRAPH_LS_peripheral    [14] LIST_remove            [20] init_mem
-  [22] GRAPH_LS_width         [26] MATRIX_bandwidth       [18] is_in_mem
-  [10] GRAPH_adjacent         [24] MATRIX_clean           [31] place
-  [13] GRAPH_adjacent_per_level [27] MATRIX_envelope      [23] pow_uint
-   [5] GRAPH_bfs              [28] MATRIX_permutation     [32] prefix_sum
-  [11] GRAPH_bfs_RCM          [29] MATRIX_readCSR          [9] update_work_set
-   [8] GRAPH_degree            [6] REORDERING_RCM_opt      [2] <cycle 1>
-  [17] GRAPH_degree_per_level  [3] Unordered_RCM
-   [7] GRAPH_parallel_fixedpoint_bfs [30] count_nodes_by_level
+  [15] COMPARE_array           [7] GRAPH_parallel_fixedpoint_bfs [29] get_time
+  [11] COMPARE_dist_degr_DES  [19] LIST_first             [22] has_work
+  [24] GRAPH_LS_depth          [6] LIST_insert_IF_NOT_EXIST [23] init_mem
+  [16] GRAPH_LS_last_level    [18] LIST_remove            [21] is_in_mem
+   [4] GRAPH_LS_peripheral    [26] MATRIX_bandwidth       [31] place
+  [14] GRAPH_LS_width         [27] MATRIX_clean           [25] pow_uint
+   [9] GRAPH_adjacent         [28] MATRIX_envelope        [32] prefix_sum
+  [17] GRAPH_adjacent_per_level [10] MATRIX_permutation    [8] update_work_set
+   [5] GRAPH_bfs              [12] MATRIX_readCSR          [2] <cycle 1>
+  [13] GRAPH_degree            [3] Unordered_RCM
+  [20] GRAPH_degree_per_level [30] count_nodes_by_level

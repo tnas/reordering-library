@@ -7,7 +7,7 @@ int main (int argc, char* argv[]){
   
 	if (argc != 2)
 	{
-		printf("\n Error! No matrix file (.mtx) and/or number of machines specified."); 
+		printf("\n Error! No matrix file (.mtx) specified."); 
 		printf("\n Usage: ./program <filename>. Exiting... [main]\n\n");
 		return 0;
 	}
