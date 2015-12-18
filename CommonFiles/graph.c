@@ -84,12 +84,12 @@ int GRAPH_degree_per_level (MAT* A, int x, const int* levels, const int adjacenc
 {
 	if (A->n == 0)
 	{
-		printf("error: GRAPH does not exist. Exiting.. [GRAPH_degree]\n");
+		printf("error: GRAPH does not exist. Exiting.. [GRAPH_degree_per_level]\n");
 		exit(0);
 	}
 	if (x > A->n - 1 || x < 0)
 	{
-		printf("error: Vertex %d does not exist in this GRAPH. Exiting.. [GRAPH_degree]\n", x);
+		printf("error: Vertex %d does not exist in this GRAPH. Exiting.. [GRAPH_degree_per_level]\n", x);
 		exit(0);
 	}
 	
