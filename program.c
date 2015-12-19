@@ -26,6 +26,7 @@ int main (int argc, char* argv[]){
 	bandwidth = MATRIX_bandwidth(matrix);
 	envelope  = MATRIX_envelope(matrix);
 	printf("\n  [ REORDERING ]\n"); 
+	printf("  - Matrix : %s\n", argv[1]); 
 	printf("  - Bandwidth/Envelope before = %ld    / %ld\n\n", bandwidth,envelope); 
 	
 	
