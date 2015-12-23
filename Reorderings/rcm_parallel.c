@@ -448,7 +448,7 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 
 
 
-
+/*
 void *alloc_perm_vector(void *params)
 {
 	int node, degree, count;
@@ -496,7 +496,7 @@ void *alloc_perm_vector(void *params)
 	}
 	
 	return NULL;
-}
+}*/
 
 
 

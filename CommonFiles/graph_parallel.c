@@ -4,12 +4,12 @@
 #include "protos_parallel.h"
 
 
-int inline has_work(const int* status_th)
-{
-	int working_ok, count;
-	for (count = 0, working_ok = 0; count < NUM_THREADS; working_ok |= status_th[count++]);
-	return working_ok;
-}
+// int inline has_work(const int* status_th)
+// {
+// 	int working_ok, count;
+// 	for (count = 0, working_ok = 0; count < NUM_THREADS; working_ok |= status_th[count++]);
+// 	return working_ok;
+// }
 
 
 void inline update_work_set(const OPERATION op, LIST** ws, int* node)
@@ -43,9 +43,75 @@ void inline update_work_set(const OPERATION op, LIST** ws, int* node)
  * param root: start node
  * param levels: vector of levels of nodes
  --------------------------------------------------------------------------*/
+// void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
+// {
+//   int node, n_nodes, adj_node, node_degree, count_nodes, level, count;
+//   int* neighboors;
+//   int status_threads[NUM_THREADS];
+//   
+//   n_nodes = adjacency->n;
+//   *levels = calloc(n_nodes, sizeof(int));
+//   
+//   for (node = 0; node < n_nodes; ++node) (*levels)[node] = INFINITY;
+//   (*levels)[root] = 0;
+//   
+//   LIST* work_set = NULL;
+//   work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
+//   
+//   omp_set_num_threads(NUM_THREADS);
+//   for (count = 0; count < NUM_THREADS; status_threads[count++] = THREAD_ON);
+//   
+//   #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
+//   {
+// 	while (has_work(status_threads)) 
+// 	{
+// 		node = -1;
+// 		update_work_set(READ, &work_set, &node);
+// 		
+// 		if (node != -1)
+// 		{
+// 			status_threads[omp_get_thread_num()] = 1;
+// 			
+// 			neighboors  = GRAPH_adjacent(adjacency, node);
+// 			node_degree = GRAPH_degree(adjacency, node);
+// 		
+// 			for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
+// 			{
+// 				adj_node = neighboors[count_nodes];
+// 				
+// 				#pragma omp critical
+// 				{
+// 					#pragma omp flush (levels)
+// 					
+// 					level = (*levels)[node] + 1;
+// 					if (level < (*levels)[adj_node])
+// 					{
+// 						(*levels)[adj_node] = level;
+// 						update_work_set(WRITE, &work_set, &adj_node);
+// 					}
+// 				}
+// 			}
+// 			
+// 			free(neighboors);
+// 		}
+// 		else 
+// 		{
+// 			status_threads[omp_get_thread_num()] = THREAD_OFF;
+// 		}
+// 	}
+//   }
+//   
+// //   if (work_set != NULL) 
+// //   {
+// // 	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
+// // 	exit(0);
+// //   }
+// }
+
+
 void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 {
-  int node, n_nodes, adj_node, node_degree, count_nodes, level, count;
+  int node, n_nodes, adj_node, node_degree, count_nodes, count, level, has_work;
   int* neighboors;
   int status_threads[NUM_THREADS];
   
@@ -61,16 +127,26 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
   omp_set_num_threads(NUM_THREADS);
   for (count = 0; count < NUM_THREADS; status_threads[count++] = THREAD_ON);
   
+  has_work = NUM_THREADS;
+  
   #pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level)	
   {
-	while (has_work(status_threads)) 
+	while (has_work) 
 	{
-		node = -1;
+		node = UNDEF_NODE;
 		update_work_set(READ, &work_set, &node);
 		
-		if (node != -1)
+		if (node != UNDEF_NODE)
 		{
-			status_threads[omp_get_thread_num()] = 1;
+			#pragma omp critical
+			{
+				
+				if (status_threads[omp_get_thread_num()] != THREAD_ON)
+				{
+					status_threads[omp_get_thread_num()] = THREAD_ON;
+					++has_work;
+				}	
+			}
 			
 			neighboors  = GRAPH_adjacent(adjacency, node);
 			node_degree = GRAPH_degree(adjacency, node);
@@ -96,7 +172,16 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 		}
 		else 
 		{
-			status_threads[omp_get_thread_num()] = THREAD_OFF;
+			#pragma omp critical
+			{
+				
+				if (status_threads[omp_get_thread_num()] != THREAD_OFF)
+				{
+					status_threads[omp_get_thread_num()] = THREAD_OFF;
+					--has_work;
+				}	
+			}
+			
 		}
 	}
   }
@@ -107,4 +192,8 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 // 	exit(0);
 //   }
 }
+
+
+
+
 
