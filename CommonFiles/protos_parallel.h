@@ -1,4 +1,5 @@
 #include <omp.h>
+#include <pthread.h>
 #include "protos.h"
 #include "util.h"
 
@@ -27,6 +28,20 @@ typedef struct
 	int size;
 	int free_position;
 } mem_write_next_level;
+
+
+typedef struct
+{
+	int level;
+	int* read_offset;
+	int* write_offset;
+	int** perm;
+	const int* sums;
+	const int* levels;
+	int max_dist;
+	MAT* graph;
+	pthread_mutex_t* mut;
+} thread_args;
 
 
 extern void	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels);
