@@ -39,6 +39,30 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 
 
 /*----------------------------------------------------------------------------
+ * Insert a element in the head of LIST structure 
+ *--------------------------------------------------------------------------*/
+LIST* LIST_insert(LIST* L, int x)
+{
+	/* creating new list element */
+	if (L == NULL)
+	{
+		LIST *N = (LIST*) malloc (sizeof(LIST));
+		N->data = x;
+		N->next = NULL;
+		return N;		
+	}
+		
+
+	LIST *N = (LIST*) malloc (sizeof(LIST));
+	N->data = x;
+	N->next = L;
+	
+	return N;
+}
+
+
+
+/*----------------------------------------------------------------------------
  * Remove the element x from the LIST structure
  *--------------------------------------------------------------------------*/
 LIST* LIST_remove (LIST* L, int x)

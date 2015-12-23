@@ -68,6 +68,7 @@ extern LIST*    LIST_remove_first        (LIST* L);
 extern void     LIST_print               (LIST* L);
 extern int      LIST_first               (LIST* L);
 extern void     LIST_destroy             (LIST* L);
+extern LIST*    LIST_insert		 (LIST* L, int x);
 
 /*----------------------------------------------------------------------------
  * SOLVERS FUNCTIONS PROTOTYPE
