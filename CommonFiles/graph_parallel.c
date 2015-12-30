@@ -109,11 +109,115 @@
 // }
 
 
+// void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
+// {
+// 	int node, n_nodes, adj_node, node_degree, count_nodes, level, has_work, tid;
+// 	int* neighboors;
+// 	int status_threads[NUM_THREADS];
+// 	LIST* work_set;
+// 	omp_lock_t lock;
+//   
+// 	n_nodes = adjacency->n;
+// 	*levels = calloc(n_nodes, sizeof(int));
+//   
+// 	omp_set_num_threads(NUM_THREADS);
+// 	omp_init_lock(&lock);
+// 	
+// 	#pragma omp parallel for private (node)
+// 	for (node = 0; node < n_nodes; ++node) 
+// 		(*levels)[node] = INFINITY;
+// 	(*levels)[root] = 0;
+//   
+// 	#pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level, tid)	
+// 	{
+// 		tid = omp_get_thread_num();
+// 		status_threads[tid] = THREAD_ON;
+// 		
+// 		#pragma omp single nowait
+// 		{
+// 			work_set = NULL;
+// 			work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
+// 		}
+// 		
+// 		#pragma omp single
+// 		has_work = NUM_THREADS;
+// 		
+// 		while (has_work) 
+// 		{
+// 			node = UNDEF_NODE;
+// 			
+// 			omp_set_lock(&lock);
+// 			
+// 			if (work_set != NULL)
+// 			{
+// 				node     = LIST_first(work_set);
+// 				work_set = LIST_remove(work_set, node);
+// 			}
+// 			
+// 			omp_unset_lock(&lock);
+// 			
+// 			if (node != UNDEF_NODE)
+// 			{
+// 				
+// 				if (status_threads[tid] != THREAD_ON)
+// 				{
+// 					status_threads[tid] = THREAD_ON;
+// 					
+// 					#pragma omp atomic
+// 					++has_work;
+// 				}	
+// 				
+// 				neighboors  = GRAPH_adjacent(adjacency, node);
+// 				node_degree = GRAPH_degree(adjacency, node);
+// 				
+// 				omp_set_lock(&lock);
+// 				
+// 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
+// 				{
+// 					adj_node = neighboors[count_nodes];
+// 					level    = (*levels)[node] + 1;
+// 					
+// 					if (level < (*levels)[adj_node])
+// 					{
+// 						(*levels)[adj_node] = level;
+// 						work_set = LIST_insert_IF_NOT_EXIST(work_set, adj_node);
+// 					}
+// 				}
+// 				
+// 				omp_unset_lock(&lock);
+// 				
+// 				free(neighboors);
+// 			}
+// 			else 
+// 			{
+// 				if (status_threads[tid] != THREAD_OFF)
+// 				{
+// 					status_threads[tid] = THREAD_OFF;
+// 					
+// 					#pragma omp atomic
+// 					--has_work;
+// 				}	
+// 			}
+// 		}
+// 	}
+// 	
+// 	omp_destroy_lock(&lock);
+// 	
+// 	//   if (work_set != NULL) 
+// 	//   {
+// 	// 	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
+// 	// 	exit(0);
+// 	//   }
+// }
+
+
+
+
+
 void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 {
-	int node, n_nodes, adj_node, node_degree, count_nodes, level, has_work, tid;
+	int node, n_nodes, adj_node, node_degree, count_nodes, level, has_unreached_nodes;
 	int* neighboors;
-	int status_threads[NUM_THREADS];
 	LIST* work_set;
 	omp_lock_t lock;
   
@@ -123,26 +227,18 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 	omp_set_num_threads(NUM_THREADS);
 	omp_init_lock(&lock);
 	
-	#pragma omp for private (node)
+	#pragma omp parallel for private (node)
 	for (node = 0; node < n_nodes; ++node) 
-		(*levels)[node] = INFINITY;
+		(*levels)[node] = INFINITY_LEVEL;
 	(*levels)[root] = 0;
+	
+	work_set = NULL;
+	work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
+	has_unreached_nodes = n_nodes - 1;
   
-	#pragma omp parallel private(node, neighboors, node_degree, count_nodes, adj_node, level, tid)	
+	#pragma omp parallel private(node, neighboors, node_degree, count_nodes)
 	{
-		tid = omp_get_thread_num();
-		status_threads[tid] = THREAD_ON;
-		
-		#pragma omp single nowait
-		{
-			work_set = NULL;
-			work_set = LIST_insert_IF_NOT_EXIST(work_set, root);
-		}
-		
-		#pragma omp single
-		has_work = NUM_THREADS;
-		
-		while (has_work) 
+		while (work_set != NULL || has_unreached_nodes) 
 		{
 			node = UNDEF_NODE;
 			
@@ -159,17 +255,11 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 			if (node != UNDEF_NODE)
 			{
 				
-				if (status_threads[tid] != THREAD_ON)
-				{
-					status_threads[tid] = THREAD_ON;
-					
-					#pragma omp atomic
-					++has_work;
-				}	
-				
 				neighboors  = GRAPH_adjacent(adjacency, node);
 				node_degree = GRAPH_degree(adjacency, node);
-			
+				
+				omp_set_lock(&lock);
+				
 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
 				{
 					adj_node = neighboors[count_nodes];
@@ -177,26 +267,17 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 					
 					if (level < (*levels)[adj_node])
 					{
-						(*levels)[adj_node] = level;
+						if ((*levels)[adj_node] == INFINITY_LEVEL)
+							--has_unreached_nodes;
 						
-						omp_set_lock(&lock);
+						(*levels)[adj_node] = level;
 						work_set = LIST_insert_IF_NOT_EXIST(work_set, adj_node);
-						omp_unset_lock(&lock);
 					}
 				}
 				
+				omp_unset_lock(&lock);
+				
 				free(neighboors);
-			}
-			else 
-			{
-					
-				if (status_threads[tid] != THREAD_OFF)
-				{
-					status_threads[tid] = THREAD_OFF;
-					
-					#pragma omp atomic
-					--has_work;
-				}	
 			}
 		}
 	}
@@ -209,7 +290,6 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 	// 	exit(0);
 	//   }
 }
-
 
 
 

@@ -6,6 +6,9 @@
 #define THREAD_ON 1
 #define THREAD_OFF 0
 #define UNDEF_NODE -1
+#define UNDEF_THREAD -1
+#define INFINITY_LEVEL 2147483647
+
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
 #define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
