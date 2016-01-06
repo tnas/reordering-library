@@ -2,7 +2,7 @@
 #include "protos.h"
 #include "util.h"
 
-#define NUM_THREADS 4
+#define NUM_THREADS 8
 #define THREAD_ON 1
 #define THREAD_OFF 0
 #define UNDEF_NODE -1
@@ -14,6 +14,7 @@
 #define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
 
 typedef enum OPERATION {READ, WRITE} OPERATION;
+typedef enum LABEL { UNREACHED, LABELED, CLOSED } LABEL;
 
 typedef struct 
 {

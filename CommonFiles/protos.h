@@ -30,7 +30,7 @@ extern int      COMPARE_dist_degr_ASC    (const void * a, const void * b);
 /*----------------------------------------------------------------------------
  * MATRIX HEADER FUNCTIONS PROTOTYPE
  *--------------------------------------------------------------------------*/
-extern void     MATRIX_readCSR           (MAT* A, char* p);
+extern void     MATRIX_readCSR           (MAT* A, FILE* f);
 extern double   MATRIX_aij               (MAT* A, int i, int j);
 extern void     MATRIX_printCSR          (MAT* A);
 extern void     MATRIX_printFULL         (MAT* A);

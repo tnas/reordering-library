@@ -19,49 +19,155 @@ int COMPARE_array (const void * a, const void * b)
 /*----------------------------------------------------------------------------
  * Read matrix from file in MM format to a CSR structure
  *--------------------------------------------------------------------------*/
-void MATRIX_readCSR (MAT* A, char* p)
+// void MATRIX_readCSR (MAT* A, char* p)
+// {
+// 	int M, N, nz;   
+// 	int i, j, row, colunm, elem = 0;
+// 	double value;
+// 	char line[1025];
+// 	FILE* f;
+// 
+// 	if ((f = fopen(p, "r")) == NULL) 
+// 		exit(1);
+// 
+// 	do 
+// 	{
+// 		if (fgets(line,1025,f) == NULL) 
+// 			exit(0);
+// 	}while (line[0] == '%');
+//    
+// 	sscanf(line,"%d %d %d", &N, &M, &nz);
+// 
+// 	/* reseve memory for matrices */
+// 	A->m   = M;
+// 	A->n   = N;
+// 	A->nz  = nz;
+//     
+// 	A->AA  = (double *) calloc(nz, sizeof (double));
+// 	A->D   = (double *) calloc(N,  sizeof (double));
+// 	A->JA  = (int    *) calloc(nz, sizeof (int));
+// 	A->IA  = (int    *) calloc(N+1,sizeof (int));
+// 	
+// 	for (i = 0; i < nz; ++i)
+// 	{
+// 		fscanf(f, "%d %d %lf\n", &colunm, &row, &value);
+// 		A->AA[i]   = value;
+// 		A->JA[i]   = colunm - 1;
+// 		elem      += 1;
+// 		A->IA[row] = elem;
+// 	}
+// 	
+// 	/* Adjusting IA array */
+// 	for (i = 1; i < N + 1; ++i)
+// 		if (A->IA[i] == 0) 
+// 			A->IA[i] = A->IA[i-1];
+// 	
+// 	/* Diagonal */
+// 	if (M == N) /* square matrix */
+// 	{
+// 		for (i = 0; i < A->n; ++i)
+// 		{
+// 			int k1 = A->IA[i];
+// 			int k2 = A->IA[i+1]-1;
+// 			for (j = k1; j <= k2; ++j)
+// 				if (i == A->JA[j]) 
+// 					A->D[i] = A->AA[j];
+// 		}
+// 	}
+// 	fclose(f);
+// }
+
+
+/*----------------------------------------------------------------------------
+ * Read matrix from file in MM format to a CSR structure
+ *--------------------------------------------------------------------------*/
+void MATRIX_readCSR (MAT* A, FILE* f)
 {
-	int M, N, nz;   
-	int i, j, row, colunm, elem = 0;
-	double value;
-	char line[1025];
-	FILE* f;
-
-	if ((f = fopen(p, "r")) == NULL) 
-		exit(1);
-
+	int M, N, nz, new_nz;
+	int i, j, k, I, J, elem = 0;
+	double VAL;
+	char line[1025], header[1025],test[1025];
+	char *head0, *head1, *rep, *field, *symm;
+	ARRAY* a;
+	
+	fgets(header,200,f);
+	head0 = strtok(header," \n");
+	head1 = strtok(NULL," \n");
+	rep   = strtok(NULL," \n");
+	field = strtok(NULL," \n");
+	symm  = strtok(NULL," \n");
+	
+	if ((strcmp(symm,"symmetric") != 0 && strcmp(symm,"general") != 0))
+		fprintf (stderr,"\n Error. Matrix format not supported. Exiting.. [MATRIX_readCSR]\n\n");
+	
 	do 
 	{
 		if (fgets(line,1025,f) == NULL) 
 			exit(0);
-	}while (line[0] == '%');
-   
+	}while (line[0] == '%');   
 	sscanf(line,"%d %d %d", &N, &M, &nz);
+	
+	if (strcmp(symm,"symmetric") == 0)
+	{
+		a = malloc ((2*nz)*sizeof(ARRAY));
+		for (i = 0, k = 0; i < nz; ++i)
+		{
+			fscanf(f,"%d%d%lf",&I,&J,&VAL);
+			a[k].arr1 = VAL;
+			a[k].arr2 = J - 1;
+			a[k].arr3 = I - 1;
+			k++;
+			if (I != J)
+			{
+				a[k].arr1 = VAL;
+				a[k].arr2 = I - 1;
+				a[k].arr3 = J - 1;
+				k++;
+			}
+		}
+		nz = k;
+		a  = realloc (a,nz*sizeof(ARRAY));
+		qsort(a,nz,sizeof(ARRAY),COMPARE_array);
+	}
+	
+	if (strcmp(symm,"general") == 0)
+	{
+		a = malloc (nz*sizeof(ARRAY));
+		for (i = 0; i < nz; ++i)
+		{
+			fscanf(f,"%d%d%lf",&I,&J,&VAL);
+			a[i].arr1 = VAL;
+			a[i].arr2 = J - 1;
+			a[i].arr3 = I - 1;
+		}
+		qsort(a,nz,sizeof(ARRAY),COMPARE_array);
+	}
 
 	/* reseve memory for matrices */
 	A->m   = M;
 	A->n   = N;
 	A->nz  = nz;
-    
+	
 	A->AA  = (double *) calloc(nz, sizeof (double));
-	A->D   = (double *) calloc(N,  sizeof (double));
+	A->D   = (double *) calloc(N , sizeof (double));
 	A->JA  = (int    *) calloc(nz, sizeof (int));
 	A->IA  = (int    *) calloc(N+1,sizeof (int));
 	
 	for (i = 0; i < nz; ++i)
 	{
-		fscanf(f, "%d %d %lf\n", &colunm, &row, &value);
-		A->AA[i]   = value;
-		A->JA[i]   = colunm - 1;
+		A->AA[i]   = a[i].arr1;
+		A->JA[i]   = a[i].arr2;
 		elem      += 1;
-		A->IA[row] = elem;
+		A->IA[a[i].arr3+1] = elem;
 	}
+
+	free(a);
 	
 	/* Adjusting IA array */
 	for (i = 1; i < N + 1; ++i)
 		if (A->IA[i] == 0) 
 			A->IA[i] = A->IA[i-1];
-	
+
 	/* Diagonal */
 	if (M == N) /* square matrix */
 	{
@@ -74,8 +180,8 @@ void MATRIX_readCSR (MAT* A, char* p)
 					A->D[i] = A->AA[j];
 		}
 	}
-	fclose(f);
 }
+
 
 /*----------------------------------------------------------------------------
  * Get the element ij stored as CSR

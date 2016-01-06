@@ -25,8 +25,8 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 		if (P->data == x)
 			return L;
 	}
-// 	if (P->data == x) 
-// 		return L;
+	if (P->data == x) 
+		return L;
 
 	LIST *N = (LIST*) malloc (sizeof(LIST));
 	N->data = x;

@@ -1,7 +1,8 @@
 /*----------------------------------------------------------------------------
  * RCM REORDERING SOLVER
  *--------------------------------------------------------------------------*/
-#include "../CommonFiles/protos.h"
+// #include "../CommonFiles/protos.h"
+#include "../CommonFiles/protos_parallel.h"
 
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm
@@ -10,12 +11,16 @@ void REORDERING_RCM_opt (MAT* A, int** Fp)
 { 
 	int i, s, e;
 	int n = A->n;
+	double time;
 	
 	int* g = GRAPH_LS_peripheral (A,&s,&e);
 	int* q = calloc (n,sizeof(int));
 	int* p = calloc (n,sizeof(int));
 	
+	time = get_time(); 
 	q = GRAPH_bfs_RCM (A,s,q);
+	time = (get_time() - time)/100.0;
+	printf("Serial BFS - Elapsed time: %.6f sec\n\n", time);
 	
 	/* Reverse order */
 	for (i = 0; i < n; ++i)

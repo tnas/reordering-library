@@ -273,6 +273,7 @@ int* GRAPH_bfs_RCM (MAT* A, int x, int* p)
 		}
 	}
 	
+	
 	free(L);
 	free(color);
 	free(dist);
