@@ -11,9 +11,8 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 	int* local_max;
 	
 	max_level = 0;
-	omp_set_num_threads(NUM_THREADS);
 	
-	#pragma omp parallel private(node, count_thread, level)
+	#pragma omp parallel private(node, count_thread, level) num_threads(NUM_THREADS)
 	{
 		#pragma omp single nowait
 		local_max = calloc(NUM_THREADS, sizeof(int*));
@@ -213,27 +212,7 @@ void prefix_sum(const int* counts, int** sums, const int max_level)
 }
 
 
-void inline init_mem(mem_write_next_level* mem_write, const int* sums, const int level)
-{
-	int pos;
-	
-	mem_write->size = sums[level+2]-sums[level+1];
-	mem_write->mem = calloc(mem_write->size, sizeof(int));
-	mem_write->free_position = 0;
-	
-	for (pos = 0; pos < mem_write->size; ++pos)
-		mem_write->mem[pos] = -1;
-}
 
-
-
-inline int is_in_mem(const mem_write_next_level mem_write, const int val)
-{
-	int pos;
-	for (pos = 0; pos < mem_write.size; ++pos)
-		if (mem_write.mem[pos] == val) return 1;
-	return 0;
-}
 
 
 // void place(MAT* graph, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
@@ -324,27 +303,168 @@ inline int is_in_mem(const mem_write_next_level mem_write, const int val)
 // 	free(write_offset);
 // }
 
+// void inline init_mem(mem_write_next_level* mem_write, const int* sums, const int level)
+// {
+// 	int pos;
+// 	
+// 	mem_write->size = sums[level+2]-sums[level+1];
+// 	mem_write->mem = calloc(mem_write->size, sizeof(int));
+// 	mem_write->free_position = 0;
+// 	
+// 	for (pos = 0; pos < mem_write->size; ++pos)
+// 		mem_write->mem[pos] = -1;
+// }
+// 
+// 
+// 
+// inline int is_in_mem(const mem_write_next_level mem_write, const int val)
+// {
+// 	int pos;
+// 	for (pos = 0; pos < mem_write.size; ++pos)
+// 		if (mem_write.mem[pos] == val) return 1;
+// 	return 0;
+// }
+
+// Tentativa usando omp_set e omp_unset lock - ultimo ok
+// void place(MAT* graph, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
+// {
+// 	int level, node, degree, count;
+// 	int* read_offset;
+// 	int* write_offset;
+// 	GRAPH* children;
+// 	mem_write_next_level mem_write;
+// 	omp_lock_t locks[NUM_THREADS];
+// 	
+// 	#pragma omp parallel sections num_threads(4)
+// 	{
+// 		#pragma omp section 
+// 		{
+// 			read_offset  = calloc(max_dist, sizeof(int));
+// 			bcopy(sums, read_offset, max_dist * sizeof(int));
+// 		}
+// 		
+// 		#pragma omp section 
+// 		{
+// 			write_offset = calloc(max_dist, sizeof(int));
+// 			bcopy(sums, write_offset, max_dist * sizeof(int));
+// 			write_offset[0] = 1;
+// 		}
+// 		
+// 		#pragma omp section
+// 		(*perm)[0] =  source_node;
+// 		
+// 		#pragma omp section 
+// 		for (count = 0; count < NUM_THREADS; ++count)
+// 			omp_init_lock(&locks[count]);
+// 	}
+// 	
+// 	
+// 
+// // 	printf("max_dist: %d\n", max_dist); fflush(stdout);
+// 	#pragma omp parallel private (level, node, children, degree, count, mem_write) num_threads(NUM_THREADS)
+// 	{
+// 		level = omp_get_thread_num();
+// 		
+// 		omp_set_lock(&locks[level]);
+// 		#pragma omp barrier
+// 		
+// 		while (level < max_dist - 1)
+// 		{
+// // 			printf("Thread %d running\n", level); fflush(stdout);
+// 			
+// 			init_mem(&mem_write, sums, level);
+// 			
+// 			while (read_offset[level] != sums[level+1]) // There are nodes to read
+// 			{
+// 				#pragma omp flush (write_offset)
+// 				
+// 				// Spin
+// 				while (read_offset[level] == write_offset[level]) 
+// 				{
+// // 					printf("Thread %d blocked.\n", level); fflush(stdout);
+// 					omp_set_lock(&locks[(level-1)%NUM_THREADS]);
+// 				} 
+// 				
+// 				if (level > 0) omp_unset_lock(&locks[(level-1)%NUM_THREADS]);
+// 				
+// 				node = (*perm)[read_offset[level]];
+// 				++read_offset[level];
+// 				
+// // 				printf("Thread %d get node %d\n", level, node); fflush(stdout);
+// 				
+// 				// Edges of node with dist == level + 1
+// 				degree   = GRAPH_degree_per_level(graph, node, levels, level+1);
+// 				children = GRAPH_adjacent_per_level(graph, node, levels, level+1);
+// 				
+// // 				printf("Thread %d get %d degree %d\n", level, node, degree); fflush(stdout);
+// 				
+// 				// Sorting children by degree
+// 				qsort(children, degree, sizeof(GRAPH), COMPARE_degr_ASC);
+// 				
+// 				for (count = 0; count < degree; ++count)
+// 				{
+// // 					if (!is_in_mem(mem_write, children[count].label))
+// // 					{
+// // 						printf("Thread %d write_offset: %d\n", level, write_offset[level+1]); fflush(stdout);
+// // 						printf("Thread %d getting lock\n", level); fflush(stdout);
+// 						omp_test_lock(&locks[level%NUM_THREADS]);
+// // 						printf("Thread %d got lock\n", level); fflush(stdout);
+// 						(*perm)[write_offset[level+1]] = mem_write.mem[mem_write.free_position] = children[count].label;
+// // 						printf("Thread %d writing node %d\n", level, children[count].label); fflush(stdout);
+// 						++write_offset[level+1];
+// 						++mem_write.free_position;
+// 						omp_unset_lock(&locks[level%NUM_THREADS]);
+// // 						printf("Thread %d finish writing\n", level); fflush(stdout);
+// // 					}
+// 				}
+// 				
+// 				free(children);
+// 			}
+// 			
+// // 			printf("Thread %d finish\n", level); fflush(stdout);
+// 			
+// 			free(mem_write.mem);
+// 			level += NUM_THREADS;
+// 		}
+// 		
+// // 		printf("Thread %d waiting to die.\n", level-NUM_THREADS < 0 ? level : level-NUM_THREADS); fflush(stdout);
+// 	}
+// 	
+// 	#pragma omp parallel num_threads(3)
+// 	{
+// 		#pragma omp single nowait
+// 		free(read_offset);
+// 		
+// 		#pragma omp single nowait
+// 		free(write_offset);
+// 		
+// 		#pragma omp single
+// 		for (count = 0; count < NUM_THREADS; ++count)
+// 			omp_destroy_lock(&locks[count]);
+// 	}
+// }
 
 
-// Tentativa usando omp_set e omp_unset lock
+
 void place(MAT* graph, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
 {
 	int level, node, degree, count;
 	int* read_offset;
 	int* write_offset;
+	int colors[graph->n];
 	GRAPH* children;
-	mem_write_next_level mem_write;
+// 	mem_write_next_level mem_write;
 	omp_lock_t locks[NUM_THREADS];
 	
-	#pragma omp parallel sections num_threads(4)
+	#pragma omp parallel sections num_threads(NUM_THREADS)
 	{
-		#pragma omp section
+		#pragma omp section 
 		{
 			read_offset  = calloc(max_dist, sizeof(int));
 			bcopy(sums, read_offset, max_dist * sizeof(int));
 		}
 		
-		#pragma omp section
+		#pragma omp section 
 		{
 			write_offset = calloc(max_dist, sizeof(int));
 			bcopy(sums, write_offset, max_dist * sizeof(int));
@@ -354,13 +474,18 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 		#pragma omp section
 		(*perm)[0] =  source_node;
 		
-		#pragma omp section
+		#pragma omp section 
 		for (count = 0; count < NUM_THREADS; ++count)
 			omp_init_lock(&locks[count]);
 	}
+	
+	
+	#pragma omp parallel for num_threads(NUM_THREADS)
+	for (count = 0; count < graph->n; ++count)
+		colors[count] = UNREACHED;
 
 // 	printf("max_dist: %d\n", max_dist); fflush(stdout);
-	#pragma omp parallel private (level, node, children, degree, count, mem_write) num_threads(NUM_THREADS)
+	#pragma omp parallel private (level, node, children, degree, count) num_threads(NUM_THREADS)
 	{
 		level = omp_get_thread_num();
 		
@@ -371,7 +496,7 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 		{
 // 			printf("Thread %d running\n", level); fflush(stdout);
 			
-			init_mem(&mem_write, sums, level);
+// 			init_mem(&mem_write, sums, level);
 			
 			while (read_offset[level] != sums[level+1]) // There are nodes to read
 			{
@@ -392,8 +517,8 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 // 				printf("Thread %d get node %d\n", level, node); fflush(stdout);
 				
 				// Edges of node with dist == level + 1
-				degree   = GRAPH_degree_per_level(graph, node, levels, level+1);
-				children = GRAPH_adjacent_per_level(graph, node, levels, level+1);
+				degree   = GRAPH_degree_per_level(graph, node, levels, level+1, colors);
+				children = GRAPH_adjacent_per_level(graph, node, levels, level+1, colors);
 				
 // 				printf("Thread %d get %d degree %d\n", level, node, degree); fflush(stdout);
 				
@@ -402,19 +527,21 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 				
 				for (count = 0; count < degree; ++count)
 				{
-					if (!is_in_mem(mem_write, children[count].label))
-					{
+// 					if (!is_in_mem(mem_write, children[count].label))
+// 					{
 // 						printf("Thread %d write_offset: %d\n", level, write_offset[level+1]); fflush(stdout);
 // 						printf("Thread %d getting lock\n", level); fflush(stdout);
 						omp_test_lock(&locks[level%NUM_THREADS]);
 // 						printf("Thread %d got lock\n", level); fflush(stdout);
-						(*perm)[write_offset[level+1]] = mem_write.mem[mem_write.free_position] = children[count].label;
+// 						(*perm)[write_offset[level+1]] = mem_write.mem[mem_write.free_position] = children[count].label;
+						(*perm)[write_offset[level+1]] = children[count].label;
+						colors[children[count].label] = LABELED;
 // 						printf("Thread %d writing node %d\n", level, children[count].label); fflush(stdout);
 						++write_offset[level+1];
-						++mem_write.free_position;
+// 						++mem_write.free_position;
 						omp_unset_lock(&locks[level%NUM_THREADS]);
 // 						printf("Thread %d finish writing\n", level); fflush(stdout);
-					}
+// 					}
 				}
 				
 				free(children);
@@ -422,27 +549,26 @@ void place(MAT* graph, const int source_node, const int* sums, const int max_dis
 			
 // 			printf("Thread %d finish\n", level); fflush(stdout);
 			
-			free(mem_write.mem);
+// 			free(mem_write.mem);
 			level += NUM_THREADS;
 		}
 		
 // 		printf("Thread %d waiting to die.\n", level-NUM_THREADS < 0 ? level : level-NUM_THREADS); fflush(stdout);
 	}
 	
-	#pragma omp parallel num_threads(3)
+	#pragma omp parallel sections num_threads(NUM_THREADS)
 	{
-		#pragma omp single nowait
+		#pragma omp section
 		free(read_offset);
 		
-		#pragma omp single nowait
+		#pragma omp section
 		free(write_offset);
 		
-		#pragma omp single
+		#pragma omp section
 		for (count = 0; count < NUM_THREADS; ++count)
 			omp_destroy_lock(&locks[count]);
 	}
 }
-
 
 
 
@@ -598,7 +724,10 @@ void Unordered_RCM(MAT* A, int** perm)
 	time = (get_time() - time)/100.0;
 	printf("Parallel BFS - Elapsed time: %.6f sec\n\n", time);
 	
+	time = get_time();
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
+	time = (get_time() - time)/100.0;
+	printf("Parallel Count nodes by level - Elapsed time: %.6f sec\n\n", time);
 // 	++max_level;
 	
 // 	printf("Alocando vetor tcounts e redimensionando\n"); fflush(stdout);
@@ -642,12 +771,23 @@ void Unordered_RCM(MAT* A, int** perm)
 		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 	
 // 	printf("Liberando memoria final\n"); fflush(stdout);
-	free(levels);
-	free(counts);
-// 	free(tcounts);
-	free(sums);
-	free(tperm);
-	free(graph_ls);
+	#pragma omp parallel sections num_threads(NUM_THREADS)
+	{
+		#pragma omp section 
+		free(levels);
+		
+		#pragma omp section 
+		free(counts);
+		
+		#pragma omp section 
+		free(sums);
+		
+		#pragma omp section 
+		free(tperm);
+		
+		#pragma omp section 
+		free(graph_ls);
+	}
 // 	printf("Finalizando Unordered_RCM\n"); fflush(stdout);
 }
 

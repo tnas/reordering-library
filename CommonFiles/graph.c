@@ -80,7 +80,7 @@ int* GRAPH_adjacent (MAT* A, int x)
 /*-------------------------------------------------------------------------------------
  * Return the degree of the vertex x in graph (i.e. matrix) A at level adjacency_level
  *-------------------------------------------------------------------------------------*/
-int GRAPH_degree_per_level (MAT* A, int x, const int* levels, const int adjacency_level)
+int GRAPH_degree_per_level (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors)
 {
 	if (A->n == 0)
 	{
@@ -97,7 +97,7 @@ int GRAPH_degree_per_level (MAT* A, int x, const int* levels, const int adjacenc
 	
 	for (i = A->IA[x]; i < A->IA[x+1]; ++i)
 	{
-		if (A->JA[i] != x && levels[A->JA[i]] == adjacency_level) ++k;
+		if (A->JA[i] != x && levels[A->JA[i]] == adjacency_level && colors[A->JA[i]] == UNREACHED) ++k;
 	}
 	
 	return k;
@@ -107,7 +107,7 @@ int GRAPH_degree_per_level (MAT* A, int x, const int* levels, const int adjacenc
 /*-----------------------------------------------------------------------------------
  * Return all vertices adjacents x in graph (i.e. matrix) A at level adjacency_level
  *-----------------------------------------------------------------------------------*/
-GRAPH* GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level)
+GRAPH* GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors)
 {
 	if (A->n == 0)
 	{
@@ -122,12 +122,12 @@ GRAPH* GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adj
 	
 	int i, k = 0;
 	
-	int  degree = GRAPH_degree_per_level(A, x, levels, adjacency_level);
+	int  degree = GRAPH_degree_per_level(A, x, levels, adjacency_level, colors);
 	GRAPH* adj  = malloc(degree * sizeof(GRAPH));
 
 	for (i = A->IA[x]; i < A->IA[x+1]; ++i)
 	{
-		if (A->JA[i] != x && levels[A->JA[i]] == adjacency_level)
+		if (A->JA[i] != x && levels[A->JA[i]] == adjacency_level && colors[A->JA[i]] == UNREACHED)
 		{
 			adj[k].label = A->JA[i];
 			adj[k].degree = GRAPH_degree(A, A->JA[i]);

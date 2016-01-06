@@ -7,6 +7,8 @@
 #define min(a,b) (((a)>(b))?(b):(a))
 #define max(a,b) (((a)>(b))?(a):(b))
 
+typedef enum LABEL { UNREACHED, LABELED } LABEL;
+
 /*----------------------------------------------------------------------------
  * ALGEBRA LINEAR FUNCTIONS PROTOTYPE 
  *--------------------------------------------------------------------------*/
@@ -48,8 +50,8 @@ extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int
  *--------------------------------------------------------------------------*/
 extern int      GRAPH_degree             (MAT* A, int x);
 extern int*     GRAPH_adjacent           (MAT* A, int x);
-extern int 	GRAPH_degree_per_level   (MAT* A, int x, const int* levels, const int adjacency_level);
-extern GRAPH* 	GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level);
+extern int 	GRAPH_degree_per_level   (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors);
+extern GRAPH* 	GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors);
 extern void     GRAPH_bfs                (MAT* A, int x, int* dist);
 extern int*     GRAPH_bfs_RCM            (MAT* A, int x, int* dist);
 extern int      GRAPH_LS_depth           (int* LS, int n);
