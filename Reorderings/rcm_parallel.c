@@ -704,19 +704,26 @@ void Unordered_RCM(MAT* A, int** perm)
 	int* levels;
 	int* counts;
 	int* sums;
-// 	int* tcounts;
 	int* tperm;
 	int* graph_ls;
 	double time;
 	
-// 	printf("Alocando vetor de permutacao e inverso permutacao\n"); fflush(stdout);
 	n_nodes = A->n;
-	(*perm) = calloc(n_nodes, sizeof(int));
-	tperm = calloc(n_nodes, sizeof(int));
 	
-// 	printf("Iniciando GRAPH_LS_peripheral\n"); fflush(stdout);
-	graph_ls = GRAPH_LS_peripheral (A, &root, &e);
-// 	root = get_random_integer(n_nodes);
+	#pragma omp parallel sections num_threads(NUM_THREADS)
+	{
+		#pragma omp section
+		(*perm) = calloc(n_nodes, sizeof(int));
+		
+		#pragma omp section
+		tperm = calloc(n_nodes, sizeof(int));
+		
+		#pragma omp section
+		levels = calloc(n_nodes, sizeof(int));
+		
+		#pragma omp section
+		graph_ls = GRAPH_LS_peripheral (A, &root, &e);
+	}
 	
 // 	printf("Iniciando GRAPH_parallel_fixedpoint_bfs\n"); fflush(stdout);
 	time = get_time(); 
@@ -724,10 +731,10 @@ void Unordered_RCM(MAT* A, int** perm)
 	time = (get_time() - time)/100.0;
 	printf("Parallel BFS - Elapsed time: %.6f sec\n\n", time);
 	
-	time = get_time();
+// 	time = get_time();
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
-	time = (get_time() - time)/100.0;
-	printf("Parallel Count nodes by level - Elapsed time: %.6f sec\n\n", time);
+// 	time = (get_time() - time)/100.0;
+// 	printf("Parallel Count nodes by level - Elapsed time: %.6f sec\n\n", time);
 // 	++max_level;
 	
 // 	printf("Alocando vetor tcounts e redimensionando\n"); fflush(stdout);
@@ -743,10 +750,10 @@ void Unordered_RCM(MAT* A, int** perm)
 // 	printf("\n\n");fflush(stdout);
 	
 // 	printf("Iniciando prefix_sum\n"); fflush(stdout);
-	time = get_time();
+// 	time = get_time();
 	prefix_sum(counts, &sums, max_level);
-	time = (get_time() - time)/100.0;
-	printf("Parallel Prefix sum - Elapsed time: %.6f sec\n\n", time);
+// 	time = (get_time() - time)/100.0;
+// 	printf("Parallel Prefix sum - Elapsed time: %.6f sec\n\n", time);
 	
 // 	printf("Vetor de sums:\n"); fflush(stdout);
 // 	for (count_nodes = 0; count_nodes < max_level; ++count_nodes) 
@@ -754,10 +761,10 @@ void Unordered_RCM(MAT* A, int** perm)
 // 	printf("\n\n");fflush(stdout);
 	
 // 	printf("Iniciando place\n"); fflush(stdout);
-	time = get_time();
+// 	time = get_time();
 	place(A, root, sums, max_level, &tperm, levels);
-	time = (get_time() - time)/100.0;
-	printf("Parallel Place - Elapsed time: %.6f sec\n\n", time);
+// 	time = (get_time() - time)/100.0;
+// 	printf("Parallel Place - Elapsed time: %.6f sec\n\n", time);
 	
 // 	printf("Vetor de permutação:\n"); fflush(stdout);
 // 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 

@@ -353,10 +353,11 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 	int node, n_nodes, has_unreached_nodes, work_chunking;
 	LIST* work_set;
 	omp_lock_t lock;
-  
-	work_chunking = 128;
+	
+	
+// 	work_chunking = 128; // big matrices
+	work_chunking = 32;  // little matrices
 	n_nodes = adjacency->n;
-	*levels = calloc(n_nodes, sizeof(int));
   
 	omp_set_num_threads(NUM_THREADS);
 	
