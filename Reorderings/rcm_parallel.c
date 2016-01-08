@@ -722,7 +722,12 @@ void Unordered_RCM(MAT* A, int** perm)
 		levels = calloc(n_nodes, sizeof(int));
 		
 		#pragma omp section
-		graph_ls = GRAPH_LS_peripheral (A, &root, &e);
+		{
+		time = get_time(); 
+		graph_ls = GRAPH_LS_peripheral_PARALLEL(A, &root, &e);
+		time = (get_time() - time)/100.0;
+		printf("Parallel peripheral - Elapsed time: %.6f sec\n\n", time);
+		}
 	}
 	
 // 	printf("Iniciando GRAPH_parallel_fixedpoint_bfs\n"); fflush(stdout);

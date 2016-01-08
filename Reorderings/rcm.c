@@ -13,7 +13,11 @@ void REORDERING_RCM_opt (MAT* A, int** Fp)
 	int n = A->n;
 	double time;
 	
+	time = get_time(); 
 	int* g = GRAPH_LS_peripheral (A,&s,&e);
+	time = (get_time() - time)/100.0;
+	printf("Serial PERIPHERAL - Elapsed time: %.6f sec\n\n", time);
+	
 	int* q = calloc (n,sizeof(int));
 	int* p = calloc (n,sizeof(int));
 	

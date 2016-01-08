@@ -13,7 +13,7 @@ target_link_libraries(reordering-library m)
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
 
-set(CMAKE_C_FLAGS "-Wall -lgfortran -lblas -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -lgfortran -lblas -fopenmp")
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
 
 add_subdirectory(CommonFiles)
