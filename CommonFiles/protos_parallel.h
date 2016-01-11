@@ -26,16 +26,10 @@ typedef struct
 } status_prefix_sum;
 
 
-// typedef struct
-// {
-// 	int* mem;
-// 	int size;
-// 	int free_position;
-// } mem_write_next_level;
-
-
 extern void	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels);
-extern void 	prefix_sum(const int* counts, int** sums, const int max_level);
 extern int* 	GRAPH_LS_peripheral_PARALLEL (MAT* A, int *node_s, int* node_e);
 extern int 	GRAPH_LS_depth_PARALLEL(int* LS, int n);
+extern int 	GRAPH_LS_width_PARALLEL(int* LS, int n);
 extern LIST* 	GRAPH_LS_last_level_PARALLEL (MAT* A, int* LS, int n);
+
+extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

@@ -720,15 +720,12 @@ void Unordered_RCM(MAT* A, int** perm)
 		
 		#pragma omp section
 		levels = calloc(n_nodes, sizeof(int));
-		
-		#pragma omp section
-		{
-		time = get_time(); 
-		graph_ls = GRAPH_LS_peripheral_PARALLEL(A, &root, &e);
-		time = (get_time() - time)/100.0;
-		printf("Parallel peripheral - Elapsed time: %.6f sec\n\n", time);
-		}
 	}
+	
+	time = get_time(); 
+	graph_ls = GRAPH_LS_peripheral_PARALLEL(A, &root, &e);
+	time = (get_time() - time)/100.0;
+	printf("Parallel peripheral - Elapsed time: %.6f sec\n\n", time);
 	
 // 	printf("Iniciando GRAPH_parallel_fixedpoint_bfs\n"); fflush(stdout);
 	time = get_time(); 
@@ -741,18 +738,6 @@ void Unordered_RCM(MAT* A, int** perm)
 // 	time = (get_time() - time)/100.0;
 // 	printf("Parallel Count nodes by level - Elapsed time: %.6f sec\n\n", time);
 // 	++max_level;
-	
-// 	printf("Alocando vetor tcounts e redimensionando\n"); fflush(stdout);
-// 	tcounts = calloc(max_level, sizeof(int));
-// 	tcounts[0] = 0;
-	
-// 	#pragma omp parallel for num_threads(NUM_THREADS) private (index)
-// 	for (index = 1; index < max_level; ++index) tcounts[index] = counts[index-1];
-	
-// 	printf("Vetor de tcounts:\n"); fflush(stdout);
-// 	for (count_nodes = 0; count_nodes < max_level; ++count_nodes) 
-// 		printf("%d ", tcounts[count_nodes]); fflush(stdout);
-// 	printf("\n\n");fflush(stdout);
 	
 // 	printf("Iniciando prefix_sum\n"); fflush(stdout);
 // 	time = get_time();
@@ -771,36 +756,29 @@ void Unordered_RCM(MAT* A, int** perm)
 // 	time = (get_time() - time)/100.0;
 // 	printf("Parallel Place - Elapsed time: %.6f sec\n\n", time);
 	
-// 	printf("Vetor de permutação:\n"); fflush(stdout);
-// 	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-// 		printf("%d ", tperm[count_nodes]); fflush(stdout);
-// 	printf("\n\n"); fflush(stdout);
-	
-// 	printf("Invertendo vetor de permutacao\n"); fflush(stdout);
-	/* Reverse order */
-	#pragma omp parallel for num_threads(NUM_THREADS) private (count_nodes)
-	for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-		(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
-	
-// 	printf("Liberando memoria final\n"); fflush(stdout);
-	#pragma omp parallel sections num_threads(NUM_THREADS)
+	#pragma omp parallel num_threads(NUM_THREADS)
 	{
-		#pragma omp section 
+		/* Reverse order */
+		#pragma omp for private (count_nodes)
+		for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+			(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
+		
+		#pragma omp single nowait
 		free(levels);
 		
-		#pragma omp section 
+		#pragma omp single nowait
 		free(counts);
 		
-		#pragma omp section 
+		#pragma omp single nowait
 		free(sums);
 		
-		#pragma omp section 
+		#pragma omp single nowait
 		free(tperm);
 		
-		#pragma omp section 
+		#pragma omp single nowait
 		free(graph_ls);
 	}
-// 	printf("Finalizando Unordered_RCM\n"); fflush(stdout);
+	
 }
 
 

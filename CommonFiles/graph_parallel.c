@@ -497,12 +497,55 @@ int GRAPH_LS_depth_PARALLEL(int* LS, int n)
 
 	int level, depth = 0;
 	
+	omp_set_num_threads(NUM_THREADS);
+	
 	#pragma omp parallel for private(level) reduction(max: depth)
 	for (level = 0; level < n; ++level)
 		if (LS[level] > depth) depth = LS[level];
 
 	return depth + 1;
 }
+
+
+/*----------------------------------------------------------------------------
+ * Find the width of an LEVEL STRUCTURE
+ * (i.e. maximum number of nodes which belong to a single level)
+ *--------------------------------------------------------------------------*/
+int GRAPH_LS_width_PARALLEL(int* LS, int n)
+{
+	int i, width, size_L;
+	int* c;
+	
+	if (LS == NULL || n <= 0)
+	{
+		printf ("error: Array is empty. Exiting.. [GRAPH_LS_width]\n");
+		exit(0);
+	}
+	
+	width  = 0;	
+	size_L = GRAPH_LS_depth_PARALLEL(LS,n);
+	c      = calloc (size_L,sizeof(int));
+	
+	omp_set_num_threads(NUM_THREADS);
+	
+	#pragma omp parallel
+	{
+		#pragma omp for private(i)
+		for (i = 0; i < n; ++i)
+			c[LS[i]]++;
+		
+		#pragma omp for private(i) reduction(max: width)
+		for (i = 0; i < size_L; ++i)
+			if (width < c[i])
+				width = c[i];
+			
+		#pragma omp single
+		free(c);
+	}
+	
+	return width;
+}
+
 
 
 /*----------------------------------------------------------------------------
@@ -516,26 +559,29 @@ LIST* GRAPH_LS_last_level_PARALLEL(MAT* A, int* LS, int n)
 	
 	omp_set_num_threads(NUM_THREADS);
 	
-	#pragma omp parallel sections
+	#pragma omp parallel
 	{
-		#pragma omp section
-		last = GRAPH_LS_depth(LS, n) - 1;
+		#pragma omp sections
+		{
+			#pragma omp section
+			last = GRAPH_LS_depth(LS, n) - 1;
+			
+			#pragma omp section
+			G = (GRAPH*) malloc (n*sizeof(GRAPH));
+			
+			#pragma omp section
+			L = NULL;
+		}
 		
-		#pragma omp section
-		G = (GRAPH*) malloc (n*sizeof(GRAPH));
-		
-		#pragma omp section
-		L = NULL;
+		#pragma omp for private(i) 
+		for (i = 0; i < n; ++i)
+		{
+			G[i].label    = i;
+			G[i].distance = LS[i];
+			G[i].degree   = GRAPH_degree (A,i);			
+		}
 	}
 	
-	#pragma omp parallel for private(i) 
-	for (i = 0; i < n; ++i)
-	{
-		G[i].label    = i;
-		G[i].distance = LS[i];
-		G[i].degree   = GRAPH_degree (A,i);			
-	}
-
 	qsort (G, n, sizeof(GRAPH), COMPARE_dist_degr_DES);
 
 	k1 = k2 = 0;
@@ -564,132 +610,77 @@ LIST* GRAPH_LS_last_level_PARALLEL(MAT* A, int* LS, int n)
  *--------------------------------------------------------------------------*/
 int* GRAPH_LS_peripheral_PARALLEL (MAT* A, int *node_s, int* node_e)
 {
-	int vertex, min_vertex, e, x, dgr, min_dgr, width;
-	int n = width = A->n;
+	int n, dgr, vertex, min_vertex, e, x, min_dgr, width, new_width;
 	int*  LS1;
-	LIST* L;
-	omp_lock_t lock_width, lock_L;
+	int*  LS2;
+	LIST* level_list;
+	
+	n = width = A->n;
 	
 	omp_set_num_threads(NUM_THREADS);
 	
-	#pragma omp parallel sections
+	#pragma omp parallel 
 	{
-		#pragma omp section
-		LS1 =  (int*) calloc (n,sizeof (int));
+		#pragma omp single nowait
+		LS1 =  (int*) calloc (n, sizeof (int));
 		
-		#pragma omp section
-		{
-			omp_init_lock(&lock_L);
-			omp_init_lock(&lock_width);
-		}
+		#pragma omp single nowait
+		LS2 =  (int*) calloc (n, sizeof (int));
 		
-		#pragma omp section
+		#pragma omp single nowait
+		level_list = NULL;
+		
+		#pragma omp single
 		{
-			L = NULL;
-			min_dgr = n;
+			min_dgr    = n;
 			min_vertex = INFINITY_LEVEL;
 		}
-	}
-	
-	/* Choose a vertex min_vertex with minimum degree */
-	#pragma omp parallel for private(vertex, dgr) reduction(min: min_dgr)
-	for (vertex = 0; vertex < n; ++vertex)
-	{
-		dgr = GRAPH_degree (A, vertex);
-	
-		if (min_dgr > dgr)
+		
+		/* Choose a vertex min_vertex with minimum degree */
+		#pragma omp for private(vertex, dgr) reduction(min: min_dgr, min_vertex)
+		for (vertex = 0; vertex < n; ++vertex)
 		{
-			min_dgr    = dgr;
-			min_vertex = vertex;
+			dgr = GRAPH_degree(A, vertex);
+			
+			if (min_dgr > dgr)
+			{
+				min_dgr    = dgr;
+				min_vertex = vertex;
+			}
 		}
 	}
 	
 	/* Construct the Level Strucure of s */
 	GRAPH_bfs (A, min_vertex, LS1);
-// 	L = GRAPH_LS_last_level (A,LS1,n);
-	L = GRAPH_LS_last_level_PARALLEL(A, LS1, n);
+	level_list = GRAPH_LS_last_level_PARALLEL(A, LS1, n);
 	
-	
-	
-	
-	#pragma omp parallel private(x)
+	while (level_list != NULL)
 	{
-		int new_width;
-		LIST* new_L;
-		int*  LS2;
+		x          = LIST_first(level_list);
+		level_list = LIST_remove(level_list, x);
 		
-		new_width = width;
-		new_L     = NULL;
-		LS2 =  (int*) calloc (n,sizeof (int));
-		
-		while (L != NULL)
+		GRAPH_bfs(A, x, LS2);
+		new_width = GRAPH_LS_width_PARALLEL(LS2, n);
+
+		if (new_width < width)
 		{
-			printf("Thread %d working\n", omp_get_thread_num()); fflush(stdout);
-			
-			omp_set_lock(&lock_L);
-			
-			if (L != NULL)
+			if (GRAPH_LS_depth_PARALLEL(LS2, n) > GRAPH_LS_depth_PARALLEL(LS1, n))
 			{
-				x   = LIST_first(L);
-				L   = LIST_remove(L, x);
+				min_vertex = x; 
+				GRAPH_bfs(A, min_vertex, LS1);
+				level_list = GRAPH_LS_last_level_PARALLEL(A, LS1, n);
+				width = n;
+			}
+			else
+			{
+				e = x; 
+				width = new_width;
 			}
 			
-			omp_unset_lock(&lock_L);
-			
-			GRAPH_bfs(A, x, LS2);
-			
-			new_width = GRAPH_LS_width(LS2, n);
-
-			if (new_width < width)
-			{
-				if (GRAPH_LS_depth(LS2, n) > GRAPH_LS_depth(LS1, n))
-				{
-					#pragma omp critical
-					min_vertex = x; 
-					
-					GRAPH_bfs(A, min_vertex, LS1);
-					
-					new_L = GRAPH_LS_last_level(A, LS1, n);
-					
-					omp_set_lock(&lock_L);
-					L = new_L;
-					omp_unset_lock(&lock_L);
-
-					omp_set_lock(&lock_width);
-					width = n;
-					omp_unset_lock(&lock_width);
-				}
-				else
-				{
-					#pragma omp critical
-					e = x; 
-					
-					omp_set_lock(&lock_width);
-					width = new_width;
-					omp_unset_lock(&lock_width);
-				}
-				
-			}
-			
-// 			if (GRAPH_LS_depth (LS2,n) > GRAPH_LS_depth (LS1,n) && GRAPH_LS_width (LS2,n) < width)
-// 			{
-// 				min_vertex     = x; 
-// 				GRAPH_bfs (A,min_vertex,LS1);
-// 				L     = GRAPH_LS_last_level (A,LS1,n);
-// 				width = n;
-// 			}
-// 			else if (GRAPH_LS_width (LS2,n) < width)
-// 			{
-// 				e     = x; 
-// 				width = GRAPH_LS_width (LS2,n);
-// 			}
 		}
-		
-		free(LS2);
 	}
 	
-	omp_destroy_lock(&lock_L);
-	omp_destroy_lock(&lock_width);
+	free(LS2);
 	
 	*node_s = min_vertex;
 	*node_e = e;
