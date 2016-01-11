@@ -725,7 +725,7 @@ void Unordered_RCM(MAT* A, int** perm)
 	time = get_time(); 
 	graph_ls = GRAPH_LS_peripheral_PARALLEL(A, &root, &e);
 	time = (get_time() - time)/100.0;
-	printf("Parallel peripheral - Elapsed time: %.6f sec\n\n", time);
+	printf("Parallel peripheral - El/*a*/psed time: %.6f sec\n\n", time);
 	
 // 	printf("Iniciando GRAPH_parallel_fixedpoint_bfs\n"); fflush(stdout);
 	time = get_time(); 

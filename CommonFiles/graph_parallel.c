@@ -355,8 +355,8 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 	omp_lock_t lock;
 	
 	
-	work_chunking = 128; // big matrices
-// 	work_chunking = 64;  // little matrices
+// 	work_chunking = 256; // big matrices
+	work_chunking = 64;  // little matrices
 	n_nodes = adjacency->n;
   
 	omp_set_num_threads(NUM_THREADS);
