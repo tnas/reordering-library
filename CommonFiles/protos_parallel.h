@@ -8,6 +8,7 @@
 #define UNDEF_NODE -1
 #define UNDEF_THREAD -1
 #define INFINITY_LEVEL 2147483647
+#define BFS_WORK_CHUNK 256
 
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))

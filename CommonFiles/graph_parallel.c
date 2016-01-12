@@ -350,13 +350,10 @@
 
 void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 {
-	int node, n_nodes, has_unreached_nodes, work_chunking;
+	int node, n_nodes, has_unreached_nodes;
 	LIST* work_set;
 	omp_lock_t lock;
 	
-	
-// 	work_chunking = 256; // big matrices
-	work_chunking = 64;  // little matrices
 	n_nodes = adjacency->n;
   
 	omp_set_num_threads(NUM_THREADS);
@@ -390,7 +387,7 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 				
 				omp_set_lock(&lock);
 				
-				while (work_set != NULL && count_chunk < work_chunking)
+				while (work_set != NULL && count_chunk < BFS_WORK_CHUNK)
 				{
 					active_node     = LIST_first(work_set);
 					work_set        = LIST_remove(work_set, active_node);
@@ -400,28 +397,6 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels)
 				
 				omp_unset_lock(&lock);
 			}
-			
-			
-// 			#pragma omp critical
-// 			{
-// 				while (cache_work_set != NULL)
-// 				{
-// 					active_node    = LIST_first(cache_work_set);
-// 					cache_work_set = LIST_remove(cache_work_set, active_node);
-// 					work_set       = LIST_insert_IF_NOT_EXIST(work_set, active_node);
-// 				}
-// 				
-// 				count_chunk = 0;
-// 				
-// 				while (work_set != NULL && count_chunk < work_chunking)
-// 				{
-// 					active_node     = LIST_first(work_set);
-// 					work_set        = LIST_remove(work_set, active_node);
-// 					active_chunk_ws = LIST_insert_IF_NOT_EXIST(active_chunk_ws, active_node);
-// 					++count_chunk;
-// 				}
-// 			}
-			
 			
 			while (active_chunk_ws != NULL)
 			{
@@ -651,7 +626,8 @@ int* GRAPH_LS_peripheral_PARALLEL (MAT* A, int *node_s, int* node_e)
 	}
 	
 	/* Construct the Level Strucure of s */
-	GRAPH_bfs (A, min_vertex, LS1);
+// 	GRAPH_bfs (A, min_vertex, LS1);
+	GRAPH_parallel_fixedpoint_bfs(A, min_vertex, &LS1);
 	level_list = GRAPH_LS_last_level_PARALLEL(A, LS1, n);
 	
 	while (level_list != NULL)
@@ -659,7 +635,8 @@ int* GRAPH_LS_peripheral_PARALLEL (MAT* A, int *node_s, int* node_e)
 		x          = LIST_first(level_list);
 		level_list = LIST_remove(level_list, x);
 		
-		GRAPH_bfs(A, x, LS2);
+// 		GRAPH_bfs_(A, x, LS2);
+		GRAPH_parallel_fixedpoint_bfs(A, x, &LS2);
 		new_width = GRAPH_LS_width_PARALLEL(LS2, n);
 
 		if (new_width < width)
@@ -667,7 +644,8 @@ int* GRAPH_LS_peripheral_PARALLEL (MAT* A, int *node_s, int* node_e)
 			if (GRAPH_LS_depth_PARALLEL(LS2, n) > GRAPH_LS_depth_PARALLEL(LS1, n))
 			{
 				min_vertex = x; 
-				GRAPH_bfs(A, min_vertex, LS1);
+// 				GRAPH_bfs(A, min_vertex, LS1);
+				GRAPH_parallel_fixedpoint_bfs(A, min_vertex, &LS1);
 				level_list = GRAPH_LS_last_level_PARALLEL(A, LS1, n);
 				width = n;
 			}
