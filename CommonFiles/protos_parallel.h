@@ -8,7 +8,8 @@
 #define UNDEF_NODE -1
 #define UNDEF_THREAD -1
 #define INFINITY_LEVEL 2147483647
-#define BFS_WORK_CHUNK 256
+#define BFS_WORK_CHUNK 1024
+#define RUN_AUTOMATIC_TESTS 1
 
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
@@ -33,4 +34,6 @@ extern int 	GRAPH_LS_depth_PARALLEL(int* LS, int n);
 extern int 	GRAPH_LS_width_PARALLEL(int* LS, int n);
 extern LIST* 	GRAPH_LS_last_level_PARALLEL (MAT* A, int* LS, int n);
 
+
+extern void	Unordered_RCM(MAT* A, int** p, int root);
 extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

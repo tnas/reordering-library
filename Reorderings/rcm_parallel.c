@@ -698,15 +698,15 @@ void *alloc_perm_vector(void *params)
 /*----------------------------------------------------------------------------
  * Unordered RCM reordering from the LEVEL STRUCTURE 
  *--------------------------------------------------------------------------*/
-void Unordered_RCM(MAT* A, int** perm)
+void Unordered_RCM(MAT* A, int** perm, int root)
 { 
-	int n_nodes, root, max_level, count_nodes, e;
+	int n_nodes, max_level, count_nodes;
 	int* levels;
 	int* counts;
 	int* sums;
 	int* tperm;
 	int* graph_ls;
-	double time;
+// 	double time;
 	
 	n_nodes = A->n;
 	
@@ -722,16 +722,16 @@ void Unordered_RCM(MAT* A, int** perm)
 		levels = calloc(n_nodes, sizeof(int));
 	}
 	
-	time = get_time(); 
-	graph_ls = GRAPH_LS_peripheral_PARALLEL(A, &root, &e);
-	time = (get_time() - time)/100.0;
-	printf("Parallel peripheral - Elapsed time: %.6f sec\n\n", time);
+// 	time = get_time(); 
+// 	graph_ls = GRAPH_LS_peripheral_PARALLEL(A, &root, &e);
+// 	time = (get_time() - time)/100.0;
+// 	printf("Parallel peripheral - Elapsed time: %.6f sec\n\n", time);
 	
 // 	printf("Iniciando GRAPH_parallel_fixedpoint_bfs\n"); fflush(stdout);
-	time = get_time(); 
+// 	time = get_time(); 
 	GRAPH_parallel_fixedpoint_bfs(A, root, &levels);
-	time = (get_time() - time)/100.0;
-	printf("Parallel BFS - Elapsed time: %.6f sec\n\n", time);
+// 	time = (get_time() - time)/100.0;
+// 	printf("Parallel BFS - Elapsed time: %.6f sec\n\n", time);
 	
 // 	time = get_time();
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
@@ -775,8 +775,8 @@ void Unordered_RCM(MAT* A, int** perm)
 		#pragma omp single nowait
 		free(tperm);
 		
-		#pragma omp single nowait
-		free(graph_ls);
+// 		#pragma omp single nowait
+// 		free(graph_ls);
 	}
 	
 }
