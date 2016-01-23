@@ -52,7 +52,8 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 		#pragma omp flush(counts, local_count)
 		
 		#pragma omp for 
-		for (level = 0; level < max_level; ++level) 
+// 		for (level = 0; level < max_level; ++level) 
+		for (level = 0; level < max_level-1; ++level) 
 		{
 			for (count_thread = 0; count_thread < num_threads; ++count_thread) 
 				(*counts)[level+1] += local_count[count_thread][level];
@@ -708,8 +709,6 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 	int* counts;
 	int* sums;
 	int* tperm;
-// 	int* graph_ls;
-// 	double time;
 	
 	n_nodes = A->n;
 	
@@ -779,9 +778,6 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 		
 		#pragma omp single nowait
 		free(tperm);
-		
-// 		#pragma omp single nowait
-// 		free(graph_ls);
 	}
 	
 }

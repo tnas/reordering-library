@@ -47,9 +47,8 @@ void test_prefix_sum_parallel_serial(int* counts, int max_level)
 }
 
 
-test_result run_test_serial_rcm(const char* path_matrix_file)
+test_result run_test_serial_rcm(const char* path_matrix_file, int root)
 {
-	int root, e;
 	long int bandwidth, envelope, bandwidth_after, envelope_after;
 	int* permutation;
 	double time;
@@ -63,8 +62,6 @@ test_result run_test_serial_rcm(const char* path_matrix_file)
 	matrix = (MAT*) malloc (sizeof(MAT));
 	MATRIX_readCSR (matrix, matrix_file);
 	fclose(matrix_file);
-	
-	GRAPH_LS_peripheral(matrix, &root, &e);
 	
 	bandwidth_after = MATRIX_bandwidth(matrix);
 	envelope_after  = MATRIX_envelope(matrix);
@@ -90,9 +87,8 @@ test_result run_test_serial_rcm(const char* path_matrix_file)
 
 
 
-test_result run_test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size)
+test_result run_test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size, int root)
 {
-	int root, e;
 	long int bandwidth, envelope;
 	int* permutation;
 	double time;
@@ -106,8 +102,6 @@ test_result run_test_unordered_rcm(const char* path_matrix_file, const int num_t
 	matrix = (MAT*) malloc (sizeof(MAT));
 	MATRIX_readCSR (matrix, matrix_file);
 	fclose(matrix_file);
-	
-	GRAPH_LS_peripheral(matrix, &root, &e);
 	
 	omp_set_num_threads(num_threads);
 	
@@ -132,10 +126,34 @@ test_result run_test_unordered_rcm(const char* path_matrix_file, const int num_t
 }
 
 
+int get_node_peripheral(const char* path_matrix_file) {
+	
+	int root, e;
+	MAT* matrix;
+	FILE* matrix_file;
+	
+	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
+		exit(1);
+	
+	matrix = (MAT*) malloc (sizeof(MAT));
+	MATRIX_readCSR (matrix, matrix_file);
+	fclose(matrix_file);
+	
+	GRAPH_LS_peripheral(matrix, &root, &e);
+	
+	return root;
+}
+
+
 void run_test_serial_parallel_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size)
 {
-	run_test_serial_rcm(path_matrix_file);
-	run_test_unordered_rcm(path_matrix_file, num_threads, bfs_chunk_size);
+	
+	int root;
+	
+	root = get_node_peripheral(path_matrix_file);
+	
+	run_test_serial_rcm(path_matrix_file, root);
+	run_test_unordered_rcm(path_matrix_file, num_threads, bfs_chunk_size, root);
 }
 
 
@@ -156,23 +174,21 @@ void print_head_table_result(FILE* out_file)
 
 void run_all_tests()
 {
-	int count_matrix, count_percents, count_exec, count_nthreads;
+	int root, count_matrix, count_percents, count_exec, count_nthreads;
 	FILE* out_file;
 	test_result tresult;
 	
-	int num_matrices = 7;
+	int num_matrices = 1;
 	char* matrices[] = {
-		"../Big-Matrices/inline_1.mtx",
+// 		"../Big-Matrices/inline_1.mtx",
 		"../Big-Matrices/audikw_1.mtx",
-		"../Big-Matrices/dielFilterV3real.mtx",
-		"../Big-Matrices/G3_circuit.mtx",
-		"../Big-Matrices/hugetric-00020.mtx",
-		"../Big-Matrices/delaunay_n24.mtx"
-		"../Big-Matrices/road_usa.mtx"
-	};
-// 	char* matrices[] = {
+// 		"../Big-Matrices/dielFilterV3real.mtx",
+// 		"../Big-Matrices/G3_circuit.mtx",
+// 		"../Big-Matrices/hugetric-00020.mtx",
+// 		"../Big-Matrices/delaunay_n24.mtx"
+// 		"../Big-Matrices/road_usa.mtx"
 // 		"../Matrices/rail_5177.mtx"
-// 	};
+	};
 	
 	int num_bfs_percents = 2;
 	float bfs_chunk_percent[] = { .5, .8 };
@@ -189,16 +205,22 @@ void run_all_tests()
 		fprintf(out_file, "-----------------------------------------------------------------------\n");
 		fprintf(out_file, "Tests Execution - Matrix: %s\n", matrices[count_matrix]);
 		fprintf(out_file, "-----------------------------------------------------------------------\n");
+		fflush(out_file);
 		
-		print_head_table_result(out_file);
+		printf("-------------- Matrix: %s\n", matrices[count_matrix]);
 		
-		fprintf(out_file, "|Serial      |    1    |");
-		for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
-		{
-			tresult = run_test_serial_rcm(matrices[count_matrix]);
-			fprintf(out_file, "%.6f |", tresult.time);
-		}
-		fprintf(out_file, "\n\n");
+		root = get_node_peripheral(matrices[count_matrix]);
+		
+// 		print_head_table_result(out_file);
+// 		
+// 		fprintf(out_file, "|Serial      |    1    |");
+// 		for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
+// 		{
+// 			tresult = run_test_serial_rcm(matrices[count_matrix], root);
+// 			fprintf(out_file, "%.6f |", tresult.time);
+// 		}
+// 		fprintf(out_file, "\n\n");
+// 		fflush(out_file);
 		
 		for (count_percents = 0; count_percents < num_bfs_percents; ++count_percents)
 		{
@@ -214,10 +236,11 @@ void run_all_tests()
 				for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
 				{
 					tresult = run_test_unordered_rcm(matrices[count_matrix], 
-						nthreads[count_nthreads], bfs_chunk_percent[count_percents]);
+						nthreads[count_nthreads], bfs_chunk_percent[count_percents], root);
 					fprintf(out_file, "%.6f |", tresult.time);
 				}
 				fprintf(out_file, "\n\n");
+				fflush(out_file);
 			}
 		}
 	}

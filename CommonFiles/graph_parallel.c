@@ -117,7 +117,6 @@
 void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const float percent_chunk)
 {
 	int node, n_nodes, has_unreached_nodes, size_workset;
-	double size_chunk;
 	LIST* work_set;
 	omp_lock_t lock;
 	
@@ -141,6 +140,7 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const
 		int* neighboors;
 		LIST* cache_work_set;
 		LIST* active_chunk_ws;
+		double size_chunk;
 		
 		cache_work_set = active_chunk_ws = NULL;
 		
