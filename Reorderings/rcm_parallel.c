@@ -328,5 +328,28 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 		#pragma omp single nowait
 		free(tperm);
 	}
+}
+
+
+
+void Leveled_RCM(MAT* mat, int* perm, int root) 
+{
+	int graph_size, perm_size, degree;
+	GRAPH* children;
+	
+	graph_size = mat->n;
+	perm_size  = 0;
+	
+	perm = calloc(graph_size, sizeof(int));
+	perm[0] = root;
+	perm_size++;
+	
+// 	int degree = GRAPH_degree(graph, node, levels, level+1, colors);
+// 	children = GRAPH_adjacent_per_level(graph, node, levels, level+1, colors);
+				
+	while (perm_size < graph_size)
+	{
+		
+	}
 	
 }
