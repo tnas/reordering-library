@@ -334,22 +334,68 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 
 void Leveled_RCM(MAT* mat, int* perm, int root) 
 {
-	int graph_size, perm_size, degree;
-	GRAPH* children;
+	int graph_size, perm_size, node;
+	GRAPH* graph;
 	
 	graph_size = mat->n;
 	perm_size  = 0;
 	
-	perm = calloc(graph_size, sizeof(int));
+	perm  = calloc(graph_size, sizeof(int));
+	graph = malloc (graph_size * sizeof(GRAPH));
+	
+	#pragma omp parallel for
+	for (node = 0; node < graph_size; ++node)
+	{
+		graph[node].distance = INFINITY_LEVEL;
+		graph[node].parent   = -1;
+		graph[node].chnum    = 0;
+	}
+	
+	graph[root].distance  = 0;
+	graph[root].parent    = -1;
+	graph[root].chnum     = 0;
 	perm[0] = root;
 	perm_size++;
 	
-// 	int degree = GRAPH_degree(graph, node, levels, level+1, colors);
-// 	children = GRAPH_adjacent_per_level(graph, node, levels, level+1, colors);
-				
 	while (perm_size < graph_size)
 	{
-		
+		#pragma omp parallel
+		{
+			int n_par, n_ch, degree;
+			int* neighbors;
+			LIST* children;
+			
+			children = NULL;
+			
+			#pragma omp for
+			for (n_par = 0; n_par < perm_size; ++n_par)
+			{
+				degree    = GRAPH_degree(mat, perm[n_par]);
+				neighbors = GRAPH_adjacent(mat, perm[n_par]);
+				
+				for (n_ch = 0; n_ch < degree; ++n_ch)
+				{
+					if (graph[neighbors[n_ch]].distance > 
+						graph[perm[n_par]].distance)
+					{
+						if (graph[neighbors[n_ch]].distance > 
+							graph[perm[n_par]].distance + 1)
+						{
+							#pragma omp critical
+							graph[neighbors[n_ch]].distance =
+								graph[perm[n_par]].distance + 1;
+							children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
+						}
+						
+						if (graph[perm[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
+						{
+							#pragma omp critical
+							graph[neighbors[n_ch]].parent = perm[n_par];
+						}
+						
+					}
+				}
+			}
+		}
 	}
-	
 }

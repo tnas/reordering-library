@@ -26,6 +26,8 @@ typedef struct
 	int label;
 	int degree;
 	int distance;
+	int parent;
+	int chnum;
 } GRAPH;
 
 #endif /* GRAPH_H */

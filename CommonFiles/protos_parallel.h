@@ -13,9 +13,6 @@
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
 #define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
 
-typedef enum OPERATION {READ, WRITE} OPERATION;
-
-
 typedef struct 
 {
 	int initial_prefix_sum;
