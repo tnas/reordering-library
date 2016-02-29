@@ -8,10 +8,13 @@
 #define UNDEF_THREAD -1
 #define INFINITY_LEVEL 2147483647
 #define BFS_WORK_CHUNK 1024
-
+#define ORPHAN_NODE -1
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
 #define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
+
+typedef enum REORDERING_ALGORITHM { SERIAL_RCM, UNORDERED_RCM, LEVELED_RCM } 
+	REORDERING_ALGORITHM;
 
 typedef struct 
 {
@@ -31,4 +34,5 @@ extern LIST* 	GRAPH_LS_last_level_PARALLEL (MAT* A, int* LS, int n);
 
 
 extern void	Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk);
+extern void	Leveled_RCM(MAT* mat, int* perm, int root);
 extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

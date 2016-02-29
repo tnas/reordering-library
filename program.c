@@ -9,8 +9,9 @@ int main (int argc, char* argv[]){
 	float bfs_chunk_size;
 	char* matrix_name;
 	EXECUTION exec_type;
+// 	int algorithm;
 
-	while ((opt = getopt(argc, argv, "m:p:s:a")) != -1)
+	while ((opt = getopt(argc, argv, "m:p:s:t:a")) != -1)
 	{
 		switch (opt)
 		{
@@ -18,7 +19,9 @@ int main (int argc, char* argv[]){
 				matrix_name = optarg;
 				exec_type = ONE_INSTANCE;
 				break;
-				
+/*			case 't' :
+				algorithm = optarg;
+				break;*/				
 			case 'p':
 				num_threads = atoi(optarg);
 				break;
@@ -26,20 +29,23 @@ int main (int argc, char* argv[]){
 			case 's':
 				bfs_chunk_size = atof(optarg);
 				break;
+				
 			case 'a' :
 				exec_type = ALL_TESTS;
 				break;
 		}
 	}
+	int root = get_node_peripheral(matrix_name);
+	run_test_leveled_rcm(matrix_name, root);
 	
-	if (exec_type == ALL_TESTS)
-	{
-		run_all_tests();
-	}
-	else 
-	{
-		run_test_serial_parallel_rcm(matrix_name, num_threads, bfs_chunk_size);
-	}
+// 	if (exec_type == ALL_TESTS)
+// 	{
+// 		run_all_tests();
+// 	}
+// 	else 
+// 	{
+// 		run_test_serial_parallel_rcm(matrix_name, num_threads, bfs_chunk_size);
+// 	}
 	
 	return 0;
 }

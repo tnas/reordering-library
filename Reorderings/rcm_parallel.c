@@ -334,8 +334,11 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 
 void Leveled_RCM(MAT* mat, int* perm, int root) 
 {
-	int graph_size, perm_size, node;
+	int graph_size, perm_size, node, max_level;
 	GRAPH* graph;
+	int* counts;
+	int* parent_index;
+	LIST* children;
 	
 	graph_size = mat->n;
 	perm_size  = 0;
@@ -356,6 +359,7 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 	graph[root].chnum     = 0;
 	perm[0] = root;
 	perm_size++;
+	max_level = 1;
 	
 	while (perm_size < graph_size)
 	{
@@ -363,9 +367,16 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 		{
 			int n_par, n_ch, degree;
 			int* neighbors;
-			LIST* children;
 			
+			// ******************************
+			// Step 1-2: Expansion-Reduction
+			// ******************************
+			
+			#pragma omp single
 			children = NULL;
+			
+			#pragma omp single
+			counts = calloc(perm_size, sizeof(int));
 			
 			#pragma omp for
 			for (n_par = 0; n_par < perm_size; ++n_par)
@@ -381,21 +392,81 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 						if (graph[neighbors[n_ch]].distance > 
 							graph[perm[n_par]].distance + 1)
 						{
-							#pragma omp critical
-							graph[neighbors[n_ch]].distance =
-								graph[perm[n_par]].distance + 1;
-							children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
+							#pragma omp critical 
+							{
+								graph[neighbors[n_ch]].distance =
+									graph[perm[n_par]].distance + 1;
+								children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
+							}
 						}
 						
-						if (graph[perm[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
+						if (graph[neighbors[n_ch]].parent == ORPHAN_NODE) 
 						{
+							graph[neighbors[n_ch]].parent = perm[n_par];
+							
+							#pragma omp atomic
+							++graph[perm[n_par]].chnum;
+						}
+						else if (graph[perm[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
+						{
+							#pragma omp atomic
+							--graph[graph[neighbors[n_ch]].parent].chnum;
+							
 							#pragma omp critical
 							graph[neighbors[n_ch]].parent = perm[n_par];
+							
+							#pragma omp atomic
+							++graph[perm[n_par]].chnum;
 						}
-						
 					}
 				}
 			}
+			
+			#pragma omp for
+			for (n_par = 0; n_par < perm_size; ++n_par)
+			{
+				counts[n_par] = graph[perm[n_par]].chnum;
+			}
+		}
+			
+		// *********************
+		// Step 3: Prefix sum
+		// *********************
+		prefix_sum(counts, &parent_index, max_level);
+		
+		#pragma omp parallel
+		{
+			int child, index;
+			
+			// *********************
+			// Step 4: Placement
+			// *********************
+			while (children != NULL)
+			{
+				#pragma omp critical
+				{
+					child    = LIST_first(children);
+					children = LIST_remove(children, child);
+					index    = parent_index[graph[graph[child].parent].distance]++;
+				}
+				
+				perm[index] = child;
+				
+				#pragma omp atomic
+				++perm_size;
+				
+			}
+
+			
+			#pragma omp single
+			free(counts);
+
+			#pragma omp single
+			free(parent_index);
+
+
+			#pragma omp single
+			++max_level;
 		}
 	}
 }
