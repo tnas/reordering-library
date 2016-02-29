@@ -337,7 +337,7 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 	int graph_size, perm_size, node, max_level;
 	GRAPH* graph;
 	int* counts;
-	int* parent_index;
+	int* prefix_sum, parent_index;
 	LIST* children;
 	
 	graph_size = mat->n;
@@ -432,11 +432,17 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 		// *********************
 		// Step 3: Prefix sum
 		// *********************
-		prefix_sum(counts, &parent_index, max_level);
+		prefix_sum(counts, &prefix_sum, max_level);
 		
 		#pragma omp parallel
 		{
 			int child, index;
+			
+			#pragma omp single
+			{
+				parent_index  = calloc(max_level+2, sizeof(int));
+				bcopy(prefix_sum, parent_index, (max_level+2) * sizeof(int));
+			}
 			
 			// *********************
 			// Step 4: Placement
@@ -455,15 +461,20 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 				#pragma omp atomic
 				++perm_size;
 				
+				if (parent_index[graph[graph[child].parent].distance] == 
+					prefix_sum[graph[graph[child].parent].distance + 1])
+				{
+					// Sorting children by degree
+					qsort(perm[graph[graph[child].parent].distance], graph[graph[child].parent].chnum, sizeof(int), COMPARE_degr_ASC);
+					
+				}
 			}
 
-			
 			#pragma omp single
 			free(counts);
 
 			#pragma omp single
-			free(parent_index);
-
+			free(prefix_sum);
 
 			#pragma omp single
 			++max_level;
