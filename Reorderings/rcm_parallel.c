@@ -347,7 +347,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 	*perm  = calloc(graph_size, sizeof(int));
 	graph  = calloc(graph_size, sizeof(GRAPH));
 	
-	#pragma omp parallel for
+	#pragma omp parallel for private(node)
 	for (node = 0; node < graph_size; ++node)
 	{
 		graph[node].distance = INFINITY_LEVEL;
@@ -412,6 +412,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 						
 						if (graph[neighbors[n_ch]].parent == ORPHAN_NODE) 
 						{
+							#pragma omp critical
 							graph[neighbors[n_ch]].parent = (*perm)[n_par];
 							
 							#pragma omp atomic
@@ -430,8 +431,11 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 						}
 					}
 				}
+				
+				free(neighbors);
 			}
 			
+			#pragma omp single
 			printf("size children: %d\n", size_children);fflush(stdout);
 			
 			#pragma omp single
@@ -481,6 +485,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			// Step 4: Placement
 			// *********************
 			while (children != NULL)
+				
 			{
 				index = -1;
 				
@@ -511,6 +516,9 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 
 			#pragma omp single nowait
 			free(psum);
+			
+			#pragma omp single nowait
+			free(parent_index);
 
 			#pragma omp single nowait
 			++max_level;

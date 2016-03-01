@@ -183,6 +183,7 @@ test_result run_test_unordered_rcm(const char* path_matrix_file, const int num_t
 int get_node_peripheral(const char* path_matrix_file) {
 	
 	int root, e;
+	int* level_structure;
 	MAT* matrix;
 	FILE* matrix_file;
 	
@@ -193,7 +194,10 @@ int get_node_peripheral(const char* path_matrix_file) {
 	MATRIX_readCSR (matrix, matrix_file);
 	fclose(matrix_file);
 	
-	GRAPH_LS_peripheral(matrix, &root, &e);
+	level_structure = GRAPH_LS_peripheral(matrix, &root, &e);
+	
+	MATRIX_clean(matrix);
+	free(level_structure);
 	
 	return root;
 }
