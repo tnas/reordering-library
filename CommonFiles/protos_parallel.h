@@ -34,5 +34,5 @@ extern LIST* 	GRAPH_LS_last_level_PARALLEL (MAT* A, int* LS, int n);
 
 
 extern void	Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk);
-extern void	Leveled_RCM(MAT* mat, int* perm, int root);
+extern void	Leveled_RCM(MAT* mat, int** perm, int root);
 extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

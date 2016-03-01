@@ -38,7 +38,7 @@ int main (int argc, char* argv[]){
 	
 	int root = get_node_peripheral(matrix_name);
 	root = 1;
-	run_test_leveled_rcm(matrix_name, root);
+	run_test_leveled_rcm(matrix_name, num_threads, root);
 	
 // 	if (exec_type == ALL_TESTS)
 // 	{

@@ -90,7 +90,7 @@ test_result run_test_serial_rcm(const char* path_matrix_file, int root)
 }
 
 
-test_result run_test_leveled_rcm(const char* path_matrix_file, int root)
+test_result run_test_leveled_rcm(const char* path_matrix_file, const int num_threads, int root)
 {
 	long int bandwidth, envelope, bandwidth_after, envelope_after;
 	int* permutation;
@@ -113,12 +113,15 @@ test_result run_test_leveled_rcm(const char* path_matrix_file, int root)
 	bandwidth_after = MATRIX_bandwidth(matrix);
 	envelope_after  = MATRIX_envelope(matrix);
 	
+	omp_set_num_threads(num_threads);
+	
 	time = get_time(); 
-	Leveled_RCM(matrix, permutation, root);
+	Leveled_RCM(matrix, &permutation, root);
 	time = (get_time() - time)/100.0;
 	result.time = time;
 	
 	MATRIX_permutation(matrix, permutation);
+	
 	bandwidth = MATRIX_bandwidth(matrix);
 	envelope  = MATRIX_envelope(matrix);	
 	result.bandwidth = bandwidth;

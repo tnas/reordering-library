@@ -332,7 +332,7 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 
 
 
-void Leveled_RCM(MAT* mat, int* perm, int root) 
+void Leveled_RCM(MAT* mat, int** perm, int root) 
 {
 	int graph_size, perm_size, node, max_level, perm_offset, size_children;
 	GRAPH* graph;
@@ -344,8 +344,8 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 	graph_size = mat->n;
 	perm_size  = perm_offset = 0;
 	
-	perm  = calloc(graph_size, sizeof(int));
-	graph = calloc(graph_size, sizeof(GRAPH));
+	*perm  = calloc(graph_size, sizeof(int));
+	graph  = calloc(graph_size, sizeof(GRAPH));
 	
 	#pragma omp parallel for
 	for (node = 0; node < graph_size; ++node)
@@ -359,7 +359,7 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 	graph[root].parent    = -1;
 	graph[root].chnum     = 0;
 	
-	perm[0] = root;
+	(*perm)[0] = root;
 	perm_size++;
 	max_level = 1;
 	
@@ -370,42 +370,41 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 			int n_par, n_ch, degree;
 			int* neighbors;
 			
+// 			printf("num_threads: %d\n", omp_get_num_threads()); fflush(stdout);
+			
 			// ******************************
 			// Step 1-2: Expansion-Reduction
 			// ******************************
 			
-			#pragma omp single
+			#pragma omp single nowait
 			children = NULL;
 			
 			#pragma omp single
 			size_children = 0;
 			
-			#pragma omp single
-			counts = calloc(perm_size, sizeof(int));
-			
 			#pragma omp for
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
-				degree    = GRAPH_degree(mat, perm[n_par]);
-				neighbors = GRAPH_adjacent(mat, perm[n_par]);
+				degree    = GRAPH_degree(mat, (*perm)[n_par]);
+				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
 				
 				int i;
-				printf("Processing node %d with degree %d and children: ", perm[n_par], degree);fflush(stdout);
+				printf("Processing node %d with degree %d and children: ", (*perm)[n_par], degree);fflush(stdout);
 				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
 				printf("\n");fflush(stdout);
 				
 				for (n_ch = 0; n_ch < degree; ++n_ch)
 				{
 					if (graph[neighbors[n_ch]].distance > 
-						graph[perm[n_par]].distance)
+						graph[(*perm)[n_par]].distance)
 					{
 						if (graph[neighbors[n_ch]].distance > 
-							graph[perm[n_par]].distance + 1)
+							graph[(*perm)[n_par]].distance + 1)
 						{
 							#pragma omp critical 
 							{
 								graph[neighbors[n_ch]].distance =
-									graph[perm[n_par]].distance + 1;
+									graph[(*perm)[n_par]].distance + 1;
 								children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
 								++size_children;
 							}
@@ -413,37 +412,60 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 						
 						if (graph[neighbors[n_ch]].parent == ORPHAN_NODE) 
 						{
-							graph[neighbors[n_ch]].parent = perm[n_par];
+							graph[neighbors[n_ch]].parent = (*perm)[n_par];
 							
 							#pragma omp atomic
-							++graph[perm[n_par]].chnum;
+							++graph[(*perm)[n_par]].chnum;
 						}
-						else if (graph[perm[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
+						else if (graph[(*perm)[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
 						{
 							#pragma omp atomic
 							--graph[graph[neighbors[n_ch]].parent].chnum;
 							
 							#pragma omp critical
-							graph[neighbors[n_ch]].parent = perm[n_par];
+							graph[neighbors[n_ch]].parent = (*perm)[n_par];
 							
 							#pragma omp atomic
-							++graph[perm[n_par]].chnum;
+							++graph[(*perm)[n_par]].chnum;
 						}
 					}
 				}
 			}
 			
+			printf("size children: %d\n", size_children);fflush(stdout);
+			
+			#pragma omp single
+			counts = calloc(max_level+2, sizeof(int));
+			
+			#pragma omp single nowait
+			counts[0] = 0;
+			
+			#pragma omp single nowait
+			counts[1] = 1;
+			
 			#pragma omp for
 			for (n_par = 0; n_par < perm_size; ++n_par)
 			{
-				counts[n_par] = graph[perm[n_par]].chnum;
+				counts[graph[(*perm)[n_par]].distance + 2] += graph[(*perm)[n_par]].chnum;
 			}
 		}
-			
+		
+		printf("Counts vector: ");
+		int j;
+		for (j = 0; j < max_level+2; ++j)
+			printf("%d ", counts[j]);
+		printf("\n");fflush(stdout);
+		
 		// *********************
 		// Step 3: Prefix sum
 		// *********************
-		prefix_sum(counts, &psum, max_level);
+		prefix_sum(counts, &psum, max_level+2);
+		
+		printf("Sums vector: ");
+			int k;
+			for (k = 0; k < max_level+2; ++k)
+				printf("%d ", psum[k]);
+			printf("\n");fflush(stdout);
 		
 		#pragma omp parallel
 		{
@@ -460,38 +482,53 @@ void Leveled_RCM(MAT* mat, int* perm, int root)
 			// *********************
 			while (children != NULL)
 			{
+				index = -1;
+				
 				#pragma omp critical
 				{
-					child    = LIST_first(children);
-					children = LIST_remove(children, child);
-					index    = parent_index[graph[graph[child].parent].distance]++;
+					if (children != NULL)
+					{
+						child    = LIST_first(children);
+						children = LIST_remove(children, child);
+						index    = parent_index[graph[child].distance]++;
+					}
 				}
 				
-				perm[index] = child;
-				
-				if (parent_index[graph[graph[child].parent].distance] == 
-					psum[graph[graph[child].parent].distance + 1])
+				if (index != -1)
 				{
-					// Sorting children by degree
-					qsort(&perm[graph[graph[child].parent].distance], graph[graph[child].parent].chnum, sizeof(int), COMPARE_degr_ASC);
+					(*perm)[index] = child;
 					
+					if (parent_index[graph[child].distance] == psum[graph[child].distance + 1])
+					{
+						// Sorting children by degree
+						qsort(&((*perm)[graph[child].distance]), graph[graph[child].parent].chnum, sizeof(int), COMPARE_degr_ASC);
+					}
 				}
 			}
-
-			#pragma omp single
+			
+			#pragma omp single nowait
 			free(counts);
 
-			#pragma omp single
+			#pragma omp single nowait
 			free(psum);
 
-			#pragma omp single
+			#pragma omp single nowait
 			++max_level;
 			
 			#pragma omp single
-			perm_offset += perm_size;
+			perm_size += size_children;
 			
 			#pragma omp single
-			perm_size += size_children;
+			perm_offset = perm_size - size_children;
 		}
+		
+		printf("offset, permsize: [%d, %d]\n", perm_offset, perm_size);fflush(stdout);
+		printf("Permutation vector: ");fflush(stdout);
+		int i;
+		for (i = 0; i < perm_size; ++i)
+			printf("%d ", (*perm)[i]);
+		printf("\n");fflush(stdout);
 	}
+	
+	free(graph);
 }
