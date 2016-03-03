@@ -388,10 +388,10 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 				degree    = GRAPH_degree(mat, (*perm)[n_par]);
 				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
 				
-				int i;
-				printf("Processing node %d with degree %d and children: ", (*perm)[n_par], degree);fflush(stdout);
-				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
-				printf("\n");fflush(stdout);
+// 				int i;
+// 				printf("Processing node %d with degree %d and children: ", (*perm)[n_par], degree);fflush(stdout);
+// 				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
+// 				printf("\n");fflush(stdout);
 				
 				for (n_ch = 0; n_ch < degree; ++n_ch)
 				{
@@ -439,17 +439,26 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			printf("size children: %d\n", size_children);fflush(stdout);
 			
 			#pragma omp single
+			{
+				int i;
+				printf("Children: ");fflush(stdout);
+				for (i = 0; i< size_children; i++) printf("%d ", children[i].data); fflush(stdout);
+				printf("\n");fflush(stdout);
+			}
+			
+			#pragma omp single
 			counts = calloc(max_level+2, sizeof(int));
 			
 			#pragma omp single nowait
 			counts[0] = 0;
 			
-			#pragma omp single nowait
+			#pragma omp single
 			counts[1] = 1;
 			
 			#pragma omp for
 			for (n_par = 0; n_par < perm_size; ++n_par)
 			{
+				#pragma omp critical
 				counts[graph[(*perm)[n_par]].distance + 2] += graph[(*perm)[n_par]].chnum;
 			}
 		}
@@ -485,7 +494,6 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			// Step 4: Placement
 			// *********************
 			while (children != NULL)
-				
 			{
 				index = -1;
 				
@@ -510,6 +518,8 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 					}
 				}
 			}
+			
+			#pragma omp barrier
 			
 			#pragma omp single nowait
 			free(counts);
