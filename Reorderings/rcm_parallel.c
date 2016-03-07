@@ -363,11 +363,13 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 		}
 		
 		#pragma omp single nowait
-		{
-			graph[root].distance  = 0;
-			graph[root].parent    = ORPHAN_NODE;
-			graph[root].chnum     = 0;
-		}
+		graph[root].distance = 0;
+		
+		#pragma omp single nowait
+		graph[root].parent = ORPHAN_NODE;
+		
+		#pragma omp single nowait
+		graph[root].chnum = 0;
 		
 		#pragma omp single nowait
 		(*perm)[0] = root;
@@ -446,6 +448,9 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			#pragma omp single nowait
 			size_children = children->size;
 			
+			#pragma omp single nowait
+			ch_pointer = children;
+			
 // 			#pragma omp single
 // 			{
 // 				printf("size children: %d\n", size_children);fflush(stdout);
@@ -465,13 +470,11 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 		// ******************************
 		// Step 2: Reduction
 		// ******************************
-		ch_pointer = children;
 		while (ch_pointer != NULL)
 		{
 			graph[graph[ch_pointer->data].parent].chnum++;
 			ch_pointer = ch_pointer->next;
 		}
-		
 		
 		for (node = 0; node < perm_size; ++node)
 		{
@@ -569,7 +572,12 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 // 		printf("\n");fflush(stdout);
 	}
 	
-	omp_destroy_lock(&lock);
-	
-	free(graph);
+	#pragma omp parallel sections
+	{
+		#pragma omp section
+		omp_destroy_lock(&lock);
+		
+		#pragma omp section
+		free(graph);
+	}
 }
