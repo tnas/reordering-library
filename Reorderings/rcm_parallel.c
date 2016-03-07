@@ -724,7 +724,13 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 // 			}
 			
 			#pragma omp single
-			qsort(&((*perm)[perm_size]), size_children, sizeof(int), COMPARE_int_ASC);
+			{
+				// I'm working here
+				for (n_par = perm_offset; n_par < perm_size; ++n_par)
+				{
+					qsort(&((*perm)[perm_size]), size_children, sizeof(int), COMPARE_int_ASC);
+				}
+			}
 			
 			#pragma omp single nowait
 			++max_level;
