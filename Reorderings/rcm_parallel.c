@@ -332,6 +332,256 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 
 
 
+// void Leveled_RCM(MAT* mat, int** perm, int root) 
+// {
+// 	int graph_size, perm_size, node, max_level, perm_offset, size_children;
+// 	GRAPH* graph;
+// 	int* counts;
+// 	int* psum;
+// 	int* parent_index;
+// 	LIST* children;
+// 	LIST* ch_pointer;
+// 	omp_lock_t lock;
+// 	
+// 	graph_size = mat->n;
+// 	perm_size  = perm_offset = 0;
+// 	
+// 	#pragma omp parallel
+// 	{
+// 		#pragma omp single nowait
+// 		*perm  = calloc(graph_size, sizeof(int));
+// 		
+// 		#pragma omp single 
+// 		graph  = calloc(graph_size, sizeof(GRAPH));
+// 		
+// 		#pragma omp for private(node)
+// 		for (node = 0; node < graph_size; ++node)
+// 		{
+// 			graph[node].distance = INFINITY_LEVEL;
+// 			graph[node].parent   = -1;
+// 			graph[node].chnum    = 0;
+// 		}
+// 		
+// 		#pragma omp single nowait
+// 		graph[root].distance = 0;
+// 		
+// 		#pragma omp single nowait
+// 		graph[root].parent = ORPHAN_NODE;
+// 		
+// 		#pragma omp single nowait
+// 		graph[root].chnum = 0;
+// 		
+// 		#pragma omp single nowait
+// 		(*perm)[0] = root;
+// 		
+// 		#pragma omp single nowait
+// 		perm_size++;
+// 		
+// 		#pragma omp single nowait
+// 		max_level = 1;
+// 		
+// 		#pragma omp single nowait
+// 		omp_init_lock(&lock);
+// 	}
+// 	
+// 	while (perm_size < graph_size)
+// 	{
+// 		#pragma omp parallel
+// 		{
+// 			int n_par, n_ch, degree;
+// 			int* neighbors;
+// 			
+// 			// ******************************
+// 			// Step 1: Expansion-Reduction
+// 			// ******************************
+// 			
+// 			#pragma omp single nowait
+// 			children = NULL;
+// 			
+// 			#pragma omp for
+// 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
+// 			{
+// 				degree    = GRAPH_degree(mat, (*perm)[n_par]);
+// 				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
+// 				
+// // 				int i;
+// // 				printf("Processing node %d with degree %d and children: ", (*perm)[n_par], degree);fflush(stdout);
+// // 				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
+// // 				printf("\n");fflush(stdout);
+// 				
+// 				for (n_ch = 0; n_ch < degree; ++n_ch)
+// 				{
+// 					if (graph[neighbors[n_ch]].parent == ORPHAN_NODE) 
+// 					{
+// 						#pragma omp critical
+// 						graph[neighbors[n_ch]].parent = (*perm)[n_par];
+// 					}
+// 					
+// 					
+// 					if (graph[neighbors[n_ch]].distance > 
+// 						graph[(*perm)[n_par]].distance)
+// 					{
+// 						if (graph[neighbors[n_ch]].distance > 
+// 							graph[(*perm)[n_par]].distance + 1)
+// 						{
+// 							#pragma omp critical 
+// 							{
+// 								graph[neighbors[n_ch]].distance =
+// 									graph[(*perm)[n_par]].distance + 1;
+// 								children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
+// // 								printf("Adding child %d\n", neighbors[n_ch]);fflush(stdout);
+// 							}
+// 						}
+// 						
+// 
+// 						if (graph[(*perm)[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
+// 						{
+// 							#pragma omp critical
+// 							graph[neighbors[n_ch]].parent = (*perm)[n_par];
+// 						}
+// 					}
+// 				}
+// 				
+// 				free(neighbors);
+// 			}
+// 			
+// 			#pragma omp single nowait
+// 			size_children = children->size;
+// 			
+// 			#pragma omp single nowait
+// 			ch_pointer = children;
+// 			
+// // 			#pragma omp single
+// // 			{
+// // 				printf("size children: %d\n", size_children);fflush(stdout);
+// // 				printf(">>>Children: "); LIST_print(children); fflush(stdout);
+// // 			}
+// 			
+// 			#pragma omp single
+// 			counts = calloc(max_level+2, sizeof(int));
+// 			
+// 			#pragma omp single nowait
+// 			counts[0] = 0;
+// 			
+// 			#pragma omp single
+// 			counts[1] = 1;
+// 		}
+// 		
+// 		// ******************************
+// 		// Step 2: Reduction
+// 		// ******************************
+// 		while (ch_pointer != NULL)
+// 		{
+// 			graph[graph[ch_pointer->data].parent].chnum++;
+// 			ch_pointer = ch_pointer->next;
+// 		}
+// 		
+// 		for (node = 0; node < perm_size; ++node)
+// 		{
+// 			counts[graph[(*perm)[node]].distance + 2] += graph[(*perm)[node]].chnum;
+// 		}
+// 		
+// // 		printf("Counts vector: ");
+// // 		int j;
+// // 		for (j = 0; j < max_level+2; ++j)
+// // 			printf("%d ", counts[j]);
+// // 		printf("\n");fflush(stdout);
+// 		
+// 		// *********************
+// 		// Step 3: Prefix sum
+// 		// *********************
+// 		prefix_sum(counts, &psum, max_level+2);
+// 		
+// // 		printf("Sums vector: ");
+// // 			int k;
+// // 			for (k = 0; k < max_level+2; ++k)
+// // 				printf("%d ", psum[k]);
+// // 			printf("\n");fflush(stdout);
+// 		
+// 		#pragma omp parallel
+// 		{
+// 			int child;
+// 			
+// 			#pragma omp single
+// 			{
+// 				parent_index  = calloc(max_level+2, sizeof(int));
+// 				bcopy(psum, parent_index, (max_level+2) * sizeof(int));
+// 			}
+// 			
+// 			// *********************
+// 			// Step 4: Placement
+// 			// *********************
+// 			while (children != NULL)
+// 			{
+// 				child = -1;
+// 				
+// 				#pragma omp critical
+// 				{
+// 					if (children != NULL)
+// 					{
+// 						child    = LIST_first(children);
+// 						children = LIST_remove(children, child);
+// // 						printf("thread %d get child %d\n", omp_get_thread_num(), child);fflush(stdout);
+// 					}
+// 				}
+// 				
+// 				if (child != -1)
+// 				{
+// 					omp_set_lock(&lock);
+// // 					printf("thread %d set child %d at position %d\n", omp_get_thread_num(), child, parent_index[graph[child].distance]);fflush(stdout);
+// 					(*perm)[parent_index[graph[child].distance]++] = child;
+// 					omp_unset_lock(&lock);
+// 					
+// 					if (parent_index[graph[child].distance] == psum[graph[child].distance + 1])
+// 					{
+// 						// Sorting children by degree
+// 						omp_set_lock(&lock);
+// // 						printf("Sorting from position %d to %d\n", (*perm)[graph[child].distance], (*perm)[graph[child].distance] + graph[graph[child].parent].chnum);fflush(stdout);
+// 						qsort(&((*perm)[graph[child].distance]), graph[graph[child].parent].chnum, sizeof(int), COMPARE_degr_ASC);
+// 						omp_unset_lock(&lock);
+// 					}
+// 				}
+// 			}
+// 			
+// 			#pragma omp barrier
+// 			
+// 			#pragma omp single
+// 			perm_size += size_children;
+// 			
+// 			#pragma omp single
+// 			perm_offset = perm_size - size_children;
+// 			
+// 			#pragma omp single nowait
+// 			free(counts);
+// 
+// 			#pragma omp single nowait
+// 			free(psum);
+// 			
+// 			#pragma omp single nowait
+// 			free(parent_index);
+// 
+// 			#pragma omp single nowait
+// 			++max_level;
+// 		}
+// 		
+// // 		printf("offset, permsize: [%d, %d]\n", perm_offset, perm_size);fflush(stdout);
+// // 		printf("Permutation vector: ");fflush(stdout);
+// // 		int i;
+// // 		for (i = 0; i < perm_size; ++i)
+// // 			printf("%d ", (*perm)[i]);
+// // 		printf("\n");fflush(stdout);
+// 	}
+// 	
+// 	#pragma omp parallel sections
+// 	{
+// 		#pragma omp section
+// 		omp_destroy_lock(&lock);
+// 		
+// 		#pragma omp section
+// 		free(graph);
+// 	}
+// }
+
 void Leveled_RCM(MAT* mat, int** perm, int root) 
 {
 	int graph_size, perm_size, node, max_level, perm_offset, size_children;
@@ -380,15 +630,15 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 		#pragma omp single nowait
 		max_level = 1;
 		
-		#pragma omp single nowait
-		omp_init_lock(&lock);
+// 		#pragma omp single nowait
+// 		omp_init_lock(&lock);
 	}
 	
 	while (perm_size < graph_size)
 	{
 		#pragma omp parallel
 		{
-			int n_par, n_ch, degree;
+			int n_par, n_ch, degree, child;
 			int* neighbors;
 			
 			// ******************************
@@ -417,7 +667,6 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 						graph[neighbors[n_ch]].parent = (*perm)[n_par];
 					}
 					
-					
 					if (graph[neighbors[n_ch]].distance > 
 						graph[(*perm)[n_par]].distance)
 					{
@@ -428,122 +677,57 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 							{
 								graph[neighbors[n_ch]].distance =
 									graph[(*perm)[n_par]].distance + 1;
+									
+// 								omp_set_lock(&lock);
 								children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
+// 								omp_unset_lock(&lock);
 // 								printf("Adding child %d\n", neighbors[n_ch]);fflush(stdout);
 							}
 						}
 						
-
 						if (graph[(*perm)[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
 						{
 							#pragma omp critical
 							graph[neighbors[n_ch]].parent = (*perm)[n_par];
 						}
 					}
+					
 				}
 				
 				free(neighbors);
 			}
 			
 			#pragma omp single nowait
-			size_children = children->size;
+			size_children = 0;
 			
-			#pragma omp single nowait
-			ch_pointer = children;
+			#pragma omp single 
+			{
+				while (children != NULL)
+				{
+					child    = LIST_first(children);
+					children = LIST_remove(children, child);
+// 					printf("Setting child %d at position %d\n", child, perm_size + size_children);fflush(stdout);
+					(*perm)[perm_size + size_children] = child;
+					++size_children;
+				}
+			}
+			
 			
 // 			#pragma omp single
 // 			{
-// 				printf("size children: %d\n", size_children);fflush(stdout);
-// 				printf(">>>Children: "); LIST_print(children); fflush(stdout);
+// 				printf("Permutation vector: ");fflush(stdout);
+// 				int i;
+// 				for (i = 0; i < perm_size + size_children; ++i)
+// 					printf("%d ", (*perm)[i]);
+// 				printf("\n");fflush(stdout);
+// 				printf("Sorting from position %d (val = %d) to position %d \n", perm_size, (*perm)[perm_size], perm_size+size_children);fflush(stdout);
 // 			}
 			
 			#pragma omp single
-			counts = calloc(max_level+2, sizeof(int));
+			qsort(&((*perm)[perm_size]), size_children, sizeof(int), COMPARE_int_ASC);
 			
 			#pragma omp single nowait
-			counts[0] = 0;
-			
-			#pragma omp single
-			counts[1] = 1;
-		}
-		
-		// ******************************
-		// Step 2: Reduction
-		// ******************************
-		while (ch_pointer != NULL)
-		{
-			graph[graph[ch_pointer->data].parent].chnum++;
-			ch_pointer = ch_pointer->next;
-		}
-		
-		for (node = 0; node < perm_size; ++node)
-		{
-			counts[graph[(*perm)[node]].distance + 2] += graph[(*perm)[node]].chnum;
-		}
-		
-// 		printf("Counts vector: ");
-// 		int j;
-// 		for (j = 0; j < max_level+2; ++j)
-// 			printf("%d ", counts[j]);
-// 		printf("\n");fflush(stdout);
-		
-		// *********************
-		// Step 3: Prefix sum
-		// *********************
-		prefix_sum(counts, &psum, max_level+2);
-		
-// 		printf("Sums vector: ");
-// 			int k;
-// 			for (k = 0; k < max_level+2; ++k)
-// 				printf("%d ", psum[k]);
-// 			printf("\n");fflush(stdout);
-		
-		#pragma omp parallel
-		{
-			int child;
-			
-			#pragma omp single
-			{
-				parent_index  = calloc(max_level+2, sizeof(int));
-				bcopy(psum, parent_index, (max_level+2) * sizeof(int));
-			}
-			
-			// *********************
-			// Step 4: Placement
-			// *********************
-			while (children != NULL)
-			{
-				child = -1;
-				
-				#pragma omp critical
-				{
-					if (children != NULL)
-					{
-						child    = LIST_first(children);
-						children = LIST_remove(children, child);
-// 						printf("thread %d get child %d\n", omp_get_thread_num(), child);fflush(stdout);
-					}
-				}
-				
-				if (child != -1)
-				{
-					omp_set_lock(&lock);
-// 					printf("thread %d set child %d at position %d\n", omp_get_thread_num(), child, parent_index[graph[child].distance]);fflush(stdout);
-					(*perm)[parent_index[graph[child].distance]++] = child;
-					omp_unset_lock(&lock);
-					
-					if (parent_index[graph[child].distance] == psum[graph[child].distance + 1])
-					{
-						// Sorting children by degree
-						omp_set_lock(&lock);
-// 						printf("Sorting from position %d to %d\n", (*perm)[graph[child].distance], (*perm)[graph[child].distance] + graph[graph[child].parent].chnum);fflush(stdout);
-						qsort(&((*perm)[graph[child].distance]), graph[graph[child].parent].chnum, sizeof(int), COMPARE_degr_ASC);
-						omp_unset_lock(&lock);
-					}
-				}
-			}
-			
-			#pragma omp barrier
+			++max_level;
 			
 			#pragma omp single
 			perm_size += size_children;
@@ -551,33 +735,130 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			#pragma omp single
 			perm_offset = perm_size - size_children;
 			
-			#pragma omp single nowait
-			free(counts);
-
-			#pragma omp single nowait
-			free(psum);
+// 			#pragma omp single nowait
+// 			printf("size children: %d\n", size_children);fflush(stdout);
+// 			
+// 			#pragma omp single 
+// 			printf("offset, permsize: [%d, %d]\n", perm_offset, perm_size);fflush(stdout);
 			
-			#pragma omp single nowait
-			free(parent_index);
-
-			#pragma omp single nowait
-			++max_level;
+// 			#pragma omp single nowait
+// 			ch_pointer = children;
+// 			
+// 			#pragma omp single
+// 			counts = calloc(max_level+2, sizeof(int));
+// 			
+// 			#pragma omp single nowait
+// 			counts[0] = 0;
+// 			
+// 			#pragma omp single
+// 			counts[1] = 1;
 		}
 		
-// 		printf("offset, permsize: [%d, %d]\n", perm_offset, perm_size);fflush(stdout);
-// 		printf("Permutation vector: ");fflush(stdout);
-// 		int i;
-// 		for (i = 0; i < perm_size; ++i)
-// 			printf("%d ", (*perm)[i]);
-// 		printf("\n");fflush(stdout);
+// 		// ******************************
+// 		// Step 2: Reduction
+// 		// ******************************
+// 		while (ch_pointer != NULL)
+// 		{
+// 			graph[graph[ch_pointer->data].parent].chnum++;
+// 			ch_pointer = ch_pointer->next;
+// 		}
+// 		
+// 		for (node = 0; node < perm_size; ++node)
+// 		{
+// 			counts[graph[(*perm)[node]].distance + 2] += graph[(*perm)[node]].chnum;
+// 		}
+// 		
+// 		// *********************
+// 		// Step 3: Prefix sum
+// 		// *********************
+// 		prefix_sum(counts, &psum, max_level+2);
+// 		
+// // 		printf("Sums vector: ");
+// // 			int k;
+// // 			for (k = 0; k < max_level+2; ++k)
+// // 				printf("%d ", psum[k]);
+// // 			printf("\n");fflush(stdout);
+// 		
+// 		#pragma omp parallel
+// 		{
+// 			int child;
+// 			
+// 			#pragma omp single
+// 			{
+// 				parent_index  = calloc(max_level+2, sizeof(int));
+// 				bcopy(psum, parent_index, (max_level+2) * sizeof(int));
+// 			}
+// 			
+// 			// *********************
+// 			// Step 4: Placement
+// 			// *********************
+// 			while (children != NULL)
+// 			{
+// 				child = -1;
+// 				
+// 				#pragma omp critical
+// 				{
+// 					if (children != NULL)
+// 					{
+// 						child    = LIST_first(children);
+// 						children = LIST_remove(children, child);
+// // 						printf("thread %d get child %d\n", omp_get_thread_num(), child);fflush(stdout);
+// 					}
+// 				}
+// 				
+// 				if (child != -1)
+// 				{
+// 					omp_set_lock(&lock);
+// 					(*perm)[parent_index[graph[child].distance]++] = child;
+// 					omp_unset_lock(&lock);
+// 					
+// 					if (parent_index[graph[child].distance] == psum[graph[child].distance + 1])
+// 					{
+// 						// Sorting children by degree
+// 						omp_set_lock(&lock);
+// 						qsort(&((*perm)[graph[child].distance]), graph[graph[child].parent].chnum, sizeof(int), COMPARE_degr_ASC);
+// 						omp_unset_lock(&lock);
+// 					}
+// 				}
+// 			}
+// 			
+// 			#pragma omp barrier
+// 			
+// 			#pragma omp single
+// 			perm_size += size_children;
+// 			
+// 			#pragma omp single
+// 			perm_offset = perm_size - size_children;
+// 			
+// 			#pragma omp single nowait
+// 			free(counts);
+// 
+// 			#pragma omp single nowait
+// 			free(psum);
+// 			
+// 			#pragma omp single nowait
+// 			free(parent_index);
+// 
+// 			#pragma omp single nowait
+// 			++max_level;
+// 		}
+		
 	}
 	
+// 	printf("Permutation vector: ");fflush(stdout);
+// 	int i;
+// 	for (i = 0; i < perm_size; ++i)
+// 		printf("%d ", (*perm)[i]);
+// 	printf("\n");fflush(stdout);
+	
+		
 	#pragma omp parallel sections
 	{
-		#pragma omp section
-		omp_destroy_lock(&lock);
+// 		#pragma omp section
+// 		omp_destroy_lock(&lock);
 		
 		#pragma omp section
 		free(graph);
 	}
 }
+

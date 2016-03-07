@@ -1,5 +1,11 @@
 #include "util.h"
 
+int COMPARE_int_ASC (const void * a, const void * b)
+{ 
+	return ((int*)a) - ((int*)b);
+}
+
+
 int get_random_integer(int max)
 {
 	srand((unsigned int) time(NULL));
