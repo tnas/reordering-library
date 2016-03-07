@@ -14,6 +14,7 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 		LIST *N = (LIST*) malloc (sizeof(LIST));
 		N->data = x;
 		N->next = NULL;
+		N->size = 1;
 		return N;		
 	}
 		
@@ -33,6 +34,8 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 	N->next = NULL;
 	
 	P->next = N;
+	L->size++;
+	
 	return L;
 }
 
@@ -49,6 +52,7 @@ LIST* LIST_insert(LIST* L, int x)
 		LIST *N = (LIST*) malloc (sizeof(LIST));
 		N->data = x;
 		N->next = NULL;
+		N->size = 1;
 		return N;		
 	}
 		
@@ -56,6 +60,7 @@ LIST* LIST_insert(LIST* L, int x)
 	LIST *N = (LIST*) malloc (sizeof(LIST));
 	N->data = x;
 	N->next = L;
+	N->size++;
 	
 	return N;
 }
@@ -86,12 +91,15 @@ LIST* LIST_remove (LIST* L, int x)
 		return L;		
 	}
 	
+	L->size--;
+	
 	if (Q == NULL)
 		L = P->next;
 	else
 		Q->next = P->next;
-
+	
 	free(P);
+	
 	return L;
 }
 
@@ -137,6 +145,7 @@ void LIST_destroy (LIST* L)
 	{
 		P = L->next;
 		free(L);
+		L->size--;
 		L = P;
 	}
 }

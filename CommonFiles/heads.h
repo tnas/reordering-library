@@ -56,6 +56,7 @@ typedef struct
 typedef struct node
 {
 	int          data;
+	int	     size;
 	struct node* next;
 } LIST;
 
