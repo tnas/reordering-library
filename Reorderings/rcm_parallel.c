@@ -761,11 +761,9 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 	
 	#pragma omp parallel
 	{
-		int node, n_par, n_ch, degree, child, size_children_per_parent, 
-			size_children, th_id, th_ini, th_degree;
+		int node, n_par, n_ch, degree, size_children, size_ch_per_parent, th_id, th_ini, th_degree;
 		int* neighbors;
-		LIST* children;
-		GRAPH* children_per_parent;
+		GRAPH* children;
 		
 		#pragma omp single nowait
 		num_threads = omp_get_num_threads();
@@ -804,32 +802,39 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 		{
 			children      = NULL;
 			size_children = 0;
+			th_degree     = 0;
+			th_ini        = 0;
 			
 			#pragma omp single 
 			chunk_size = ceil((float) (perm_size - perm_offset) / num_threads);
 			
-			th_degree = 0;
+// 			printf("[offset = %d, size = %d]\n", perm_offset, perm_size);fflush(stdout);
+// 			int i;
 			
 			#pragma omp for schedule(static, chunk_size)
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
-				
-				for (node = n_par; node < n_par + chunk_size; ++node)
-					th_degree += graph[(*perm)[node]].degree;
-				
-				// I'm working here!
+				if (th_degree == 0)
+				{
+					for (node = n_par; node < n_par + chunk_size; ++node)
+					{
+// 						printf("Adding th_degree from node %d with degree %d\n", (*perm)[node], graph[(*perm)[node]].degree);
+						th_degree += graph[(*perm)[node]].degree;
+					}
 					
-				printf("Thread %d Processing n_par: %d from [%d, %d] chunk_size %d\n", omp_get_thread_num(), n_par, perm_offset, perm_size, chunk_size);fflush(stdout);
+// 					printf("th_degree: %d\n", th_degree);fflush(stdout);
+					children = calloc(th_degree, sizeof(GRAPH));
+				}
+				
+				size_ch_per_parent = 0;
+// 				printf("Thread %d Processing n_par: %d from [%d, %d] chunk_size %d\n", omp_get_thread_num(), n_par, perm_offset, perm_size, chunk_size);fflush(stdout);
 				degree    = graph[(*perm)[n_par]].degree;
 				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
 				
-				children_per_parent      = calloc(degree, sizeof(GRAPH));
-				size_children_per_parent = 0;
-				
-// 				int i;
-// 				printf("Thread %d Processing node %d with degree %d and children: ", omp_get_thread_num(), (*perm)[n_par], degree);fflush(stdout);
-// 				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
+// 				printf("Thread %d Processing node %d with degree %d and children: ", omp_get_thread_num(), (*perm)[n_par], graph[(*perm)[n_par]].degree);fflush(stdout);
+// 				for (i = 0; i< graph[(*perm)[n_par]].degree; i++) printf("%d(%d) ", neighbors[i], graph[neighbors[i]].degree); fflush(stdout);
 // 				printf("\n");fflush(stdout);
+				
 				
 				for (n_ch = 0; n_ch < degree; ++n_ch)
 				{
@@ -846,9 +851,11 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 									
 								if (graph[neighbors[n_ch]].status == UNREACHED)
 								{
-// 									children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
-									children_per_parent[size_children_per_parent++] = graph[neighbors[n_ch]]; 
+									children[size_children++] = graph[neighbors[n_ch]]; 
 									graph[neighbors[n_ch]].status = LABELED;
+									size_ch_per_parent++;
+// 									printf("Adding child %d at position %d\n", graph[neighbors[n_ch]].label, size_children-1);fflush(stdout);
+// 									printf("Child %d added at position %d\n", children[size_children-1].label, size_children-1);
 								}
 							}
 						}
@@ -861,31 +868,21 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 					}
 				}
 				
-				if (size_children_per_parent > 0)
+				if (size_ch_per_parent > 1) 
 				{
-					if (size_children_per_parent > 1) {
-// 						printf("Thread %d Sorting position %d to %d\n", omp_get_thread_num(), 0, size_children_per_parent);
-// 						printf("Children vector Before: ");fflush(stdout);
-// 						int i;
-// 						for (i = 0; i < size_children_per_parent; ++i)
-// 							printf("%d ", children_per_parent[i].label);
-// 						printf("\n");fflush(stdout);
-						qsort(children_per_parent, size_children_per_parent, sizeof(GRAPH), COMPARE_degr_ASC);
-// 						printf("Children vector After: ");fflush(stdout);
-// 						for (i = 0; i < size_children_per_parent; ++i)
-// 							printf("%d ", children_per_parent[i].label);
-// 						printf("\n");fflush(stdout);
-					}
-					
-					for (node = 0; node < size_children_per_parent; ++node)
-						children = LIST_insert_IF_NOT_EXIST(children, children_per_parent[node].label);
+					qsort(&(children[th_ini]), size_ch_per_parent, sizeof(GRAPH), COMPARE_degr_ASC);
+					th_ini += size_ch_per_parent;
 				}
 				
+// 				printf("Children: ");fflush(stdout);
+// 				for (i = 0; i< size_children; i++) printf("%d ", children[i].label); fflush(stdout);
+// 				printf("\n");fflush(stdout);
+				
 				free(neighbors);
-				free(children_per_parent);
 			}
 			
-			if (children != NULL) size_children = children->size;
+			#pragma omp single
+			total_size_children = 0;
 			
 			#pragma omp for schedule(static, 1)
 			for (th_id = 0; th_id < num_threads; ++th_id)
@@ -900,21 +897,20 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 					total_size_children += size_children;
 				}
 				
-				while (children != NULL)
-				{
-					child    = LIST_first(children);
-					children = LIST_remove(children, child);
-// 					printf("Thread %d Setting child %d(%d) at position %d\n", omp_get_thread_num(), child, GRAPH_degree(mat, child), th_ini);fflush(stdout);
-					(*perm)[th_ini++] = child;
-				}
-				
+				for (node = 0; node < size_children; ++node)
+					(*perm)[th_ini++] = children[node].label;
 			}
+			
+					
+// 			printf("Permutation vector: ");fflush(stdout);
+// 			for (i = 0; i < perm_size; ++i)
+// 				printf("%d ", (*perm)[i]);
+// 			printf("\n");fflush(stdout);
+			
+			free(children);
 			
 			#pragma omp single
 			perm_offset = perm_size - total_size_children;
-			
-			#pragma omp single
-			printf("-----------------------------\n");fflush(stdout);
 		}
 	}
 		
