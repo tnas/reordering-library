@@ -4,20 +4,15 @@
 // #include "../CommonFiles/protos.h"
 #include "../CommonFiles/protos_parallel.h"
 
+void mc60cd(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int* pair, int* info, int* iw, double* w);
+
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm
  *--------------------------------------------------------------------------*/
 void REORDERING_RCM_opt (MAT* A, int** Fp, int s)
 { 
 	int i;
-// 	int s, e;
 	int n = A->n;
-// 	double time;
-	
-// 	time = get_time(); 
-// 	int* g = GRAPH_LS_peripheral (A, &s, &e);
-// 	time = (get_time() - time)/100.0;
-// 	printf("Serial PERIPHERAL - Elapsed time: %.6f sec\n\n", time);
 	
 	int* q = calloc (n,sizeof(int));
 	int* p = calloc (n,sizeof(int));
@@ -29,7 +24,7 @@ void REORDERING_RCM_opt (MAT* A, int** Fp, int s)
 		p[n-1-i] = q[i]; 
 	
 	(*Fp) = p;
-// 	free(g);
+	
 	free(q);
 }
 
@@ -121,3 +116,45 @@ void REORDERING_RCM (MAT* A, int** Fp)
 	free(q);
 	free(close);
 }
+
+
+/*----------------------------------------------------------------------------
+ * HSL_MC60 RCM Reordering
+ * 
+ * void mc60cd(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int* pair, int* info, int* iw, double* w);
+ *--------------------------------------------------------------------------*/
+void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
+{
+	int i;
+	int n        = A->n; 
+	int nsup     = n;
+	int lirn     = A->nz;
+	int *irn     = A->JA;
+	int *icptr   = A->IA;
+	int *vars;
+	int jcntl[2] = { RCM, ESPECIFIED_PERIPHERAL};
+	int* permsv  = NULL;
+	double* weight = NULL;
+	int pair[2]  = { root };
+	int info[4];
+	int iw[3*nsup + 1];
+	double w[nsup];
+	
+	/* -------------------------------------------------------------------- */    
+	/* Setting VARS vector with supervaribles of one variable               */
+	/* -------------------------------------------------------------------- */
+	vars = calloc(n, sizeof(int));
+	
+	for (i = 0; i < n; ++i)  
+		vars[i] = 1;
+
+	/* -------------------------------------------------------------------- */    
+	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
+	/* -------------------------------------------------------------------- */
+	for (i = 0; i < lirn; i++) 
+		irn[i] += 1;
+	
+	mc60cd(&n, &nsup, &lirn, irn, &icptr, vars, jcntl, &permsv, weight, pair, &info, &iw, &w);
+}
+
+

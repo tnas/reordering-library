@@ -101,6 +101,7 @@ extern void     ILUT                     (SparMAT* csmat, SparILU* lu, int lfil,
  *--------------------------------------------------------------------------*/
 extern void     REORDERING_RCM_opt       (MAT* A, int** p, int s);
 extern void     REORDERING_RCM           (MAT* A, int** p);
+extern void     REORDERING_RCM_HSL       (MAT* A, int** p, int root);
 extern void     REORDERING_SLOAN         (MAT* A, int** p);
 extern void     REORDERING_SPECTRAL      (MAT* A, int** p);
 extern void     REORDERING_SPECTRAL_WGT  (MAT* A, int** p);

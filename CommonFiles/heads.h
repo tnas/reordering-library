@@ -64,6 +64,19 @@ typedef struct node
 #endif /* LINKED_LIST_H */
 
 /*----------------------------------------------------------------------------
+ * HSL LIBRARY STRUCTURES
+ *--------------------------------------------------------------------------*/
+#ifndef HSL_LIBRARY_H
+#define HSL_LIBRARY_H
+
+typedef enum MC60_ALGORITHM { SLOAN, RCM } MC60_ALGORITHM;
+
+typedef enum MC60_CONTROL { 
+	AUTOMATIC_PERIPHERAL, ESPECIFIED_PERIPHERAL, GLOBAL_PRIORITY_VECTOR } MC60_CONTROL;
+
+#endif
+
+/*----------------------------------------------------------------------------
  * PRECONDITIONERS STRUCTURES
  *--------------------------------------------------------------------------*/
 #ifndef PRECONDITIONERS_H
