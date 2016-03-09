@@ -582,7 +582,7 @@ void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
 // 	}
 // }
 
-void Leveled_RCM(MAT* mat, int** perm, int root) 
+void Leveled_RCM_v1(MAT* mat, int** perm, int root) 
 {
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads;
 	GRAPH* graph;
@@ -642,6 +642,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			#pragma omp for schedule(static, chunk_size)
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
+// 				printf("Thread %d Processing n_par: %d\n", omp_get_thread_num(), n_par);fflush(stdout);
 				degree    = graph[(*perm)[n_par]].degree;
 				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
 				
@@ -712,6 +713,8 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			#pragma omp for schedule(static, 1)
 			for (th_id = 0; th_id < num_threads; ++th_id)
 			{
+// 				printf("Thread %d Processing th_id: %d\n", omp_get_thread_num(), th_id);fflush(stdout);
+				
 				#pragma omp critical
 				{
 // 					printf("Thread %d setting perm vector\n", omp_get_thread_num());fflush(stdout);
@@ -732,6 +735,9 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			
 			#pragma omp single
 			perm_offset = perm_size - total_size_children;
+			
+// 			#pragma omp single
+// 			printf("-----------------------------\n");fflush(stdout);
 		}
 	}
 		
@@ -743,4 +749,183 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 		printf("%d ", (*perm)[i]);
 	printf("\n");fflush(stdout);*/
 }
+
+
+void Leveled_RCM_v2(MAT* mat, int** perm, int root) 
+{
+	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads;
+	GRAPH* graph;
+	
+	graph_size = mat->n;
+	perm_size  = perm_offset = total_size_children = 0;
+	
+	#pragma omp parallel
+	{
+		int node, n_par, n_ch, degree, child, size_children_per_parent, 
+			size_children, th_id, th_ini, th_degree;
+		int* neighbors;
+		LIST* children;
+		GRAPH* children_per_parent;
+		
+		#pragma omp single nowait
+		num_threads = omp_get_num_threads();
+		
+		#pragma omp single nowait
+		*perm  = calloc(graph_size, sizeof(int));
+		
+		#pragma omp single 
+		graph  = calloc(graph_size, sizeof(GRAPH));
+		
+		#pragma omp for
+		for (node = 0; node < graph_size; ++node)
+		{
+			graph[node].label    = node;
+			graph[node].distance = INFINITY_LEVEL;
+			graph[node].parent   = ORPHAN_NODE;
+			graph[node].status   = UNREACHED;
+			graph[node].degree   = GRAPH_degree(mat, node);
+		}
+		
+		#pragma omp single nowait
+		graph[root].distance = 0;
+		
+		#pragma omp single nowait
+		graph[root].status = LABELED;
+		
+		#pragma omp single nowait
+		(*perm)[0] = root;
+		
+		#pragma omp single nowait
+		perm_size++;
+		
+		#pragma omp barrier
+	
+		while (perm_size < graph_size)
+		{
+			children      = NULL;
+			size_children = 0;
+			
+			#pragma omp single 
+			chunk_size = ceil((float) (perm_size - perm_offset) / num_threads);
+			
+			th_degree = 0;
+			
+			#pragma omp for schedule(static, chunk_size)
+			for (n_par = perm_offset; n_par < perm_size; ++n_par)
+			{
+				
+				for (node = n_par; node < n_par + chunk_size; ++node)
+					th_degree += graph[(*perm)[node]].degree;
+				
+				// I'm working here!
+					
+				printf("Thread %d Processing n_par: %d from [%d, %d] chunk_size %d\n", omp_get_thread_num(), n_par, perm_offset, perm_size, chunk_size);fflush(stdout);
+				degree    = graph[(*perm)[n_par]].degree;
+				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
+				
+				children_per_parent      = calloc(degree, sizeof(GRAPH));
+				size_children_per_parent = 0;
+				
+// 				int i;
+// 				printf("Thread %d Processing node %d with degree %d and children: ", omp_get_thread_num(), (*perm)[n_par], degree);fflush(stdout);
+// 				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
+// 				printf("\n");fflush(stdout);
+				
+				for (n_ch = 0; n_ch < degree; ++n_ch)
+				{
+					if (graph[neighbors[n_ch]].parent == ORPHAN_NODE)
+						graph[neighbors[n_ch]].parent = (*perm)[n_par];
+					
+					if (graph[neighbors[n_ch]].distance > graph[(*perm)[n_par]].distance)
+					{
+						if (graph[neighbors[n_ch]].distance > graph[(*perm)[n_par]].distance + 1)
+						{
+							#pragma omp critical
+							{
+								graph[neighbors[n_ch]].distance = graph[(*perm)[n_par]].distance + 1;
+									
+								if (graph[neighbors[n_ch]].status == UNREACHED)
+								{
+// 									children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
+									children_per_parent[size_children_per_parent++] = graph[neighbors[n_ch]]; 
+									graph[neighbors[n_ch]].status = LABELED;
+								}
+							}
+						}
+						
+						if (graph[(*perm)[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
+						{
+							#pragma omp critical
+							graph[neighbors[n_ch]].parent = (*perm)[n_par];
+						}
+					}
+				}
+				
+				if (size_children_per_parent > 0)
+				{
+					if (size_children_per_parent > 1) {
+// 						printf("Thread %d Sorting position %d to %d\n", omp_get_thread_num(), 0, size_children_per_parent);
+// 						printf("Children vector Before: ");fflush(stdout);
+// 						int i;
+// 						for (i = 0; i < size_children_per_parent; ++i)
+// 							printf("%d ", children_per_parent[i].label);
+// 						printf("\n");fflush(stdout);
+						qsort(children_per_parent, size_children_per_parent, sizeof(GRAPH), COMPARE_degr_ASC);
+// 						printf("Children vector After: ");fflush(stdout);
+// 						for (i = 0; i < size_children_per_parent; ++i)
+// 							printf("%d ", children_per_parent[i].label);
+// 						printf("\n");fflush(stdout);
+					}
+					
+					for (node = 0; node < size_children_per_parent; ++node)
+						children = LIST_insert_IF_NOT_EXIST(children, children_per_parent[node].label);
+				}
+				
+				free(neighbors);
+				free(children_per_parent);
+			}
+			
+			if (children != NULL) size_children = children->size;
+			
+			#pragma omp for schedule(static, 1)
+			for (th_id = 0; th_id < num_threads; ++th_id)
+			{
+// 				printf("Thread %d Processing th_id: %d\n", omp_get_thread_num(), th_id);fflush(stdout);
+				
+				#pragma omp critical
+				{
+// 					printf("Thread %d setting perm vector\n", omp_get_thread_num());fflush(stdout);
+					th_ini     = perm_size;
+					perm_size += size_children;
+					total_size_children += size_children;
+				}
+				
+				while (children != NULL)
+				{
+					child    = LIST_first(children);
+					children = LIST_remove(children, child);
+// 					printf("Thread %d Setting child %d(%d) at position %d\n", omp_get_thread_num(), child, GRAPH_degree(mat, child), th_ini);fflush(stdout);
+					(*perm)[th_ini++] = child;
+				}
+				
+			}
+			
+			#pragma omp single
+			perm_offset = perm_size - total_size_children;
+			
+			#pragma omp single
+			printf("-----------------------------\n");fflush(stdout);
+		}
+	}
+		
+	free(graph);
+/*		
+	printf("Permutation vector: ");fflush(stdout);
+	int i;
+	for (i = 0; i < perm_size; ++i)
+		printf("%d ", (*perm)[i]);
+	printf("\n");fflush(stdout);*/
+}
+
+
 
