@@ -28,6 +28,7 @@ typedef struct
 	int distance;
 	int parent;
 	int status;
+	int chnum;
 } GRAPH;
 
 #endif /* GRAPH_H */
