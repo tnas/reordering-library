@@ -639,12 +639,6 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			#pragma omp single 
 			chunk_size = ceil((float) (perm_size - perm_offset) / num_threads);
 			
-// 			#pragma omp single
-// 			{
-// 				printf("chunk_size: %d\n", chunk_size);fflush(stdout);
-// 				printf("offset, permsize: [%d, %d]\n", perm_offset, perm_size);fflush(stdout);
-// 			}
-			
 			#pragma omp for schedule(static, chunk_size)
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
@@ -654,10 +648,10 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 				children_per_parent      = calloc(degree, sizeof(GRAPH));
 				size_children_per_parent = 0;
 				
-				int i;
-				printf("Thread %d Processing node %d with degree %d and children: ", omp_get_thread_num(), (*perm)[n_par], degree);fflush(stdout);
-				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
-				printf("\n");fflush(stdout);
+// 				int i;
+// 				printf("Thread %d Processing node %d with degree %d and children: ", omp_get_thread_num(), (*perm)[n_par], degree);fflush(stdout);
+// 				for (i = 0; i< degree; i++) printf("%d ", neighbors[i]); fflush(stdout);
+// 				printf("\n");fflush(stdout);
 				
 				for (n_ch = 0; n_ch < degree; ++n_ch)
 				{
@@ -692,8 +686,17 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 				if (size_children_per_parent > 0)
 				{
 					if (size_children_per_parent > 1) {
-						printf("Thread %d Sorting position %d to %d\n", omp_get_thread_num(), 0, size_children_per_parent);
+// 						printf("Thread %d Sorting position %d to %d\n", omp_get_thread_num(), 0, size_children_per_parent);
+// 						printf("Children vector Before: ");fflush(stdout);
+// 						int i;
+// 						for (i = 0; i < size_children_per_parent; ++i)
+// 							printf("%d ", children_per_parent[i].label);
+// 						printf("\n");fflush(stdout);
 						qsort(children_per_parent, size_children_per_parent, sizeof(GRAPH), COMPARE_degr_ASC);
+// 						printf("Children vector After: ");fflush(stdout);
+// 						for (i = 0; i < size_children_per_parent; ++i)
+// 							printf("%d ", children_per_parent[i].label);
+// 						printf("\n");fflush(stdout);
 					}
 					
 					for (node = 0; node < size_children_per_parent; ++node)
@@ -711,49 +714,21 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			{
 				#pragma omp critical
 				{
+// 					printf("Thread %d setting perm vector\n", omp_get_thread_num());fflush(stdout);
 					th_ini     = perm_size;
 					perm_size += size_children;
+					total_size_children += size_children;
 				}
 				
 				while (children != NULL)
 				{
 					child    = LIST_first(children);
 					children = LIST_remove(children, child);
-					printf("Setting child %d(%d) at position %d\n", child, GRAPH_degree(mat, child), th_ini);fflush(stdout);
+// 					printf("Thread %d Setting child %d(%d) at position %d\n", omp_get_thread_num(), child, GRAPH_degree(mat, child), th_ini);fflush(stdout);
 					(*perm)[th_ini++] = child;
 				}
 				
 			}
-			
-// 			#pragma omp single
-// 			{
-// 				printf("Permutation vector Before Sorting: ");fflush(stdout);
-// 				int i;
-// 				for (i = 0; i < perm_size; ++i)
-// 					printf("%d ", (*perm)[i]);
-// 				printf("\n");fflush(stdout);
-// 			}
-			
-// 			if (size_children > 1) 
-// 			{
-// 				printf("Thread %d Sorting position %d to %d\n", omp_get_thread_num(), th_ini-size_children, th_ini);
-// 				qsort(&((*perm)[th_ini-size_children]), size_children, sizeof(int), COMPARE_int_ASC);
-// 			}
-			
-// 			#pragma omp single
-// 			{
-// 				printf("Permutation vector After Sorting: ");fflush(stdout);
-// 				int i;
-// 				for (i = 0; i < perm_size; ++i)
-// 					printf("%d ", (*perm)[i]);
-// 				printf("\n");fflush(stdout);
-// 			}
-			
-			
-			#pragma omp critical
-			total_size_children += size_children;
-			
-			#pragma omp barrier
 			
 			#pragma omp single
 			perm_offset = perm_size - total_size_children;
@@ -761,11 +736,11 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 	}
 		
 	free(graph);
-		
+/*		
 	printf("Permutation vector: ");fflush(stdout);
 	int i;
 	for (i = 0; i < perm_size; ++i)
 		printf("%d ", (*perm)[i]);
-	printf("\n");fflush(stdout);
+	printf("\n");fflush(stdout);*/
 }
 
