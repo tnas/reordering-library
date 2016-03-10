@@ -378,7 +378,7 @@ void MATRIX_permutation (MAT* A, int* p)
 			a[k].arr1 = B->AA[j];
 			a[k].arr2 = q[B->JA[j]];
 			a[k].arr3 = i;
-				k = k + 1;
+			k = k + 1;
 		}
 		A->IA[i+1] = k;    
 	}

@@ -5,7 +5,9 @@
 #include "../CommonFiles/protos_parallel.h"
 
 void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int* pair, int* info, int* iw, double* w);
+void mc60dd_(int* n, int* nsup, int* svar, int* vars, int* permsv, int* perm, int* possv);
 
+//MC60DD(N,NSUP,SVAR,VARS,PERMSV,PERM,POSSV)
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm
  *--------------------------------------------------------------------------*/
@@ -26,6 +28,13 @@ void REORDERING_RCM_opt (MAT* A, int** Fp, int s)
 	(*Fp) = p;
 	
 	free(q);
+	
+	printf("Permutation Vector: ");
+	for (i = 0; i < n; i++)
+	{
+		printf("%d ", (*Fp)[i]);
+	}
+	printf("\n");fflush(stdout);
 }
 
 /*----------------------------------------------------------------------------
@@ -129,37 +138,83 @@ void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 	int lirn     = A->nz;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
-	int *vars;
-	int jcntl[2] = { RCM, ESPECIFIED_PERIPHERAL};
-	int* permsv  = NULL;
-	double* weight = NULL;
-	int pair[2]  = { root };
+	int vars[n];
+	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL};
+	int* permsv;
+	double weight[2];
+	int pair[2]  = { 1, root+1 };
 	int info[4];
 	int iw[3*nsup + 1];
 	double w[nsup];
 	
-	/* -------------------------------------------------------------------- */    
-	/* Setting VARS vector with supervaribles of one variable               */
-	/* -------------------------------------------------------------------- */
-	vars = calloc(n, sizeof(int));
+	int svar[n];
+	int* perm;
+	int possv[nsup];
 	
+	/* -------------------------------------------------------------------- */    
+	/* Initializing vectors variable                                        */
+	/* -------------------------------------------------------------------- */
 	for (i = 0; i < n; ++i)  
-		vars[i] = 1;
-
+	{
+		vars[i]  = 1;
+		possv[i] = 0;
+		svar[i]  = i + 1;
+	}
+	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
 	/* -------------------------------------------------------------------- */
 	for (i = 0; i < lirn; i++) 
 		irn[i] += 1;
 	
+	permsv = calloc(nsup, sizeof(int));
+	
 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
 	/* -------------------------------------------------------------------- */
-	for (i = 0; i < lirn; i++) {
+	for (i = 0; i < lirn; i++) 
 		irn[i] -= 1;
+	
+	perm = calloc(n, sizeof(int));
+	
+// 	mc60dd_(&n, &nsup, svar, vars, permsv, perm, possv);
+
+
+	printf("JCNTL Vector: JCNTL(1) = %d, JCNTL(2) = %d\n", jcntl[0], jcntl[1]);fflush(stdout);
+	
+	printf("PERMSV Vector: ");
+	for (i = 0; i < n; i++)
+	{
+		printf("%d ", permsv[i]);
 	}
+	printf("\n");fflush(stdout);
+	
+	
+	printf("Permutation Vector: ");
+	for (i = 0; i < n; i++)
+	{
+		perm[permsv[i]-1] = i;
+// 		perm[i] = permsv[i] - 1;
+	}
+	for (i = 0; i < n; i++)
+	{
+		printf("%d ", perm[i]);
+	}
+	printf("\n");fflush(stdout);
+	
+	
+
+	*Fp = perm;
+	
+// 	printf("Permutation Super Vector: ");
+// 	for (i = 0; i < nsup; i++)
+// 	{
+// 		printf("%d ", (*Fp)[i]);
+// 	}
+// 	printf("\n");fflush(stdout);
+	
 }
 
 
