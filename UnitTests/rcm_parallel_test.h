@@ -17,5 +17,6 @@ test_result run_test_unordered_rcm(const char* path_matrix_file, const int num_t
 test_result run_test_leveled_rcm(const char* path_matrix_file, const int num_threads, int root);
 test_result run_test_leveled_rcm_v1(const char* path_matrix_file, const int num_threads, int root);
 test_result run_test_leveled_rcm_v2(const char* path_matrix_file, const int num_threads, int root);
+test_result run_test_hsl_rcm(const char* path_matrix_file, const int num_threads, int root);
 extern void run_test_serial_parallel_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size);
 extern void run_all_tests();

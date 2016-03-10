@@ -237,6 +237,53 @@ test_result run_test_leveled_rcm_v2(const char* path_matrix_file, const int num_
 }
 
 
+test_result run_test_hsl_rcm(const char* path_matrix_file, const int num_threads, int root)
+{
+	long int bandwidth, envelope, bandwidth_after, envelope_after;
+	int* permutation;
+	double time;
+	MAT* matrix;
+	FILE* matrix_file;
+	test_result result;
+	
+	permutation = NULL;
+	
+	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
+		exit(1);
+	
+	matrix = (MAT*) malloc (sizeof(MAT));
+	MATRIX_readCSR (matrix, matrix_file);
+	fclose(matrix_file);
+	
+	write_output_before(matrix);
+	
+	bandwidth_after = MATRIX_bandwidth(matrix);
+	envelope_after  = MATRIX_envelope(matrix);
+	
+	omp_set_num_threads(num_threads);
+	
+	time = get_time(); 
+	REORDERING_RCM_HSL(matrix, &permutation, root);
+	time = (get_time() - time)/100.0;
+	result.time = time;
+	
+	MATRIX_permutation(matrix, permutation);
+	
+	bandwidth = MATRIX_bandwidth(matrix);
+	envelope  = MATRIX_envelope(matrix);	
+	result.bandwidth = bandwidth;
+	
+	write_output_after(matrix);
+	
+	free(permutation);
+	MATRIX_clean(matrix);
+	
+	printf("HSL RCM: Band/Env [ %ld / %ld => %ld / %ld ] Time [ %.6f ]\n",
+		bandwidth_after, envelope_after, bandwidth, envelope, time); fflush(stdout);
+	
+	return result;
+}
+
 
 test_result run_test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size, int root)
 {

@@ -4,7 +4,7 @@
 // #include "../CommonFiles/protos.h"
 #include "../CommonFiles/protos_parallel.h"
 
-void mc60cd(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int* pair, int* info, int* iw, double* w);
+void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int* pair, int* info, int* iw, double* w);
 
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm
@@ -120,8 +120,6 @@ void REORDERING_RCM (MAT* A, int** Fp)
 
 /*----------------------------------------------------------------------------
  * HSL_MC60 RCM Reordering
- * 
- * void mc60cd(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int* pair, int* info, int* iw, double* w);
  *--------------------------------------------------------------------------*/
 void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 {
@@ -154,7 +152,14 @@ void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 	for (i = 0; i < lirn; i++) 
 		irn[i] += 1;
 	
-	mc60cd(&n, &nsup, &lirn, irn, &icptr, vars, jcntl, &permsv, weight, pair, &info, &iw, &w);
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
+	
+	/* -------------------------------------------------------------------- */    
+	/* Convert matrix back to 0-based C-notation.                           */
+	/* -------------------------------------------------------------------- */
+	for (i = 0; i < lirn; i++) {
+		irn[i] -= 1;
+	}
 }
 
 
