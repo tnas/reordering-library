@@ -4,6 +4,7 @@
 // #include "../CommonFiles/protos.h"
 #include "../CommonFiles/protos_parallel.h"
 
+void mc60ad_(int* n, int* lirn, int* irn, int* icptr, int* icntl, int* iw, int* info);
 void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int* pair, int* info, int* iw, double* w);
 void mc60dd_(int* n, int* nsup, int* svar, int* vars, int* permsv, int* perm, int* possv);
 
@@ -135,14 +136,14 @@ void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 	int i;
 	int n        = A->n; 
 	int nsup     = n;
-	int lirn     = A->nz;
+	int lirn     = 20;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
 	int vars[n];
-	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL};
+	int jcntl[2] = { SLOAN, AUTOMATIC_PERIPHERAL};
 	int* permsv;
-	double weight[2];
-	int pair[2]  = { 1, root+1 };
+	double weight[2] = { 2.0, 1.0 };
+	int pair[2]  = { root+1, root+1 };
 	int info[4];
 	int iw[3*nsup + 1];
 	double w[nsup];
@@ -150,6 +151,8 @@ void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 	int svar[n];
 	int* perm;
 	int possv[nsup];
+	
+	// perm vector: 3 5 4 1 2
 	
 	/* -------------------------------------------------------------------- */    
 	/* Initializing vectors variable                                        */
@@ -169,6 +172,10 @@ void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 	
 	permsv = calloc(nsup, sizeof(int));
 	
+	int icntl[2] = {0, 6};
+	
+// 	mc60ad_(&n, &lirn, irn, icptr, icntl, iw, info);
+	
 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
 	
 	/* -------------------------------------------------------------------- */    
@@ -176,8 +183,6 @@ void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 	/* -------------------------------------------------------------------- */
 	for (i = 0; i < lirn; i++) 
 		irn[i] -= 1;
-	
-	perm = calloc(n, sizeof(int));
 	
 // 	mc60dd_(&n, &nsup, svar, vars, permsv, perm, possv);
 
@@ -191,29 +196,8 @@ void REORDERING_RCM_HSL (MAT* A, int** Fp, int root)
 	}
 	printf("\n");fflush(stdout);
 	
-	
-	printf("Permutation Vector: ");
-	for (i = 0; i < n; i++)
-	{
-		perm[permsv[i]-1] = i;
-// 		perm[i] = permsv[i] - 1;
-	}
-	for (i = 0; i < n; i++)
-	{
-		printf("%d ", perm[i]);
-	}
-	printf("\n");fflush(stdout);
-	
-	
 
-	*Fp = perm;
-	
-// 	printf("Permutation Super Vector: ");
-// 	for (i = 0; i < nsup; i++)
-// 	{
-// 		printf("%d ", (*Fp)[i]);
-// 	}
-// 	printf("\n");fflush(stdout);
+	*Fp = permsv;
 	
 }
 
