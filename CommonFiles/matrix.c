@@ -83,18 +83,19 @@ int COMPARE_array (const void * a, const void * b)
  *--------------------------------------------------------------------------*/
 void MATRIX_readCSR (MAT* A, FILE* f)
 {
-	int M, N, nz, new_nz;
+	int M, N, nz;
 	int i, j, k, I, J, elem = 0;
 	double VAL;
-	char line[1025], header[1025],test[1025];
-	char *head0, *head1, *rep, *field, *symm;
+	char line[1025], header[1025];
+	char *symm;
 	ARRAY* a;
 	
-	fgets(header,200,f);
-	head0 = strtok(header," \n");
-	head1 = strtok(NULL," \n");
-	rep   = strtok(NULL," \n");
-	field = strtok(NULL," \n");
+	fgets(header,200,f);	
+	strtok(header," \n");
+	strtok(NULL," \n");
+	strtok(NULL," \n");
+	strtok(NULL," \n");
+	
 	symm  = strtok(NULL," \n");
 	
 	if ((strcmp(symm,"symmetric") != 0 && strcmp(symm,"general") != 0))
