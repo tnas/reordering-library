@@ -5,12 +5,13 @@
 !
 ! History: See ChangeLog
 !
-   module hsl_mc73_single
-       use hsl_mc65_single
-       use hsl_zd11_single
+
+   module hsl_mc73_double
+       use hsl_mc65_double
+       use hsl_zd11_double
 
 ! This module is for computing the
-! spectral ordering of a matrix A with a symmetric sparsity pattern.
+! spectral ordering a matrix A with a symmetric sparsity pattern.
 ! A multilevel algorithm is used. An approx. Fiedler vector of the
 ! (weighted) Laplacian associated with A is computed.
 ! The Fiedler vector is found by finding
@@ -21,7 +22,7 @@
       public mc73_fiedler,mc73_order
       public mc73_print_message,mc73_initialize,mc73_control
 
-      integer, parameter :: wpr = kind(0.0)
+      integer, parameter :: wpr = kind(0.0d0)
 
 ! Error/warning parameters
 ! memory alloc failure
@@ -178,7 +179,7 @@
           control%max_reduction = 0.8_wpr
       end subroutine mc73_initialize
 ! *****************************************************************
-      subroutine mc73_fiedler(n,lirn,irn,ip,list,fvector,control,info,a)
+      subroutine mc73_fiedler(n,lirn,irn,ip,list,fvector,info,a) BIND(C, NAME='mc73_fiedler')
 
       real (kind = wpr), parameter :: zero = 0.0_wpr
 ! the matrix
@@ -190,7 +191,7 @@
       integer,  intent (in) :: n
       integer,  intent (in) :: lirn
       integer,  intent (in) :: irn(lirn)
-      integer,  intent (in) :: ip(n+1)
+      integer,  intent (inout) :: ip(n+1)
 ! added following optional arguement.
 ! If present must hold matrix weights (otherwise, standard
 ! Laplacian used)
@@ -198,7 +199,7 @@
 
 ! information flag and control arrays
       integer, intent (out) :: info(1:10)
-      type(mc73_control),intent(in) :: control
+      !type(mc73_control),intent(in) :: control
 
 ! On exit, the number of the component within the
 ! adjacency graph of A that variable i belongs to is list(i)
@@ -221,21 +222,21 @@
       integer :: err,wrn,mp,print_level
       logical :: lerr,lwrn
 
-      icntl(1) = control%lp
-      icntl(2) = control%wp
-      icntl(3) = control%mp
-      icntl(4) = control%print_level
-      icntl(5) = max(1,control%mglevel)
-      icntl(6) = control%coarsest_size
-      icntl(7) = control%maxit
-      icntl(8) = control%mlancz
+      icntl(1) = 6!control%lp
+      icntl(2) = 6!control%wp
+      icntl(3) = 6!control%mp
+      icntl(4) = 0!control%print_level
+      icntl(5) = max(1,10)!max(1,control%mglevel)
+      icntl(6) = 200!control%coarsest_size
+      icntl(7) = 10!control%maxit
+      icntl(8) = 300!control%mlancz
 
-      cntl(1) = control%tol
-      cntl(2) = max(0.1_wpr,control%min_reduction)
-      cntl(3) = control%max_reduction
+      cntl(1) = 0.001_wpr!control%tol
+      cntl(2) = max(0.1_wpr,0.1_wpr)!max(0.1_wpr,control%min_reduction)
+      cntl(3) = 0.8_wpr!control%max_reduction
       if (cntl(2) > cntl(3)) cntl(2) = 0.1_wpr
-      cntl(4) = control%tol1
-      cntl(5) = min(control%rtol*0.001_wpr,10.0_wpr*control%tol)
+      cntl(4) = 0.001_wpr!control%tol1
+      cntl(5) = min(0.01_wpr*0.001_wpr,10.0_wpr*0.001_wpr)!min(control%rtol*0.001_wpr,10.0_wpr*control%tol)
 
       if (icntl(4) < 0) print_level = 0
 ! The default is icntl(4) = 0
@@ -250,7 +251,12 @@
 ! Set warning controls
       lwrn = icntl(2).ge.0 .and. print_level.gt.0
       wrn = icntl(2)
-
+      
+! alteracao do vetor ip
+      do i=1,n+1
+        ip(i) = ip(i) + 1
+      end do
+      
       info(1:10) = 0
 ! initial printing
       if (print_level >= 2) then
@@ -305,7 +311,7 @@
          if (lerr) call print_message(info(1),err,' MC73_FIEDLER')
          return
       end if
-
+   
      do i = 1,n
         if (ip(i) > ip(i+1)) then
            ierr = -3
@@ -317,11 +323,6 @@
       if (present(a)) then
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
                                    val=a,checking=1)
-! check for error return
-        if (ierr < 0) then
-           if (ierr == -12) ierr = -3
-           go to 998
-        end if
 ! Ensure we have positive weights
         do i = 1,ip(n+1)-1
            matrix%val(i) = abs(matrix%val(i))
@@ -329,13 +330,13 @@
       else
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
                                    type='general',checking=1)
-! check for error return
-        if (ierr < 0) then
-           if (ierr == -12) ierr = -3
-           go to 998
-        end if
       end if
-! check for warning
+
+! check for error return
+      if (ierr < 0) then
+         if (ierr == -12) ierr = -3
+         go to 998
+      end if
       if (ierr == 1) then
          info(1) = MC73_WARN_RANGE_IRN
          if (lwrn) call print_message(info(1),wrn,' MC73_FIEDLER')
@@ -348,15 +349,13 @@
 ! (if a not present, graph of matrix A+A^T is returned)
       if (present(a)) then
          call mc65_matrix_symmetrize(matrix,ierr)
-         if (ierr /= 0 ) go to 998
          call mc65_matrix_remove_diagonal(matrix)
          llap = .true.
       else
          call mc65_matrix_symmetrize(matrix,ierr,graph=.true.)
-         if (ierr /= 0 ) go to 998
          llap = .false.
       end if
-
+      if (ierr /= 0 ) go to 998
 ! Ordering depends how graph is coarsened. we can get consistent
 ! results by preordering (sorting)
 !      call mc65_matrix_sort(matrix,ierr)
@@ -384,10 +383,15 @@
       call mc65_matrix_destruct(matrix,ierr)
 ! do not test error message since matrix may not have been allocated
       return
-
+      
 999   if (print_level >= 2 .and. info(1) >= 0)   &
          write (mp,fmt='(/a,i3,4i8)') ' On exit INFO(1:2) = ',info(1:2)
-      call mc65_matrix_destruct(matrix,ierr)
+! alteracao do vetor ip
+      do i=1,n+1
+        ip(i) = ip(i) - 1
+      end do
+      
+      call mc65_matrix_destruct(matrix,ierr)      
       return
 
       end subroutine mc73_fiedler
@@ -441,7 +445,7 @@
       integer :: err,wrn,mp,print_level
       logical :: lerr,lwrn
 
-      external mc60c,mc60f,mc61i,mc61a,mc67i,mc67a
+      external mc60cd,mc60fd,mc61id,mc61ad,mc67id,mc67ad
 
       icntl(1) = control%lp
       icntl(2) = control%wp
@@ -560,11 +564,6 @@
       if (present(a) .and. job /= 1) then
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
                                    val=a,checking=1)
-! check for error return
-        if (ierr < 0) then
-           if (ierr == -12) ierr = -3
-           go to 998
-        end if
 ! Ensure we have positive weights
         do i = 1,ip(n+1)-1
            matrix%val(i) = abs(matrix%val(i))
@@ -572,13 +571,12 @@
       else
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
                                    type='general',checking=1)
-! check for error return
-        if (ierr < 0) then
-           if (ierr == -12) ierr = -3
-           go to 998
-        end if
       end if
-! check for warnings
+! check for error return
+      if (ierr < 0) then
+         if (ierr == -12) ierr = -3
+         go to 998
+      end if
       if (ierr == 1) then
          info(1) = MC73_WARN_RANGE_IRN
          if (lwrn) call print_message(info(1),wrn,' MC73_ORDER')
@@ -590,15 +588,13 @@
 ! make the matrix symmetric and remove diagonal
       if (present(a) .and. job /= 1) then
          call mc65_matrix_symmetrize(matrix,ierr)
-         if (ierr /= 0 ) go to 998
          call mc65_matrix_remove_diagonal(matrix)
          llap = .true.
       else
          call mc65_matrix_symmetrize(matrix,ierr,graph=.true.)
-         if (ierr /= 0 ) go to 998
          llap = .false.
       end if
-
+      if (ierr /= 0 ) go to 998
 ! Ordering depends how graph is coarsened. we can get consistent
 ! results by preordering (sorting)
 !      call mc65_matrix_sort(matrix,ierr)
@@ -608,7 +604,7 @@
      if (job == 1 .and. icntl(5) == 1) then
 ! Single level ==> multilevel reduces to Sloan algorithm
 ! Call MC61 and return
-        call mc61i(icntl61,cntl61)
+        call mc61id(icntl61,cntl61)
 ! Switch off printing
         icntl61(1) = -1
         icntl61(2) = -1
@@ -624,7 +620,7 @@
            go to 998
         end if
         nz = matrix%ptr(n+1) - 1
-        call mc61a(1,n,nz,matrix%col,matrix%ptr,perm,liw,iw,w,&
+        call mc61ad(1,n,nz,matrix%col,matrix%ptr,perm,liw,iw,w,&
                     icntl61,cntl61,info61,rinfo61)
         info(2:5) = info61(4:7)
         rinfo(1:8) = rinfo61(1:8)
@@ -632,7 +628,7 @@
 ! Optionally call Hager to refine order
         if (hager > 0) then
           liw = size(iw)
-          call mc67i(icntl67)
+          call mc67id(icntl67)
           icntl67(1) = -1
           icntl67(2) = -1
           icntl67(3) = 0
@@ -640,12 +636,12 @@
 ! down/up exchanges
           icntl67(5) = 0
           icntl67(6) = 0
-          call mc67a(n,nz,matrix%col,matrix%ptr,perm,  &
+          call mc67ad(n,nz,matrix%col,matrix%ptr,perm,  &
                       liw,iw,icntl67,info67,rinfo67)
           if (rinfo67(1) > zero) then
 ! mc67 has reduced profile
              iw(1:n) = 1
-             call mc60f(n,n,nz,matrix%col,matrix%ptr,iw,perm,   &
+             call mc60fd(n,n,nz,matrix%col,matrix%ptr,iw,perm,   &
                          iw(n+1),rinfo(5))
           end if
         end if
@@ -693,7 +689,7 @@
             iw(n+i) = i
          end do
          nz = matrix%ptr(n+1)-1
-         call mc60f(n,n,nz,matrix%col,matrix%ptr,  &
+         call mc60fd(n,n,nz,matrix%col,matrix%ptr,  &
                      iw(1),iw(n+1),iw(2*n+1),rinfo)
          if (print_level >= 2) then
            write (mp,fmt='(/a)')  ' Original ordering:'
@@ -703,20 +699,20 @@
 ! Optionally call Hager to refine order (default setting used)
          if (hager > 0) then
            liw = size(iw)
-           call mc67i(icntl67)
+           call mc67id(icntl67)
            icntl67(1) = -1
            icntl67(2) = -1
            icntl67(3) = 0
            icntl67(4) = hager
            icntl67(5) = 0
            icntl67(6) = 0
-           call mc67a(n,nz,matrix%col,matrix%ptr,perm,liw,iw,   &
+           call mc67ad(n,nz,matrix%col,matrix%ptr,perm,liw,iw,   &
                        icntl67,info67,rinfo67)
          end if
 
 ! statistics for final ordering
          iw(1:n) = 1
-         call mc60f(n,n,nz,matrix%col,matrix%ptr,iw(1),perm,   &
+         call mc60fd(n,n,nz,matrix%col,matrix%ptr,iw(1),perm,   &
                      iw(n+1),rinfo(5))
          if (print_level >= 2) then
            if (hager == 0) write (mp,fmt='(/a)')  ' Multilevel ordering:'
@@ -772,14 +768,14 @@
             iw(n+i) = i
          end do
          nz = matrix%ptr(n+1)-1
-         call mc60f(n,n,nz,matrix%col,matrix%ptr,   &
+         call mc60fd(n,n,nz,matrix%col,matrix%ptr,   &
                      iw(1),iw(n+1),iw(2*n+1),rinfo)
          if (print_level >= 2) then
            write (mp,fmt='(/a)')  ' Original ordering:'
            call write_rinfo(n,mp,rinfo)
          end if
 ! statistics for spectral ordering
-         call mc60f(n,n,nz,matrix%col,matrix%ptr,   &
+         call mc60fd(n,n,nz,matrix%col,matrix%ptr,   &
                      iw(1),perm,iw(n+1),rinfo(5))
 
 ! if asked for by user, compute hybrid ordering
@@ -810,16 +806,16 @@
             weight(2) = 2.0_wpr
             iw(temp_perm:temp_perm+n-1) = perm(1:n)
             iw(temp_perm1:temp_perm1+n-1) = perm(1:n)
-            call mc60c(n,n,nz,matrix%col,matrix%ptr,iw(1),jcntl, &
+            call mc60cd(n,n,nz,matrix%col,matrix%ptr,iw(1),jcntl, &
                         iw(temp_perm),weight,iw(pair),info60,iw(n+1),w)
-            call mc60f(n,n,nz,matrix%col,matrix%ptr,   &
+            call mc60fd(n,n,nz,matrix%col,matrix%ptr,   &
                         iw(1),iw(temp_perm),iw(n+1),rtemp)
 
             weight(1) = 16.0_wpr
             weight(2) = 1.0_wpr
-            call mc60c(n,n,nz,matrix%col,matrix%ptr,iw(1),jcntl, &
+            call mc60cd(n,n,nz,matrix%col,matrix%ptr,iw(1),jcntl, &
                         iw(temp_perm1),weight,iw(pair),info60,iw(n+1),w)
-            call mc60f(n,n,nz,matrix%col,matrix%ptr,iw(1), &
+            call mc60fd(n,n,nz,matrix%col,matrix%ptr,iw(1), &
                         iw(temp_perm1),iw(n+1),rtemp1)
 ! If this is better than first set of weights, keep this ordering
             if (rtemp1(1) < rtemp(1)) then
@@ -846,21 +842,21 @@
 ! Optionally call Hager to refine order (default setting used)
          if (hager > 0) then
            liw = size(iw)
-           call mc67i(icntl67)
+           call mc67id(icntl67)
            icntl67(1) = -1
            icntl67(2) = -1
            icntl67(3) = 0
            icntl67(4) = hager
            icntl67(5) = 0
            icntl67(6) = 0
-           call mc67a(n,nz,matrix%col,matrix%ptr,   &
+           call mc67ad(n,nz,matrix%col,matrix%ptr,   &
                        perm,liw,iw,icntl67,info67,rinfo67)
 
            if (rinfo67(1) > zero) then
 ! mc67 has reduced profile
 ! Compute statistics for final ordering
              iw(1:n) = 1
-             call mc60f(n,n,nz,matrix%col,matrix%ptr,  &
+             call mc60fd(n,n,nz,matrix%col,matrix%ptr,  &
                          iw(1),perm,iw(n+1),rinfo(5))
            end if
          end if
@@ -1966,7 +1962,7 @@
 ! stat parameter
       integer st
 
-      external mc60c,mc60f
+      external mc60cd,mc60fd
 
       ierr = 0
       nsup = matrix%n
@@ -1996,9 +1992,9 @@
          jcntl(2) = 0
       end if
 
-      call mc60c(n,nsup,lirn,matrix%col,matrix%ptr,vars,jcntl,&
+      call mc60cd(n,nsup,lirn,matrix%col,matrix%ptr,vars,jcntl,&
                   permsv,weight,pair,info,iw,w)
-      call mc60f(n,nsup,lirn,matrix%col,matrix%ptr,vars,permsv,iw,rinfo)
+      call mc60fd(n,nsup,lirn,matrix%col,matrix%ptr,vars,permsv,iw,rinfo)
 
 !      write (*,'('prof = ',g16.8,' maxw = ',&
 !           &g16.8,' sband = ',g16.8,' rms = ',g16.8)') rinfo(1:4)
@@ -2007,9 +2003,9 @@
       weight(1) = 16.0_wpr
       weight(2) = 1.0_wpr
 
-      call mc60c(n,nsup,lirn,matrix%col,matrix%ptr,vars,jcntl,&
+      call mc60cd(n,nsup,lirn,matrix%col,matrix%ptr,vars,jcntl,&
                   temp,weight,pair,info,iw,w)
-      call mc60f(n,nsup,lirn,matrix%col,matrix%ptr,vars,temp,iw,rinfo_temp)
+      call mc60fd(n,nsup,lirn,matrix%col,matrix%ptr,vars,temp,iw,rinfo_temp)
 
       if (rinfo_temp(1) < rinfo(1)) then
 ! selecting ordering on basis of profile
@@ -2129,9 +2125,9 @@
 ! for verification only
 !      real (kind = wpr) :: lambda
 !      real (kind = wpr), dimension (n) :: y
-!      real (kind = wpr) :: snrm2
+!      real (kind = wpr) :: dnrm2
 
-      external kb07a
+      external kb07ad
 
       if (icntl(4) < 0) print_level = 0
 ! The default is icntl(4) = 0
@@ -2296,13 +2292,13 @@
 !    lambda = grid%lambda
 !    call lxv(fvector,y,grid%graph,llap)
 !    write (*,*) 'lambda  = ',lambda
-!    write (*,*) 'residual  = ',snrm2(n,(fvector*lambda+y),1)/snrm2(n,y,1)
+!    write (*,*) 'residual  = ',dnrm2(n,(fvector*lambda+y),1)/dnrm2(n,y,1)
 
               if (lspec) then
                  do ii = 1,n
                     perm(ii) = ii
                  end do
-                 call kb07a(fvector,n,perm)
+                 call kb07ad(fvector,n,perm)
 
 ! need inverse
 ! so that new index number for node j is in perm(j)
@@ -2335,7 +2331,7 @@
                  do ii = 1,comp_nvtx
                     comp_perm(ii) = ii
                  end do
-                 call kb07a(grid%eigvector,comp_nvtx,comp_perm)
+                 call kb07ad(grid%eigvector,comp_nvtx,comp_perm)
 
 ! Take inverse
                 iw(1:comp_nvtx) = comp_perm(1:comp_nvtx)
@@ -2787,7 +2783,7 @@
       integer :: maxind
 
 ! order of which vertex is visited for matching
-!      integer, allocatable, dimension (:) :: order ! this is not used.
+      integer, allocatable, dimension (:) :: order
       integer, allocatable, dimension (:) :: nrow
 
       integer :: nz
@@ -2816,14 +2812,14 @@
       match = unmatched
 
 ! randomly permute the vertex order
-   !   allocate (order(nvtx),stat=st)
-   !   if (st /= 0) then
-   !      ierr = MC73_ERR_MEMORY_ALLOC
-   !      return
-   !   end if
-   !   do i = 1,nvtx
-   !      order(i) = i ! we do not use random permutation
-   !   end do
+      allocate (order(nvtx),stat=st)
+      if (st /= 0) then
+         ierr = MC73_ERR_MEMORY_ALLOC
+         return
+      end if
+      do i = 1,nvtx
+         order(i) = i
+      end do
 
       allocate (nrow(grid%size),stat=st)
       if (st /= 0) then
@@ -2836,8 +2832,7 @@
       nz = 0
       nrow = 0
       do i = 1, nvtx
-    !   v = order(i)
-        v = i
+        v = order(i)
 ! If already matched, next vertex please
         if (match(v) /= unmatched) cycle
 ! access the col. indices of row v
@@ -2878,10 +2873,6 @@
 ! storage allocation for col. indices and values of prolongation
 ! matrix P (order nvtx * cnvtx)
       call mc65_matrix_construct(p,nvtx,nz,info,n=cnvtx,type = 'general')
-      if (info < 0) then
-         ierr = info
-         return
-      end if
       p%val = 0.0_wpr
 
 ! Set column pointers for P
@@ -2898,8 +2889,7 @@
 ! loop over each vertex and match along the heaviest edge
       cnvtx = 0
       do i = 1,nvtx
-    !   v = order(i)
-        v = i
+        v = order(i)
 ! if already matched, next vertex please
         if (match(v) /= unmatched) cycle
         call mc65_matrix_getrow(graph,v,the_row)
@@ -2945,8 +2935,7 @@
          return
       end if
 
-!      deallocate(order,nrow,stat=st)
-      deallocate(nrow,stat=st)
+      deallocate(order,nrow,stat=st)
       if (st /= 0) then
          ierr = MC73_ERR_MEMORY_DEALLOC
          return
@@ -3155,7 +3144,7 @@
 
 ! eigenvalue
       real (kind = wpr) :: theta,rho,tol1,vnorm
-      real (kind = wpr) :: snrm2
+      real (kind = wpr) :: dnrm2
 
 ! machine precision and termination tolerance of
 ! symmlq and residual norm
@@ -3172,12 +3161,12 @@
       v = v - w1
 
 ! v=x/||x||
-      vnorm = snrm2(n,v,1)
+      vnorm = dnrm2(n,v,1)
       v = v / vnorm
 
 ! Compute L*eigenvector ie v1 = L*v
       call lxv(v,v1,graph,llap)
-      vnorm = snrm2(n,v1,1)
+      vnorm = dnrm2(n,v1,1)
 
 ! theta = (v^T)*L*v
       theta = dot_product(v1,v)
@@ -3231,7 +3220,7 @@
 ! v = x/||x||
 ! In the unlikely event that v = 0 so that vnorm = 0, we will have to
 ! return with v unchanged
-      vnorm = snrm2(n,v,1)
+      vnorm = dnrm2(n,v,1)
       if (vnorm == zero) then
          v = v1
          return
@@ -3473,12 +3462,12 @@
 ! Subroutines and functions
 !
 ! USER       lxv
-! BLAS       saxpy, scopy, sdot , snrm2
+! BLAS       daxpy, dcopy, ddot , dnrm2
 !
 
 ! Functions and local variables
 
-      real (kind = wpr) :: sdot, snrm2
+      real (kind = wpr) :: ddot, dnrm2
       integer  :: i
       real (kind = wpr) :: s,t,z,b1,cs,sn,alfa,beta,dbar,diag,    &
                           epsr,epsx,gbar,gmax,gmin,         &
@@ -3487,7 +3476,7 @@
                           tnorm,ynorm,cgnorm,qrnorm,snprod,ynorm2
       intrinsic abs,max,min,mod,sqrt
 
-      external saxpy,scopy,sdot,snrm2
+      external daxpy,dcopy,ddot,dnrm2
 
 !     ------------------------------------------------------------------
 !
@@ -3508,10 +3497,10 @@
 
 ! Set up  v,  the first vector in the Lanczos sequence.
 
-     call scopy ( n,b,1,y,1 )
-     call scopy ( n,b,1,r1,1 )
+     call dcopy ( n,b,1,y,1 )
+     call dcopy ( n,b,1,r1,1 )
      b1     = y(1)
-     beta1  = sdot( n,r1,1,y,1 )
+     beta1  = ddot( n,r1,1,y,1 )
      if (beta1 < zero) istop = 6
      if (beta1 <= zero) go to 900
      beta1  = sqrt( beta1 )
@@ -3522,18 +3511,18 @@
 ! Set up  y  for the second Lanczos vector.
 
      call lxv(v,y,graph,llap)
-     call saxpy ( n,(-shift),v,1,y,1 )
-     alfa   = sdot( n,v,1,y,1 )
-     call saxpy ( n,(-alfa/beta1),r1,1,y,1 )
+     call daxpy ( n,(-shift),v,1,y,1 )
+     alfa   = ddot( n,v,1,y,1 )
+     call daxpy ( n,(-alfa/beta1),r1,1,y,1 )
 
 !  Make sure  r2  will be orthogonal to the first  v.
 
-     z      = sdot( n,v,1,y,1 )
-     s      = sdot( n,v,1,v,1 )
-     call saxpy ( n,(-z/s),v,1,y,1 )
-     call scopy ( n,y,1,r2,1 )
+     z      = ddot( n,v,1,y,1 )
+     s      = ddot( n,v,1,v,1 )
+     call daxpy ( n,(-z/s),v,1,y,1 )
+     call dcopy ( n,y,1,r2,1 )
      oldb   = beta1
-     beta   = sdot( n,r2,1,y,1 )
+     beta   = ddot( n,r2,1,y,1 )
       if (beta < zero) then
          istop = 6
          go to 900
@@ -3548,9 +3537,9 @@
 
 ! See if the local reorthogonalization achieved anything.
 
-     denom  = sqrt(s) * snrm2( n,r2,1 ) + eps
+     denom  = sqrt(s) * dnrm2( n,r2,1 ) + eps
      s      = z/denom
-     t      = sdot( n,v,1,r2,1 )/denom
+     t      = ddot( n,v,1,r2,1 )/denom
      if (nout > 0) write (nout, 1100) beta1,alfa
      if (nout > 0) write (nout, 1120) s,t
 
@@ -3642,15 +3631,15 @@
      v = s*y
 
      call lxv(v,y,graph,llap)
-     call saxpy ( n,(-shift),v,1,y,1 )
-     call saxpy ( n,(-beta/oldb),r1,1,y,1 )
-     alfa   = sdot( n,v,1,y,1 )
+     call daxpy ( n,(-shift),v,1,y,1 )
+     call daxpy ( n,(-beta/oldb),r1,1,y,1 )
+     alfa   = ddot( n,v,1,y,1 )
      tnorm  = tnorm + (alfa**2) + 2.0*(beta**2)
-     call saxpy ( n,(-alfa/beta),r2,1,y,1 )
-     call scopy ( n,r2,1,r1,1 )
-     call scopy ( n,y,1,r2,1 )
+     call daxpy ( n,(-alfa/beta),r2,1,y,1 )
+     call dcopy ( n,r2,1,r1,1 )
+     call dcopy ( n,y,1,r2,1 )
      oldb   = beta
-     beta   = sdot( n,r2,1,y,1 )
+     beta   = ddot( n,r2,1,y,1 )
      if (beta <= zero) then
         istop = 6
         go to 800
@@ -3703,20 +3692,20 @@
      bstep  = snprod*zbar + bstep
      ynorm  = sqrt(ynorm2 + zbar**2)
      rnorm  = cgnorm
-     call saxpy ( n,zbar,w,1,x,1 )
+     call daxpy ( n,zbar,w,1,x,1 )
 
 ! Add the step along  B.
      bstep  = bstep/beta1
-     call scopy ( n,b,1,y,1 )
-     call saxpy ( n,bstep,y,1,x,1 )
+     call dcopy ( n,b,1,y,1 )
+     call daxpy ( n,bstep,y,1,x,1 )
 
 ! Compute the final residual,  r1 = b - (a - shift*i)*x.
 !     call lxv(x,y,graph)
-!     call saxpy ( n,(-shift),x,1,y,1 )
+!     call daxpy ( n,(-shift),x,1,y,1 )
 !     r1 = b - y
-!     rnorm  = snrm2( n,r1,1 )
+!     rnorm  = dnrm2( n,r1,1 )
 !     write (6,*) 'rnorm,cgnorm',rnorm,cgnorm
-!     xnorm  = snrm2( n,x,1 )
+!     xnorm  = dnrm2( n,x,1 )
 !
 !     ==================================================================
 !     Display final status.
@@ -3889,11 +3878,11 @@
       integer :: nwork,i,j,k,jjj,seed
       real (kind = wpr) :: w
 ! random number generator
-      real (kind = wpr) :: fa14a
+      real (kind = wpr) :: fa14ad
 
-      external fa14i,fa14a
+      external fa14id,fa14ad
 
-      call fa14i(seed)
+      call fa14id(seed)
 
       allocate(v(n),u(n),r(n),stat=st)
       if (st /= 0) then
@@ -3965,14 +3954,14 @@
 ! it is not the one corresponding to the second largest
 ! eigenvalue
 
-!!    if (j == 1 .and. beta(j) < tiny(1.0)) then
+!!    if (j == 1 .and. beta(j) < tiny(1.0_wpr)) then
         if (j == 1 .and. beta(j) < epsilon(zero)) then
            if (unit >= 0 .and. level > 1) then
               write (unit,'(a)') &
                 ' Eigenvector found on first iteration'
            end if
            do k = 1,n
-              w = fa14a(seed,-1)
+              w = fa14ad(seed,-1)
               r(k) = 1 - w*w
            end do
 
@@ -4130,7 +4119,7 @@
          go to 30
       end if
 15    continue
-      if ((abs(f) < 1.0e-5) .or. (up-low < eps*100.0_wpr)) go to 20
+      if ((abs(f) < 1.0d-5) .or. (up-low < eps*100.0_wpr)) go to 20
       if (f > 0) then
          low = root
       else
@@ -4494,7 +4483,7 @@
       end select
       end subroutine print_message
 
-   end module hsl_mc73_single
+   end module hsl_mc73_double
 
 
 

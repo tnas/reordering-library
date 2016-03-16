@@ -1,7 +1,7 @@
 ! COPYRIGHT (c) 2003 Council for the Central Laboratory
 !         of the Research Councils
 !
-! Version 2.4.0
+! Version 2.5.0
 !
 ! History: See ChangeLog
 !
@@ -11,7 +11,7 @@
        use hsl_zd11_double
 
 ! This module is for computing the
-! spectral ordering a matrix A with a symmetric sparsity pattern.
+! spectral ordering of a matrix A with a symmetric sparsity pattern.
 ! A multilevel algorithm is used. An approx. Fiedler vector of the
 ! (weighted) Laplacian associated with A is computed.
 ! The Fiedler vector is found by finding
@@ -179,7 +179,7 @@
           control%max_reduction = 0.8_wpr
       end subroutine mc73_initialize
 ! *****************************************************************
-      subroutine mc73_fiedler(n,lirn,irn,ip,list,fvector,info,a) BIND(C, NAME='mc73_fiedler')
+      subroutine mc73_fiedler(n,lirn,irn,ip,list,fvector,control,info,a)
 
       real (kind = wpr), parameter :: zero = 0.0_wpr
 ! the matrix
@@ -191,7 +191,7 @@
       integer,  intent (in) :: n
       integer,  intent (in) :: lirn
       integer,  intent (in) :: irn(lirn)
-      integer,  intent (inout) :: ip(n+1)
+      integer,  intent (in) :: ip(n+1)
 ! added following optional arguement.
 ! If present must hold matrix weights (otherwise, standard
 ! Laplacian used)
@@ -199,7 +199,7 @@
 
 ! information flag and control arrays
       integer, intent (out) :: info(1:10)
-      !type(mc73_control),intent(in) :: control
+      type(mc73_control),intent(in) :: control
 
 ! On exit, the number of the component within the
 ! adjacency graph of A that variable i belongs to is list(i)
@@ -222,21 +222,21 @@
       integer :: err,wrn,mp,print_level
       logical :: lerr,lwrn
 
-      icntl(1) = 6!control%lp
-      icntl(2) = 6!control%wp
-      icntl(3) = 6!control%mp
-      icntl(4) = 0!control%print_level
-      icntl(5) = max(1,10)!max(1,control%mglevel)
-      icntl(6) = 200!control%coarsest_size
-      icntl(7) = 10!control%maxit
-      icntl(8) = 300!control%mlancz
+      icntl(1) = control%lp
+      icntl(2) = control%wp
+      icntl(3) = control%mp
+      icntl(4) = control%print_level
+      icntl(5) = max(1,control%mglevel)
+      icntl(6) = control%coarsest_size
+      icntl(7) = control%maxit
+      icntl(8) = control%mlancz
 
-      cntl(1) = 0.001_wpr!control%tol
-      cntl(2) = max(0.1_wpr,0.1_wpr)!max(0.1_wpr,control%min_reduction)
-      cntl(3) = 0.8_wpr!control%max_reduction
+      cntl(1) = control%tol
+      cntl(2) = max(0.1_wpr,control%min_reduction)
+      cntl(3) = control%max_reduction
       if (cntl(2) > cntl(3)) cntl(2) = 0.1_wpr
-      cntl(4) = 0.001_wpr!control%tol1
-      cntl(5) = min(0.01_wpr*0.001_wpr,10.0_wpr*0.001_wpr)!min(control%rtol*0.001_wpr,10.0_wpr*control%tol)
+      cntl(4) = control%tol1
+      cntl(5) = min(control%rtol*0.001_wpr,10.0_wpr*control%tol)
 
       if (icntl(4) < 0) print_level = 0
 ! The default is icntl(4) = 0
@@ -251,12 +251,7 @@
 ! Set warning controls
       lwrn = icntl(2).ge.0 .and. print_level.gt.0
       wrn = icntl(2)
-      
-! alteracao do vetor ip
-      do i=1,n+1
-        ip(i) = ip(i) + 1
-      end do
-      
+
       info(1:10) = 0
 ! initial printing
       if (print_level >= 2) then
@@ -311,7 +306,7 @@
          if (lerr) call print_message(info(1),err,' MC73_FIEDLER')
          return
       end if
-   
+
      do i = 1,n
         if (ip(i) > ip(i+1)) then
            ierr = -3
@@ -323,6 +318,11 @@
       if (present(a)) then
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
                                    val=a,checking=1)
+! check for error return
+        if (ierr < 0) then
+           if (ierr == -12) ierr = -3
+           go to 998
+        end if
 ! Ensure we have positive weights
         do i = 1,ip(n+1)-1
            matrix%val(i) = abs(matrix%val(i))
@@ -330,13 +330,13 @@
       else
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
                                    type='general',checking=1)
-      end if
-
 ! check for error return
-      if (ierr < 0) then
-         if (ierr == -12) ierr = -3
-         go to 998
+        if (ierr < 0) then
+           if (ierr == -12) ierr = -3
+           go to 998
+        end if
       end if
+! check for warning
       if (ierr == 1) then
          info(1) = MC73_WARN_RANGE_IRN
          if (lwrn) call print_message(info(1),wrn,' MC73_FIEDLER')
@@ -349,13 +349,15 @@
 ! (if a not present, graph of matrix A+A^T is returned)
       if (present(a)) then
          call mc65_matrix_symmetrize(matrix,ierr)
+         if (ierr /= 0 ) go to 998
          call mc65_matrix_remove_diagonal(matrix)
          llap = .true.
       else
          call mc65_matrix_symmetrize(matrix,ierr,graph=.true.)
+         if (ierr /= 0 ) go to 998
          llap = .false.
       end if
-      if (ierr /= 0 ) go to 998
+
 ! Ordering depends how graph is coarsened. we can get consistent
 ! results by preordering (sorting)
 !      call mc65_matrix_sort(matrix,ierr)
@@ -383,15 +385,10 @@
       call mc65_matrix_destruct(matrix,ierr)
 ! do not test error message since matrix may not have been allocated
       return
-      
+
 999   if (print_level >= 2 .and. info(1) >= 0)   &
          write (mp,fmt='(/a,i3,4i8)') ' On exit INFO(1:2) = ',info(1:2)
-! alteracao do vetor ip
-      do i=1,n+1
-        ip(i) = ip(i) - 1
-      end do
-      
-      call mc65_matrix_destruct(matrix,ierr)      
+      call mc65_matrix_destruct(matrix,ierr)
       return
 
       end subroutine mc73_fiedler
@@ -563,7 +560,12 @@
 ! Include checking of data
       if (present(a) .and. job /= 1) then
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
-                                   val=a,checking=1)
+                                  val=a,checking=1)
+! check for error return
+        if (ierr < 0) then
+           if (ierr == -12) ierr = -3
+           go to 998
+        end if
 ! Ensure we have positive weights
         do i = 1,ip(n+1)-1
            matrix%val(i) = abs(matrix%val(i))
@@ -571,12 +573,13 @@
       else
         call mc65_matrix_construct(matrix,n,n,ip,irn,ierr,&
                                    type='general',checking=1)
-      end if
 ! check for error return
-      if (ierr < 0) then
-         if (ierr == -12) ierr = -3
-         go to 998
+        if (ierr < 0) then
+           if (ierr == -12) ierr = -3
+           go to 998
+        end if
       end if
+! check for warnings
       if (ierr == 1) then
          info(1) = MC73_WARN_RANGE_IRN
          if (lwrn) call print_message(info(1),wrn,' MC73_ORDER')
@@ -588,17 +591,19 @@
 ! make the matrix symmetric and remove diagonal
       if (present(a) .and. job /= 1) then
          call mc65_matrix_symmetrize(matrix,ierr)
+         if (ierr /= 0 ) go to 998
          call mc65_matrix_remove_diagonal(matrix)
          llap = .true.
       else
          call mc65_matrix_symmetrize(matrix,ierr,graph=.true.)
+         if (ierr /= 0 ) go to 998
          llap = .false.
       end if
-      if (ierr /= 0 ) go to 998
+
 ! Ordering depends how graph is coarsened. we can get consistent
 ! results by preordering (sorting)
 !      call mc65_matrix_sort(matrix,ierr)
-      if (ierr /= 0 ) go to 998
+!      if (ierr /= 0 ) go to 998
 
 
      if (job == 1 .and. icntl(5) == 1) then
@@ -2783,11 +2788,11 @@
       integer :: maxind
 
 ! order of which vertex is visited for matching
-      integer, allocatable, dimension (:) :: order
+!      integer, allocatable, dimension (:) :: order ! this is not used.
       integer, allocatable, dimension (:) :: nrow
 
-      integer :: nz
       integer :: info
+      integer :: nz
 
 ! allocate the prolongation matrix pointers
       cgrid => grid%coarse
@@ -2812,14 +2817,14 @@
       match = unmatched
 
 ! randomly permute the vertex order
-      allocate (order(nvtx),stat=st)
-      if (st /= 0) then
-         ierr = MC73_ERR_MEMORY_ALLOC
-         return
-      end if
-      do i = 1,nvtx
-         order(i) = i
-      end do
+   !   allocate (order(nvtx),stat=st)
+   !   if (st /= 0) then
+   !      ierr = MC73_ERR_MEMORY_ALLOC
+   !      return
+   !   end if
+   !   do i = 1,nvtx
+   !      order(i) = i ! we do not use random permutation
+   !   end do
 
       allocate (nrow(grid%size),stat=st)
       if (st /= 0) then
@@ -2832,7 +2837,8 @@
       nz = 0
       nrow = 0
       do i = 1, nvtx
-        v = order(i)
+    !   v = order(i)
+        v = i
 ! If already matched, next vertex please
         if (match(v) /= unmatched) cycle
 ! access the col. indices of row v
@@ -2873,6 +2879,10 @@
 ! storage allocation for col. indices and values of prolongation
 ! matrix P (order nvtx * cnvtx)
       call mc65_matrix_construct(p,nvtx,nz,info,n=cnvtx,type = 'general')
+      if (info < 0) then
+         ierr = info
+         return
+      end if
       p%val = 0.0_wpr
 
 ! Set column pointers for P
@@ -2889,7 +2899,8 @@
 ! loop over each vertex and match along the heaviest edge
       cnvtx = 0
       do i = 1,nvtx
-        v = order(i)
+    !   v = order(i)
+        v = i
 ! if already matched, next vertex please
         if (match(v) /= unmatched) cycle
         call mc65_matrix_getrow(graph,v,the_row)
@@ -2935,7 +2946,8 @@
          return
       end if
 
-      deallocate(order,nrow,stat=st)
+!      deallocate(order,nrow,stat=st)
+      deallocate(nrow,stat=st)
       if (st /= 0) then
          ierr = MC73_ERR_MEMORY_DEALLOC
          return

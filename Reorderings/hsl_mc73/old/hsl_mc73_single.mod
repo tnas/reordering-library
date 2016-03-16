@@ -1,14 +1,14 @@
-GFORTRAN module version '10' created from hsl_mc73d.f90
-MD5:8a3c40da2df7f849aaee32124298758e -- If you edit this, you'll get what you deserve.
+GFORTRAN module version '10' created from hsl_mc73s.f90
+MD5:12ed46b4c8cf7e3cc9f2337bdc4a9def -- If you edit this, you'll get what you deserve.
 
 (() () () () () () () () () () () () () () () () () () () () () () ()
 () () () ())
 
 ()
 
-(('mc73_control' 'hsl_mc73_double' 2) ('mc73_fiedler' 'hsl_mc73_double'
-3) ('mc73_order' 'hsl_mc73_double' 4) ('mc73_print_message'
-'hsl_mc73_double' 5))
+(('mc73_control' 'hsl_mc73_single' 2) ('mc73_fiedler' 'hsl_mc73_single'
+3) ('mc73_order' 'hsl_mc73_single' 4) ('mc73_print_message'
+'hsl_mc73_single' 5))
 
 ()
 
@@ -16,7 +16,7 @@ MD5:8a3c40da2df7f849aaee32124298758e -- If you edit this, you'll get what you de
 
 ()
 
-(2 'Mc73_control' 'hsl_mc73_double' '' 1 ((DERIVED UNKNOWN-INTENT
+(2 'Mc73_control' 'hsl_mc73_single' '' 1 ((DERIVED UNKNOWN-INTENT
 UNKNOWN-PROC UNKNOWN UNKNOWN 0 0) (UNKNOWN 0 0 0 0 UNKNOWN ()) 0 0 () ()
 0 ((6 'lp' (INTEGER 4 0 0 0 INTEGER ()) () (UNKNOWN-FL UNKNOWN-INTENT
 UNKNOWN-PROC UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (7 'wp' (INTEGER 4
@@ -35,72 +35,72 @@ UNKNOWN-ACCESS ()) (13 'maxit' (INTEGER 4 0 0 0 INTEGER ()) () (
 UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
 UNKNOWN-ACCESS ()) (14 'hager_exchange' (INTEGER 4 0 0 0 INTEGER ()) ()
 (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (15 'tol' (REAL 8 0 0 0 REAL ()) () (UNKNOWN-FL
+UNKNOWN-ACCESS ()) (15 'tol' (REAL 4 0 0 0 REAL ()) () (UNKNOWN-FL
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (16
-'tol1' (REAL 8 0 0 0 REAL ()) () (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
-UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (17 'rtol' (REAL 8 0 0 0 REAL ())
+'tol1' (REAL 4 0 0 0 REAL ()) () (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC
+UNKNOWN UNKNOWN 0 0) UNKNOWN-ACCESS ()) (17 'rtol' (REAL 4 0 0 0 REAL ())
 () (UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (18 'min_reduction' (REAL 8 0 0 0 REAL ()) () (
+UNKNOWN-ACCESS ()) (18 'min_reduction' (REAL 4 0 0 0 REAL ()) () (
 UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ()) (19 'max_reduction' (REAL 8 0 0 0 REAL ()) () (
+UNKNOWN-ACCESS ()) (19 'max_reduction' (REAL 4 0 0 0 REAL ()) () (
 UNKNOWN-FL UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0)
-UNKNOWN-ACCESS ())) PUBLIC (() () () ()) () 0 0 81012111)
-20 'mc73_control' 'hsl_mc73_double' '' 1 ((PROCEDURE UNKNOWN-INTENT
+UNKNOWN-ACCESS ())) PUBLIC (() () () ()) () 0 0 32432472)
+20 'mc73_control' 'hsl_mc73_single' '' 1 ((PROCEDURE UNKNOWN-INTENT
 UNKNOWN-PROC DECL UNKNOWN 0 0 FUNCTION GENERIC) (UNKNOWN 0 0 0 0 UNKNOWN
 ()) 0 0 () () 0 () () () 0 0)
-21 'mc73_err_a_toosmall' 'hsl_mc73_double' '' 1 ((PARAMETER
+21 'mc73_err_a_toosmall' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '-7') () 0 ()
 () () 0 0)
-22 'mc73_err_job_wrong' 'hsl_mc73_double' '' 1 ((PARAMETER
+22 'mc73_err_job_wrong' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '-6') () 0 ()
 () () 0 0)
-23 'mc73_err_lirn_toosmall' 'hsl_mc73_double' '' 1 ((PARAMETER
+23 'mc73_err_lirn_toosmall' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '-4') () 0 ()
 () () 0 0)
-24 'mc73_err_memory_alloc' 'hsl_mc73_double' '' 1 ((PARAMETER
+24 'mc73_err_memory_alloc' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '-1') () 0 ()
 () () 0 0)
-25 'mc73_err_memory_dealloc' 'hsl_mc73_double' '' 1 ((PARAMETER
+25 'mc73_err_memory_dealloc' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '-2') () 0 ()
 () () 0 0)
-26 'mc73_err_n_nonpositive' 'hsl_mc73_double' '' 1 ((PARAMETER
+26 'mc73_err_n_nonpositive' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '-3') () 0 ()
 () () 0 0)
-27 'mc73_err_range_ip' 'hsl_mc73_double' '' 1 ((PARAMETER UNKNOWN-INTENT
+27 'mc73_err_range_ip' 'hsl_mc73_single' '' 1 ((PARAMETER UNKNOWN-INTENT
 UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0 INTEGER ()) 0 0
 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '-5') () 0 () () () 0 0)
-3 'mc73_fiedler' 'hsl_mc73_double' '' 1 ((PROCEDURE UNKNOWN-INTENT
+3 'mc73_fiedler' 'hsl_mc73_single' '' 1 ((PROCEDURE UNKNOWN-INTENT
 MODULE-PROC DECL UNKNOWN 0 0 SUBROUTINE GENERIC ALWAYS_EXPLICIT) (
 UNKNOWN 0 0 0 0 UNKNOWN ()) 28 0 (29 30 31 32 33 34 35 36 37) () 0 () ()
 () 0 0)
-38 'mc73_initialize' 'hsl_mc73_double' '' 1 ((PROCEDURE UNKNOWN-INTENT
+38 'mc73_initialize' 'hsl_mc73_single' '' 1 ((PROCEDURE UNKNOWN-INTENT
 MODULE-PROC DECL UNKNOWN 0 0 SUBROUTINE IMPLICIT_PURE) (UNKNOWN 0 0 0 0
 UNKNOWN ()) 39 0 (40) () 0 () () () 0 0)
-4 'mc73_order' 'hsl_mc73_double' '' 1 ((PROCEDURE UNKNOWN-INTENT
+4 'mc73_order' 'hsl_mc73_single' '' 1 ((PROCEDURE UNKNOWN-INTENT
 MODULE-PROC DECL UNKNOWN 0 0 SUBROUTINE GENERIC ALWAYS_EXPLICIT) (
 UNKNOWN 0 0 0 0 UNKNOWN ()) 41 0 (42 43 44 45 46 47 48 49 50 51) () 0 ()
 () () 0 0)
-52 'mc73_warn_dup_entry' 'hsl_mc73_double' '' 1 ((PARAMETER
+52 'mc73_warn_dup_entry' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '2') () 0 ()
 () () 0 0)
-53 'mc73_warn_maxit' 'hsl_mc73_double' '' 1 ((PARAMETER UNKNOWN-INTENT
+53 'mc73_warn_maxit' 'hsl_mc73_single' '' 1 ((PARAMETER UNKNOWN-INTENT
 UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0 INTEGER ()) 0 0
 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '4') () 0 () () () 0 0)
-54 'mc73_warn_mc67' 'hsl_mc73_double' '' 1 ((PARAMETER UNKNOWN-INTENT
+54 'mc73_warn_mc67' 'hsl_mc73_single' '' 1 ((PARAMETER UNKNOWN-INTENT
 UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0 INTEGER ()) 0 0
 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '8') () 0 () () () 0 0)
-55 'mc73_warn_range_irn' 'hsl_mc73_double' '' 1 ((PARAMETER
+55 'mc73_warn_range_irn' 'hsl_mc73_single' '' 1 ((PARAMETER
 UNKNOWN-INTENT UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (INTEGER 4 0 0 0
 INTEGER ()) 0 0 () (CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '1') () 0 ()
 () () 0 0)
-5 'print_message' 'hsl_mc73_double' '' 1 ((PROCEDURE UNKNOWN-INTENT
+5 'print_message' 'hsl_mc73_single' '' 1 ((PROCEDURE UNKNOWN-INTENT
 MODULE-PROC DECL UNKNOWN 0 0 SUBROUTINE ALWAYS_EXPLICIT) (UNKNOWN 0 0 0
 0 UNKNOWN ()) 56 0 (57 58 59) () 0 () () () 0 0)
 29 'n' '' '' 28 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY) (
@@ -121,7 +121,7 @@ DIMENSION DUMMY) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () (1 0 EXPLICIT (
 CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '1') (VARIABLE (INTEGER 4 0 0 0
 INTEGER ()) 0 29 ())) 0 () () () 0 0)
 34 'fvector' '' '' 28 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0
-DIMENSION DUMMY) (REAL 8 0 0 0 REAL ()) 0 0 () (1 0 EXPLICIT (CONSTANT (
+DIMENSION DUMMY) (REAL 4 0 0 0 REAL ()) 0 0 () (1 0 EXPLICIT (CONSTANT (
 INTEGER 4 0 0 0 INTEGER ()) 0 '1') (VARIABLE (INTEGER 4 0 0 0 INTEGER ())
 0 29 ())) 0 () () () 0 0)
 35 'control' '' '' 28 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0
@@ -131,7 +131,7 @@ DIMENSION DUMMY) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () (1 0 EXPLICIT (
 CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '1') (CONSTANT (INTEGER 4 0 0 0
 INTEGER ()) 0 '10')) 0 () () () 0 0)
 37 'a' '' '' 28 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DIMENSION
-OPTIONAL DUMMY) (REAL 8 0 0 0 REAL ()) 0 0 () (1 0 ASSUMED_SHAPE (
+OPTIONAL DUMMY) (REAL 4 0 0 0 REAL ()) 0 0 () (1 0 ASSUMED_SHAPE (
 CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '1') ()) 0 () () () 0 0)
 40 'control' '' '' 39 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0
 DUMMY) (DERIVED 2 0 0 0 DERIVED ()) 0 0 () () 0 () () () 0 0)
@@ -161,11 +161,11 @@ DIMENSION DUMMY) (INTEGER 4 0 0 0 INTEGER ()) 0 0 () (1 0 EXPLICIT (
 CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '1') (CONSTANT (INTEGER 4 0 0 0
 INTEGER ()) 0 '10')) 0 () () () 0 0)
 50 'rinfo' '' '' 41 ((VARIABLE OUT UNKNOWN-PROC UNKNOWN UNKNOWN 0 0
-DIMENSION DUMMY) (REAL 8 0 0 0 REAL ()) 0 0 () (1 0 EXPLICIT (CONSTANT (
+DIMENSION DUMMY) (REAL 4 0 0 0 REAL ()) 0 0 () (1 0 EXPLICIT (CONSTANT (
 INTEGER 4 0 0 0 INTEGER ()) 0 '1') (CONSTANT (INTEGER 4 0 0 0 INTEGER ())
 0 '20')) 0 () () () 0 0)
 51 'a' '' '' 41 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DIMENSION
-OPTIONAL DUMMY) (REAL 8 0 0 0 REAL ()) 0 0 () (1 0 ASSUMED_SHAPE (
+OPTIONAL DUMMY) (REAL 4 0 0 0 REAL ()) 0 0 () (1 0 ASSUMED_SHAPE (
 CONSTANT (INTEGER 4 0 0 0 INTEGER ()) 0 '1') ()) 0 () () () 0 0)
 57 'info' '' '' 56 ((VARIABLE IN UNKNOWN-PROC UNKNOWN UNKNOWN 0 0 DUMMY)
 (INTEGER 4 0 0 0 INTEGER ()) 0 0 () () 0 () () () 0 0)
