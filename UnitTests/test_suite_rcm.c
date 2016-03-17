@@ -387,12 +387,15 @@ void run_all_tests_leveled_rcm(FILE* out_file, int* nthreads, int num_nthreads, 
 	{
 		fprintf(out_file, "|%s      |   %d    |", alg_name, nthreads[count_nthreads]);
 		
+		long int vec_band[TEST_EXEC_TIMES];
+		
 		for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
 		{
 			switch (alg)
 			{
 				case (leveled_rcm) :
 					tresult = test_leveled_rcm(matrix, nthreads[count_nthreads], root);
+					
 					break;
 					
 				case (leveled_rcm_v1) :
@@ -408,9 +411,19 @@ void run_all_tests_leveled_rcm(FILE* out_file, int* nthreads, int num_nthreads, 
 				
 			}
 			
+			vec_band[count_exec-1] = tresult.bandwidth;
 			fprintf(out_file, "%.6f |", tresult.time);
+			
+			
 		}
-		fprintf(out_file, "\n\n");
+		
+		fprintf(out_file, "\n");
+		fprintf(out_file, "|%s      |   %d    |", alg_name, nthreads[count_nthreads]);
+		
+		for (count_exec = 0; count_exec < TEST_EXEC_TIMES; ++count_exec)
+			fprintf(out_file, "%ld    |", vec_band[count_exec]);
+		
+		fprintf(out_file, "\n");
 		fflush(out_file);
 	}
 	
@@ -424,18 +437,15 @@ void run_all_tests()
 	FILE* out_file;
 	
 	int num_matrices = 1;
-/*	char* matrices[] = {
-		"../Big-Matrices/atmosmodj.mtx",
-		"../Big-Matrices/Dubcova3.mtx",
-		"../Big-Matrices/dw8192.mtx",
-		"../Big-Matrices/inline_1.mtx"
-		"../Big-Matrices/nlpkkt120.mtx",
-		"../Big-Matrices/nlpkkt240.mtx"
-	};*/	
-
 	char* matrices[] = {
-		"../Matrices/aft01.mtx",
-// 		"../Matrices/bcspwr01.mtx",
+// 		"../Big-Matrices/atmosmodj.mtx",
+// 		"../Big-Matrices/Dubcova3.mtx",
+// 		"../Big-Matrices/dw8192.mtx",
+// 		"../Big-Matrices/inline_1.mtx"
+// 		"../Big-Matrices/nlpkkt120.mtx",
+// 		"../Big-Matrices/nlpkkt240.mtx"
+// 		"../Matrices/aft01.mtx",
+		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx"
 // 		"../Matrices/FEM_3D_thermal1.mtx",
