@@ -29,6 +29,7 @@ typedef struct
 	int parent;
 	int status;
 	int chnum;
+	int index;
 } GRAPH;
 
 #endif /* GRAPH_H */

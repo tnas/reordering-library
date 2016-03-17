@@ -7,7 +7,6 @@
 void mc60ad_(int* n, int* lirn, int* irn, int* icptr, int* icntl, int* iw, int* info);
 void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int** pair, int* info, int* iw, double* w);
 
-//MC60DD(N,NSUP,SVAR,VARS,PERMSV,PERM,POSSV)
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm
  *--------------------------------------------------------------------------*/
@@ -128,9 +127,9 @@ void REORDERING_RCM_HSL (MAT* A, int** perm, int root)
 	int i;
 	int n        = A->n; 
 	int nsup     = n;
-	int lirn     = A->nz;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
+	int lirn     = 2 * icptr[n-1];
 	int vars[n];
 	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
 	double weight[2];
@@ -144,16 +143,15 @@ void REORDERING_RCM_HSL (MAT* A, int** perm, int root)
 	*perm = calloc(nsup, sizeof(int));
 	
 	/* -------------------------------------------------------------------- */    
-	/* Initializing vectors variable                                        */
-	/* -------------------------------------------------------------------- */
-	for (i = 0; i < n; ++i) vars[i]  = 1;
-	
-	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
 	/* -------------------------------------------------------------------- */
-	for (i = 0; i < lirn; i++) irn[i] += 1;
+	for (i = 0; i < lirn; i++) ++irn[i];
 	
-	for (i = 0; i < n; i++) icptr[i] += 1;
+	for (i = 0; i < n; i++) 
+	{
+		++icptr[i];
+		vars[i] = 1;
+	}
 	
 	mc60ad_(&n, &lirn, irn, icptr, icntl, iiw, info);
 	
@@ -162,11 +160,14 @@ void REORDERING_RCM_HSL (MAT* A, int** perm, int root)
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
 	/* -------------------------------------------------------------------- */
-	for (i = 0; i < lirn; i++) irn[i] -= 1;
+	for (i = 0; i < lirn; i++) --irn[i];
 	
-	for (i = 0; i < n; i++) icptr[i] -= 1;
+	for (i = 0; i < n; i++) 
+	{
+		--icptr[i];
+		--((*perm)[i]);
+	}
 
-	for (i = 0; i < nsup; i++) --((*perm)[i]);
 }
 
 

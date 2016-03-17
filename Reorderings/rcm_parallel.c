@@ -702,6 +702,8 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 		size_children = children->size;
 		ch_pointer    = children;
 		
+// 		printf("size children: %d\n", size_children);fflush(stdout);
+		
 		while (ch_pointer != NULL)
 		{
 			graph[graph[ch_pointer->data].parent].chnum++;
@@ -719,7 +721,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			{
 				++node_offset;
 				counts[node_offset] = graph[(*perm)[node+perm_offset]].chnum;
-				graph[(*perm)[node+perm_offset]].distance = node_offset - 1;
+				graph[(*perm)[node+perm_offset]].index = node_offset - 1;
 // 				printf("parent %d with index %d in psum\n", graph[(*perm)[node+perm_offset]].label, node_offset-1);fflush(stdout);
 			}
 // 			else
@@ -777,19 +779,19 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 				{
 					#pragma omp critical
 					{
-// 						printf("thread %d set child %d of parent %d at position %d\n", omp_get_thread_num(), child, graph[child].parent, parent_index[graph[graph[child].parent].distance]);fflush(stdout);
-						(*perm)[parent_index[graph[graph[child].parent].distance]++] = child;
+// 						printf("thread %d set child %d of parent %d at position %d\n", omp_get_thread_num(), child, graph[child].parent, parent_index[graph[graph[child].parent].index]);fflush(stdout);
+						(*perm)[parent_index[graph[graph[child].parent].index]++] = child;
 					}
 					
-					if (parent_index[graph[graph[child].parent].distance] == psum[graph[graph[child].parent].distance + 1])
+					if (parent_index[graph[graph[child].parent].index] == psum[graph[graph[child].parent].index + 1])
 					{
 						num_children   = graph[graph[child].parent].chnum;
-						index_children = psum[graph[graph[child].parent].distance];
+						index_children = psum[graph[graph[child].parent].index];
 						
 						if (num_children > 1)
 						{
 							// Sorting children by degree
-// 							printf("Thread %d Sorting from position %d to %d\n", omp_get_thread_num(), index_children, psum[graph[graph[child].parent].distance + 1]);fflush(stdout);
+// 							printf("Thread %d Sorting from position %d to %d\n", omp_get_thread_num(), index_children, psum[graph[graph[child].parent].index + 1]);fflush(stdout);
 							
 							p_children = calloc(num_children, sizeof(GRAPH));
 							
