@@ -1,17 +1,17 @@
 #include <unistd.h>
 #include <ctype.h>
-#include "./UnitTests/rcm_parallel_test.h"
+#include "./UnitTests/test_suite_rcm.h"
 
 
 int main (int argc, char* argv[]){
   
-	int opt, num_threads;
+	int opt, num_threads, root;
 	float bfs_chunk_size;
 	char* matrix_name;
 	EXECUTION exec_type;
-// 	int algorithm;
+	int algorithm;
 
-	while ((opt = getopt(argc, argv, "m:p:s:t:a")) != -1)
+	while ((opt = getopt(argc, argv, "m:p:b:t:a")) != -1)
 	{
 		switch (opt)
 		{
@@ -19,14 +19,15 @@ int main (int argc, char* argv[]){
 				matrix_name = optarg;
 				exec_type = ONE_INSTANCE;
 				break;
-/*			case 't' :
-				algorithm = optarg;
-				break;*/				
+			case 't' :
+				algorithm = atoi(optarg);
+				break;		
+				
 			case 'p':
 				num_threads = atoi(optarg);
 				break;
 				
-			case 's':
+			case 'b':
 				bfs_chunk_size = atof(optarg);
 				break;
 				
@@ -35,27 +36,57 @@ int main (int argc, char* argv[]){
 				break;
 		}
 	}
+
+	if (exec_type == ALL_TESTS)
+	{
+		run_all_tests();
+	}
+	else 
+	{
+		root = get_node_peripheral(matrix_name);
 	
-	
-// 	int root = get_node_peripheral(matrix_name);
-	int root = 1;
-	
-// 	run_test_hsl_rcm(matrix_name, root);
-	run_test_leveled_rcm(matrix_name, num_threads, root);
-// 	run_test_hsl_rcm(matrix_name, num_threads, root);
-// 	run_test_leveled_rcm_v1(matrix_name, num_threads, root);
-// 	run_test_leveled_rcm_v2(matrix_name, num_threads, root);
-// 	run_test_serial_rcm(matrix_name, root);
-// 	run_test_hsl_spectral(matrix_name);
-	
-// 	if (exec_type == ALL_TESTS)
-// 	{
-// 		run_all_tests();
-// 	}
-// 	else 
-// 	{
-// 		run_test_serial_parallel_rcm(matrix_name, num_threads, bfs_chunk_size);
-// 	}
+		switch (algorithm)
+		{
+			case rcm : 
+				// t = 0
+				test_serial_rcm(matrix_name, root);
+				break;
+				
+			case hsl_rcm : 
+				// t = 1
+				test_hsl_rcm(matrix_name);
+				break;
+				
+			case hsl_spectral :
+				// t = 2
+				test_hsl_spectral(matrix_name);
+				break;
+				
+			case leveled_rcm :
+				// t = 3
+				test_leveled_rcm(matrix_name, num_threads, root);
+				break;
+				
+			case leveled_rcm_v1 :
+				// t = 4
+				test_leveled_rcm_v1(matrix_name, num_threads, root);
+				break;
+				
+			case leveled_rcm_v2 :
+				// t = 5
+				test_leveled_rcm_v2(matrix_name, num_threads, root);
+				break;
+				
+			case unordered_rcm :
+				// t = 6
+				test_unordered_rcm(matrix_name, num_threads, bfs_chunk_size, root);
+				break;
+				
+			default :
+				printf("*** [Error] Algorithm must be between 0 and 6 ***\n");
+				exit(1);
+		}
+	}
 	
 	return 0;
 }

@@ -8,7 +8,7 @@
  *--------------------------------------------------------------------------*/
 void mc73_fiedler(int* n, int* lirn, int* irn, int* ip, int* list, double* fvector, int* info, double* a);
 
-void REORDERING_SPECTRAL (MAT* A, int** Fp)
+void REORDERING_HSL_SPECTRAL (MAT* A, int** Fp)
 {
 	int i;
 	int n = A->n;
@@ -59,7 +59,7 @@ void REORDERING_SPECTRAL (MAT* A, int** Fp)
 	(*Fp) = p;
 }
 
-void REORDERING_SPECTRAL_WGT (MAT* A, int** Fp)
+void REORDERING_HSL_SPECTRAL_WGT (MAT* A, int** Fp)
 {
 	int i;
 	int n = A->n;

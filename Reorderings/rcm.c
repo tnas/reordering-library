@@ -122,52 +122,58 @@ void REORDERING_RCM (MAT* A, int** Fp)
 /*----------------------------------------------------------------------------
  * HSL_MC60 RCM Reordering
  *--------------------------------------------------------------------------*/
-void REORDERING_RCM_HSL (MAT* A, int** perm, int root)
+void REORDERING_HSL_RCM (MAT* A, int** p)
 {
 	int i;
 	int n        = A->n; 
 	int nsup     = n;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
-	int lirn     = 2 * icptr[n-1];
+	int lirn     = 2 * (icptr[n]-1);
 	int vars[n];
-	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
+	int jcntl[2] = { RCM, ESPECIFIED_PERIPHERAL };
 	double weight[2];
 	int pair[2][nsup/2];
 	int info[4];
-	int iw[3*nsup + 1];
-	int iiw[n];
-	double w[nsup];
-	int icntl[2] = { 0, 6 };
+	int iw[3*n + 1];
+	double w[n];
+// 	int icntl[2] = { 0, 6 };
 	
-	*perm = calloc(nsup, sizeof(int));
+	*p = calloc(nsup, sizeof(int));
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
 	/* -------------------------------------------------------------------- */
 	for (i = 0; i < lirn; i++) ++irn[i];
 	
-	for (i = 0; i < n; i++) 
-	{
-		++icptr[i];
-		vars[i] = 1;
-	}
+	for (i = 0; i < n; i++) vars[i] = 1;
 	
-	mc60ad_(&n, &lirn, irn, icptr, icntl, iiw, info);
+	printf("irn vector: ");
+	for (i = 0; i < lirn; i++) printf("%d ", irn[i]);
+	printf("\n");fflush(stdout);
 	
-	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, *perm, weight, (int**) pair, info, iw, w);
+	printf("icptr vector: ");
+	for (i = 0; i <= n; i++) printf("%d ", icptr[i]);
+	printf("\n");fflush(stdout);
+	
+	pair[0][0] = 3;
+	pair[1][0] = 2;
+	printf("pseudo peripheral(1): %d\n", pair[0][0]);
+	printf("pseudo peripheral(2): %d\n", pair[1][0]);
+	
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, *p, weight, (int**) pair, info, iw, w);
+
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
 	/* -------------------------------------------------------------------- */
 	for (i = 0; i < lirn; i++) --irn[i];
 	
-	for (i = 0; i < n; i++) 
-	{
-		--icptr[i];
-		--((*perm)[i]);
-	}
-
+	for (i = 0; i < n; i++) --((*p)[i]);
+	
+	printf("Permutation vector: ");
+	for (i = 0; i < n; i++) printf("%d ", (*p)[i]);
+	printf("\n");fflush(stdout);
 }
 
 

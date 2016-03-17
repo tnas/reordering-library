@@ -185,6 +185,127 @@ void MATRIX_readCSR (MAT* A, FILE* f)
 
 
 /*----------------------------------------------------------------------------
+ * Read upper triangular matrix from file in MM format to a CSR structure
+ *--------------------------------------------------------------------------*/
+void MATRIX_readCSR_SymmUpper (MAT* A, FILE* f)
+{
+	int M, N, nz, N_upper;
+	int i, j, k, I, J, elem = 0;
+	double VAL;
+	char line[1025], header[1025];
+	char *symm;
+	ARRAY* a;
+	
+	fgets(header,200,f);	
+	strtok(header," \n");
+	strtok(NULL," \n");
+	strtok(NULL," \n");
+	strtok(NULL," \n");
+	
+	symm  = strtok(NULL," \n");
+	
+	if ((strcmp(symm,"symmetric") != 0 && strcmp(symm,"general") != 0))
+		fprintf (stderr,"\n Error. Matrix format not supported. Exiting.. [MATRIX_readCSR]\n\n");
+	
+	do 
+	{
+		if (fgets(line,1025,f) == NULL) 
+			exit(0);
+	}while (line[0] == '%');   
+	sscanf(line,"%d %d %d", &N, &M, &nz);
+	
+	if (strcmp(symm,"symmetric") == 0)
+	{
+		a = malloc (nz * sizeof(ARRAY));
+		
+		for (i = 0, k = 0; i < nz; ++i)
+		{
+			fscanf(f,"%d%d%lf",&I,&J,&VAL);
+			
+			if (I > J)
+			{
+				a[k].arr1 = VAL;
+				a[k].arr2 = I - 1;
+				a[k].arr3 = J - 1;
+				k++;
+			}
+			else 
+			{
+				a[k].arr1 = VAL;
+				a[k].arr2 = J - 1;
+				a[k].arr3 = I - 1;
+				k++;
+			}
+		}
+		
+		nz = k;
+		a  = realloc (a,nz*sizeof(ARRAY));
+		qsort(a,nz,sizeof(ARRAY),COMPARE_array);
+	}
+	else if (strcmp(symm,"general") == 0)
+	{
+		N_upper = (nz + N)/2;
+		a = malloc (N_upper * sizeof(ARRAY));
+		
+		for (i = 0, k = 0; i < nz; ++i)
+		{
+			fscanf(f, "%d%d%lf",&I, &J, &VAL);
+			
+			if (I <= J)
+			{
+				a[k].arr1 = VAL;
+				a[k].arr2 = J - 1;
+				a[k].arr3 = I - 1;
+				k++;
+			}
+		}
+		
+		qsort(a, N_upper, sizeof(ARRAY), COMPARE_array);
+		nz = N_upper;
+	}
+
+	/* reseve memory for matrices */
+	A->m   = M;
+	A->n   = N;
+	A->nz  = nz;
+	
+	A->AA  = (double *) calloc(nz, sizeof (double));
+	A->D   = (double *) calloc(N , sizeof (double));
+	A->JA  = (int    *) calloc(nz, sizeof (int));
+	A->IA  = (int    *) calloc(N+1,sizeof (int));
+	
+	for (i = 0; i < nz; ++i)
+	{
+		A->AA[i]   = a[i].arr1;
+		A->JA[i]   = a[i].arr2;
+		elem      += 1;
+		A->IA[a[i].arr3+1] = elem;
+	}
+
+	free(a);
+	
+	/* Adjusting IA array */
+	for (i = 1; i < N + 1; ++i)
+		if (A->IA[i] == 0) 
+			A->IA[i] = A->IA[i-1];
+
+	/* Diagonal */
+	if (M == N) /* square matrix */
+	{
+		for (i = 0; i < A->n; ++i)
+		{
+			int k1 = A->IA[i];
+			int k2 = A->IA[i+1]-1;
+			for (j = k1; j <= k2; ++j)
+				if (i == A->JA[j]) 
+					A->D[i] = A->AA[j];
+		}
+	}
+}
+
+
+
+/*----------------------------------------------------------------------------
  * Get the element ij stored as CSR
  *--------------------------------------------------------------------------*/
 double MATRIX_aij (MAT* A, int i, int j)

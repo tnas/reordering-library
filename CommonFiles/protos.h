@@ -44,6 +44,7 @@ extern void     MATRIX_forward           (MAT* L, double* b, double* y);
 extern void     MATRIX_backward          (MAT* U, double* y, double* x);
 extern void     MATRIX_permutation       (MAT* A, int* p);
 extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int bandwidth);
+extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
 
 /*----------------------------------------------------------------------------
  * GRAPH FUNCTIONS PROTOTYPE IN CSR FORMAT
@@ -99,9 +100,9 @@ extern void     ILUT                     (SparMAT* csmat, SparILU* lu, int lfil,
 /*----------------------------------------------------------------------------
  * REORDERING FUNCTIONS PROTOTYPE
  *--------------------------------------------------------------------------*/
-extern void     REORDERING_RCM_opt       (MAT* A, int** p, int s);
-extern void     REORDERING_RCM           (MAT* A, int** p);
-extern void     REORDERING_RCM_HSL       (MAT* A, int** p, int root);
-extern void     REORDERING_SLOAN         (MAT* A, int** p);
-extern void     REORDERING_SPECTRAL      (MAT* A, int** p);
-extern void     REORDERING_SPECTRAL_WGT  (MAT* A, int** p);
+extern void     REORDERING_RCM_opt          (MAT* A, int** p, int s);
+extern void     REORDERING_RCM              (MAT* A, int** p);
+extern void     REORDERING_HSL_RCM          (MAT* A, int** p);
+extern void     REORDERING_SLOAN            (MAT* A, int** p);
+extern void     REORDERING_HSL_SPECTRAL     (MAT* A, int** p);
+extern void     REORDERING_HSL_SPECTRAL_WGT (MAT* A, int** p);

@@ -13,7 +13,7 @@ add_executable(reordering-library program.c
 	./Reorderings/rcm.c 
 	./Reorderings/rcm_parallel.c 
 	./Reorderings/sloan.c 
-	./UnitTests/rcm_parallel_test.c)
+	UnitTests/test_suite_rcm.c)
 
 target_link_libraries(reordering-library m gfortran blas)
 
