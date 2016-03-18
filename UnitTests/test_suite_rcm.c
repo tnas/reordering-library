@@ -441,7 +441,7 @@ void run_all_tests()
 		"../Big-Matrices/atmosmodj.mtx",
 		"../Big-Matrices/Dubcova3.mtx",
 		"../Big-Matrices/dw8192.mtx",
-		"../Big-Matrices/inline_1.mtx"
+		"../Big-Matrices/inline_1.mtx",
 		"../Big-Matrices/nlpkkt120.mtx",
 		"../Big-Matrices/nlpkkt240.mtx"
 // 		"../Matrices/aft01.mtx",
