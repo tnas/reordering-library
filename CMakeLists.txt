@@ -15,12 +15,6 @@ add_executable(reordering-library program.c
 	./Reorderings/sloan.c 
 	./UnitTests/test_suite_rcm.c)
 
-# target_link_libraries(reordering-library /usr/lib64/libgfortran.so.3)
-# target_link_libraries(reordering-library /usr/lib/x86_64-linux-gnu/libgfortran.so.3)
-
-# target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc60/mc60d.o)
-# target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc60/libmc60.a)
-
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/libhsl_mc73.a)
 

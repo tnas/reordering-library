@@ -198,6 +198,61 @@ test_def test_hsl_spectral(const char* path_matrix_file)
 
 
 
+// test_def test_hsl_rcm(const char* path_matrix_file)
+// {
+// 	long int bandwidth, envelope, bandwidth_after, envelope_after;
+// 	int* permutation;
+// 	double time;
+// 	MAT* matrix;
+// 	FILE* matrix_file;
+// 	test_def defs;
+// 	
+// 	defs.algorithm_name = "HSL RCM";
+// 	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
+// 		exit(1);
+// 	
+// 	matrix = (MAT*) malloc (sizeof(MAT));
+// 	MATRIX_readCSR_SymmUpper (matrix, matrix_file);
+// 	fclose(matrix_file);
+// 	
+// 	MATRIX_printFULL(matrix);
+// 	write_output_before(matrix);
+// 	
+// 	time = get_time(); 
+// 	REORDERING_HSL_RCM(matrix, &permutation);
+// 	time = (get_time() - time)/100.0;
+// 	defs.time = time;
+// 	
+// 	MATRIX_clean(matrix);
+// 	
+// 	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
+// 		exit(1);
+// 	
+// 	matrix = (MAT*) malloc (sizeof(MAT));
+// 	MATRIX_readCSR (matrix, matrix_file);
+// 	fclose(matrix_file);
+// 		
+// 	bandwidth_after = MATRIX_bandwidth(matrix);
+// 	envelope_after  = MATRIX_envelope(matrix);
+// 	
+// 	MATRIX_permutation(matrix, permutation);
+// 	bandwidth = MATRIX_bandwidth(matrix);
+// 	envelope  = MATRIX_envelope(matrix);	
+// 	defs.bandwidth = bandwidth;
+// 	
+// 	write_output_after(matrix);
+// 	
+// 	free(permutation);
+// 	MATRIX_clean(matrix);
+// 	
+// 	printf("%s: Band/Env [ %ld / %ld => %ld / %ld ] Time [ %.6f ]\n",
+// 		defs.algorithm_name, bandwidth_after, envelope_after, bandwidth, envelope, time); 
+// 	fflush(stdout);
+// 	
+// 	return defs;
+// }
+
+
 test_def test_hsl_rcm(const char* path_matrix_file)
 {
 	test_def defs;
@@ -211,6 +266,7 @@ test_def test_hsl_rcm(const char* path_matrix_file)
 	
 	return defs;
 }
+
 
 
 test_def test_leveled_rcm(const char* path_matrix_file, const int num_threads, int root)

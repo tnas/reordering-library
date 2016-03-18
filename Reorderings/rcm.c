@@ -1,8 +1,7 @@
 /*----------------------------------------------------------------------------
  * RCM REORDERING SOLVER
  *--------------------------------------------------------------------------*/
-// #include "../CommonFiles/protos.h"
-#include "../CommonFiles/protos_parallel.h"
+#include "../CommonFiles/protos.h"
 
 void mc60ad_(int* n, int* lirn, int* irn, int* icptr, int* icntl, int* iw, int* info);
 void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int** pair, int* info, int* iw, double* w);
@@ -129,15 +128,14 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	int nsup     = n;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
-	int lirn     = 2 * (icptr[n]-1);
+	int lirn     = 3 * (icptr[n]-1);
 	int vars[n];
-	int jcntl[2] = { RCM, ESPECIFIED_PERIPHERAL };
+	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
 	double weight[2];
-	int pair[2][nsup/2];
+	int pair[nsup/2][2];
 	int info[4];
 	int iw[3*n + 1];
 	double w[n];
-// 	int icntl[2] = { 0, 6 };
 	
 	*p = calloc(nsup, sizeof(int));
 	
@@ -156,14 +154,12 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	for (i = 0; i <= n; i++) printf("%d ", icptr[i]);
 	printf("\n");fflush(stdout);
 	
-	pair[0][0] = 3;
-	pair[1][0] = 2;
-	printf("pseudo peripheral(1): %d\n", pair[0][0]);
-	printf("pseudo peripheral(2): %d\n", pair[1][0]);
+// 	int icntl[2] = { 0, 6 };	
+// 	int iiw[n];
+// 	mc60ad_(&n, &lirn, irn, icptr, icntl, iiw, info);
 	
 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, *p, weight, (int**) pair, info, iw, w);
 
-	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
 	/* -------------------------------------------------------------------- */
