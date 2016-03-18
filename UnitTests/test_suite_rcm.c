@@ -492,14 +492,16 @@ void run_all_tests()
 	int root, count_matrix, count_alg;
 	FILE* out_file;
 	
-	int num_matrices = 6;
+	int num_matrices = 8;
 	char* matrices[] = {
-		"../Big-Matrices/atmosmodj.mtx",
-		"../Big-Matrices/Dubcova3.mtx",
 		"../Big-Matrices/dw8192.mtx",
+		"../Big-Matrices/rail_79841.mtx",
+		"../Big-Matrices/Dubcova3.mtx",
 		"../Big-Matrices/inline_1.mtx",
-		"../Big-Matrices/nlpkkt120.mtx",
-		"../Big-Matrices/nlpkkt240.mtx"
+		"../Big-Matrices/audikw_1.mtx",
+		"../Big-Matrices/dielFilterV3real.mtx",
+		"../Big-Matrices/atmosmodj.mtx",
+		"../Big-Matrices/G3_circuit.mtx"
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
