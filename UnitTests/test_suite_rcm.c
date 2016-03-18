@@ -436,16 +436,16 @@ void run_all_tests()
 	int root, count_matrix, count_alg;
 	FILE* out_file;
 	
-	int num_matrices = 1;
+	int num_matrices = 6;
 	char* matrices[] = {
-// 		"../Big-Matrices/atmosmodj.mtx",
-// 		"../Big-Matrices/Dubcova3.mtx",
-// 		"../Big-Matrices/dw8192.mtx",
-// 		"../Big-Matrices/inline_1.mtx"
-// 		"../Big-Matrices/nlpkkt120.mtx",
-// 		"../Big-Matrices/nlpkkt240.mtx"
+		"../Big-Matrices/atmosmodj.mtx",
+		"../Big-Matrices/Dubcova3.mtx",
+		"../Big-Matrices/dw8192.mtx",
+		"../Big-Matrices/inline_1.mtx"
+		"../Big-Matrices/nlpkkt120.mtx",
+		"../Big-Matrices/nlpkkt240.mtx"
 // 		"../Matrices/aft01.mtx",
-		"../Matrices/bcspwr01.mtx",
+// 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx"
 // 		"../Matrices/FEM_3D_thermal1.mtx",
@@ -456,7 +456,7 @@ void run_all_tests()
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
 	int num_algorithms = 1;
-	reorder_algorithm algorithm[] = { leveled_rcm};
+	reorder_algorithm algorithm[] = { leveled_rcm, leveled_rcm_v1, leveled_rcm_v2 };
 	
 	if ((out_file = fopen("run_all_tests_output.txt", "w")) == NULL) 
 		exit(1);
