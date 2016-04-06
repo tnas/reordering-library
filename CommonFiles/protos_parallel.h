@@ -16,6 +16,8 @@
 typedef enum REORDERING_ALGORITHM { SERIAL_RCM, UNORDERED_RCM, LEVELED_RCM } 
 	REORDERING_ALGORITHM;
 
+	
+	
 typedef struct 
 {
 	int initial_prefix_sum;
@@ -45,3 +47,4 @@ extern void	Leveled_RCM(MAT* mat, int** perm, int root);
 extern void	Leveled_RCM_v1(MAT* mat, int** perm, int root);
 extern void	Leveled_RCM_v2(MAT* mat, int** perm, int root);
 extern void 	prefix_sum(const int* counts, int** sums, const int max_level);
+extern void 	Parallel_Sloan (MAT* A, int** Fp, int node_s, int node_e);

@@ -851,7 +851,7 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 				
 			}
 			
-			#pragma omp for schedule(static, chunk_size) 
+			#pragma omp for schedule(static, chunk_size) ordered
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
 				
@@ -880,14 +880,17 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 				// Processing children from a parent
 				for (n_ch = 0; n_ch < degree; ++n_ch)
 				{
+					#pragma omp critical
+					{
 					if (graph[neighbors[n_ch]].parent == ORPHAN_NODE)
 						graph[neighbors[n_ch]].parent = (*perm)[n_par];
+					}
 					
 					if (graph[neighbors[n_ch]].distance > graph[(*perm)[n_par]].distance)
 					{
 						if (graph[neighbors[n_ch]].distance > graph[(*perm)[n_par]].distance + 1)
 						{
-							#pragma omp critical
+							#pragma omp ordered
 							{
 								graph[neighbors[n_ch]].distance = graph[(*perm)[n_par]].distance + 1;
 									

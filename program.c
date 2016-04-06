@@ -82,8 +82,18 @@ int main (int argc, char* argv[]){
 				test_unordered_rcm(matrix_name, num_threads, bfs_chunk_size, root);
 				break;
 				
+			case serial_sloan :
+				// t = 7
+				test_serial_sloan(matrix_name);
+				break;
+				
+			case parallel_sloan :
+				// t = 8
+				test_parallel_sloan(matrix_name, num_threads);
+				break;
+				
 			default :
-				printf("*** [Error] Algorithm must be between 0 and 6 ***\n");
+				printf("*** [Error] Algorithm must be between 0 and 8 ***\n");
 				exit(1);
 		}
 	}

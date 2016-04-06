@@ -78,6 +78,8 @@ test_def test_reorder_algorithm(test_def defs)
 	double time;
 	MAT* matrix;
 	FILE* matrix_file;
+	int* g;
+	int node_s, node_e;
 	
 	if ((matrix_file = fopen(defs.path_matrix_file, "r")) == NULL) 
 		exit(1);
@@ -144,6 +146,26 @@ test_def test_reorder_algorithm(test_def defs)
 			time = (get_time() - time)/100.0;
 			defs.time = time;
 			break;
+			
+		case serial_sloan :
+			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
+			free(g);
+			
+			time = get_time();
+			REORDERING_SLOAN(matrix, &permutation, node_s, node_e);
+			time = (get_time() - time)/100.0;
+			defs.time = time;
+			break;
+			
+		case parallel_sloan :
+			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
+			free(g);
+			
+			time = get_time();
+			Parallel_Sloan(matrix, &permutation, node_s, node_e);
+			time = (get_time() - time)/100.0;
+			defs.time = time;
+			break;
 	}
 	
 	MATRIX_permutation(matrix, permutation);
@@ -196,6 +218,19 @@ test_def test_hsl_spectral(const char* path_matrix_file)
 	return defs;
 }
 
+
+test_def test_serial_sloan(const char* path_matrix_file)
+{
+	test_def defs;
+	
+	defs.path_matrix_file = path_matrix_file;
+	defs.algorithm_name = "Serial Sloan";
+	defs.algorithm = serial_sloan;
+	defs.strategy = serial;
+	defs = test_reorder_algorithm(defs);
+	
+	return defs;
+}
 
 
 // test_def test_hsl_rcm(const char* path_matrix_file)
@@ -323,6 +358,23 @@ test_def test_leveled_rcm_v2(const char* path_matrix_file, const int num_threads
 }
 
 
+test_def test_sloan(const char* path_matrix_file, const int num_threads, int root)
+{
+	test_def defs;
+	
+	defs.path_matrix_file = path_matrix_file;
+	defs.algorithm_name = "Leveled RCM v2";
+	defs.algorithm = leveled_rcm_v2;
+	defs.root = root;
+	defs.num_threads = num_threads;
+	defs.strategy = parallel;
+	
+	defs = test_reorder_algorithm(defs);
+	
+	return defs;
+}
+
+
 test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size, int root)
 {
 	test_def defs;
@@ -340,6 +392,20 @@ test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads,
 	return defs;
 }
 
+
+test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads)
+{
+	test_def defs;
+	
+	defs.path_matrix_file = path_matrix_file;
+	defs.algorithm_name = "Parallel Sloan";
+	defs.algorithm = parallel_sloan;
+	defs.strategy = parallel;
+	defs.num_threads = num_threads;
+	defs = test_reorder_algorithm(defs);
+	
+	return defs;
+}
 
 
 void print_head_table_result(FILE* out_file)
@@ -492,15 +558,15 @@ void run_all_tests()
 	int root, count_matrix, count_alg;
 	FILE* out_file;
 	
-	int num_matrices = 8;
+	int num_matrices = 4;
 	char* matrices[] = {
-		"../Big-Matrices/dw8192.mtx",
+// 		"../Big-Matrices/dw8192.mtx",
 		"../Big-Matrices/rail_79841.mtx",
-		"../Big-Matrices/Dubcova3.mtx",
-		"../Big-Matrices/inline_1.mtx",
+// 		"../Big-Matrices/Dubcova3.mtx",
+// 		"../Big-Matrices/inline_1.mtx",
 		"../Big-Matrices/audikw_1.mtx",
 		"../Big-Matrices/dielFilterV3real.mtx",
-		"../Big-Matrices/atmosmodj.mtx",
+// 		"../Big-Matrices/atmosmodj.mtx",
 		"../Big-Matrices/G3_circuit.mtx"
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/bcspwr01.mtx",
@@ -513,8 +579,8 @@ void run_all_tests()
 	int num_nthreads = 6;
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	int num_algorithms = 1;
-	reorder_algorithm algorithm[] = { leveled_rcm, leveled_rcm_v1, leveled_rcm_v2 };
+	int num_algorithms = 2;
+	reorder_algorithm algorithm[] = { leveled_rcm_v1, leveled_rcm_v2 };
 	
 	if ((out_file = fopen("run_all_tests_output.txt", "w")) == NULL) 
 		exit(1);

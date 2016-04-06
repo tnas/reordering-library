@@ -6,10 +6,10 @@
 /*----------------------------------------------------------------------------
  * SLOAN reordering
  *--------------------------------------------------------------------------*/
-void REORDERING_SLOAN (MAT* A, int** Fp)
+void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 {
 	int i,j,k,I,J,K,n = A->n,max_P,nadj1,nadj2;
-	int node_e, node_s;
+// 	int node_e, node_s;
 	int *adj1,*adj2;
 	
 	int W1 = 1;
@@ -18,8 +18,8 @@ void REORDERING_SLOAN (MAT* A, int** Fp)
 	LIST* L = NULL;
 	LIST* q;
 	
-	int* g = GRAPH_LS_peripheral (A,&node_s,&node_e);
-	free(g);
+// 	int* g = GRAPH_LS_peripheral (A,&node_s,&node_e);
+// 	free(g);
 	
 	int* d = calloc (n,sizeof (int));
 	int* p = calloc (n,sizeof (int));

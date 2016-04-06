@@ -12,7 +12,8 @@ add_executable(reordering-library program.c
 	./Reorderings/spectral.c 
 	./Reorderings/rcm.c 
 	./Reorderings/rcm_parallel.c 
-	./Reorderings/sloan.c 
+	./Reorderings/sloan.c
+	./Reorderings/sloan_parallel.c
 	./UnitTests/test_suite_rcm.c)
 
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)

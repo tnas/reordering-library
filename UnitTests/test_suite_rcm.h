@@ -15,7 +15,9 @@ typedef enum {
 	leveled_rcm,
 	leveled_rcm_v1,
 	leveled_rcm_v2,
-	unordered_rcm
+	unordered_rcm,
+	serial_sloan,
+	parallel_sloan
 } reorder_algorithm;
 
 
@@ -24,6 +26,8 @@ typedef struct {
 	long int bandwidth;
 	const char* path_matrix_file;
 	int root;
+	int start_node;
+	int end_node;
 	char* algorithm_name;
 	int num_threads;
 	reorder_algorithm algorithm;
@@ -43,10 +47,12 @@ int get_node_peripheral(const char* path_matrix_file);
 test_def test_serial_rcm(const char* path_matrix_file, int root);
 test_def test_hsl_spectral(const char* path_matrix_file);
 test_def test_hsl_rcm(const char* path_matrix_file);
+test_def test_serial_sloan(const char* path_matrix_file);
 
 test_def test_leveled_rcm(const char* path_matrix_file, const int num_threads, int root);
 test_def test_leveled_rcm_v1(const char* path_matrix_file, const int num_threads, int root);
 test_def test_leveled_rcm_v2(const char* path_matrix_file, const int num_threads, int root);
 test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size, int root);
+test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads);
 
 extern void run_all_tests();
