@@ -19,9 +19,9 @@ void Parallel_Sloan (MAT* A, int** Fp, int node_s, int node_e)
 	omp_lock_t lock_queue, lock_priority;
 	
 	int* distance = calloc (n,sizeof (int));
-	int* p = calloc (n,sizeof (int));
+	int* p        = calloc (n,sizeof (int));
 	int* priority = calloc (n,sizeof (int));
-	int* status = calloc (n,sizeof (int));
+	int* status   = calloc (n,sizeof (int));
 	
 	/* start vertex s and end vertex e */
 	GRAPH_bfs (A, node_e, distance);
@@ -83,7 +83,7 @@ void Parallel_Sloan (MAT* A, int** Fp, int node_s, int node_e)
 			
 			if (vertex != -1) 
 			{
-				printf("Thread %d get vertex %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+// 				printf("Thread %d get vertex %d\n", omp_get_thread_num(), vertex);fflush(stdout);
 				
 				if (status[vertex] == -1)
 				{
@@ -112,7 +112,7 @@ void Parallel_Sloan (MAT* A, int** Fp, int node_s, int node_e)
 				
 				#pragma omp critical
 				{
-					printf("Thread %d setting vertex %d at position %d.\n", omp_get_thread_num(), vertex, I);
+// 					printf("Thread %d setting vertex %d at position %d.\n", omp_get_thread_num(), vertex, I);
 					p[I++] = vertex;	
 				}
 				
@@ -191,9 +191,9 @@ void Parallel_Sloan (MAT* A, int** Fp, int node_s, int node_e)
 		(*Fp) = p;
 	}
 	
-	printf("Permutation vector of size %d: ", n);fflush(stdout);
-	int i;
-	for (i = 0; i < n; ++i)
-		printf("%d ", (*Fp)[i]);
-	printf("\n");fflush(stdout);
+// 	printf("Permutation vector of size %d: ", n);fflush(stdout);
+// 	int i;
+// 	for (i = 0; i < n; ++i)
+// 		printf("%d ", (*Fp)[i]);
+// 	printf("\n");fflush(stdout);
 }

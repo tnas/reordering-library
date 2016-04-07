@@ -36,10 +36,13 @@ int main (int argc, char* argv[]){
 				break;
 		}
 	}
-
+	
 	if (exec_type == ALL_TESTS)
 	{
-		run_all_tests();
+		reorder_algorithm algorithm[] = { serial_sloan, parallel_sloan, serial_rcm };
+		
+		printf("Size of x: %ld\n", sizeof(algorithm)/sizeof(algorithm[0]));
+// 		run_all_tests();
 	}
 	else 
 	{
@@ -47,7 +50,7 @@ int main (int argc, char* argv[]){
 	
 		switch (algorithm)
 		{
-			case rcm : 
+			case serial_rcm : 
 				// t = 0
 				test_serial_rcm(matrix_name, root);
 				break;

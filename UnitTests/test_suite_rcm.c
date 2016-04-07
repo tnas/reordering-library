@@ -98,7 +98,7 @@ test_def test_reorder_algorithm(test_def defs)
 	
 	switch (defs.algorithm)
 	{
-		case rcm :
+		case serial_rcm :
 			time = get_time(); 
 			REORDERING_RCM_opt(matrix, &permutation, defs.root);
 			time = (get_time() - time)/100.0;
@@ -194,7 +194,7 @@ test_def test_serial_rcm(const char* path_matrix_file, int root)
 	defs.path_matrix_file = path_matrix_file;
 	defs.root = root;
 	defs.algorithm_name = "Serial RCM";
-	defs.algorithm = rcm;
+	defs.algorithm = serial_rcm;
 	defs.strategy = serial;
 	
 	defs = test_reorder_algorithm(defs);
@@ -375,7 +375,7 @@ test_def test_sloan(const char* path_matrix_file, const int num_threads, int roo
 }
 
 
-test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_size, int root)
+test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_percent, int root)
 {
 	test_def defs;
 	
@@ -383,7 +383,7 @@ test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads,
 	defs.algorithm_name = "Unordered RCM";
 	defs.algorithm = unordered_rcm;
 	defs.root = root;
-	defs.percent_chunk = .5;
+	defs.percent_chunk = bfs_chunk_percent;
 	defs.num_threads = num_threads;
 	defs.strategy = parallel;
 	
@@ -408,222 +408,161 @@ test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads
 }
 
 
-void print_head_table_result(FILE* out_file)
+
+void normalize_tests(const test_def* results, test_def* result)
 {
-	int count_exec;
+	int pos_min_band, pos_max_band, pos_min_time, pos_max_time, times;
+	double sum_time, max_time, min_time;
+	long int sum_band, max_band, min_band;
 	
-	fprintf(out_file, "|Reordering  | Threads |");
-	for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
-		fprintf(out_file, " Exec %d  |", count_exec);
-	fprintf(out_file, "\n");
+	max_band = max_time = 0;
+	min_band = INT_MAX;
+	min_time = DBL_MAX;
+	sum_band = sum_time = 0;
 	
-	for (count_exec = 1; count_exec <= TEST_EXEC_TIMES + 2; ++count_exec)
-		fprintf(out_file, "---------|");
-	fprintf(out_file, "\n");
-}
-
-
-
-
-void run_all_tests_unordered_rcm(FILE* out_file, int* nthreads, int num_nthreads, char* matrix, int root)
-{
-	int count_percents, count_nthreads, count_exec;
-	test_def tresult;
-	
-	int num_bfs_percents = 2;
-	float bfs_chunk_percent[] = { .5, .8 };
-	
-	for (count_percents = 0; count_percents < num_bfs_percents; ++count_percents)
+	// Finding out max/min bandwidth and time execution
+	for (times = 0; times < TEST_EXEC_TIMES; ++times)
 	{
-		fprintf(out_file, "Dinamyc Chunk: %f\n\n", bfs_chunk_percent[count_percents]);
-		printf("\nDinamyc Chunk: %f\n", bfs_chunk_percent[count_percents]);
-		
-		print_head_table_result(out_file);
-		
-		for (count_nthreads = 0; count_nthreads < num_nthreads; ++count_nthreads)
+		if (results[times].bandwidth > max_band)
 		{
-			fprintf(out_file, "|Unordered      |   %d    |", nthreads[count_nthreads]);
-			
-			for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
-			{
-				tresult = test_unordered_rcm(matrix, 
-					nthreads[count_nthreads], bfs_chunk_percent[count_percents], root);
-				fprintf(out_file, "%.6f |", tresult.time);
-			}
-			fprintf(out_file, "\n\n");
-			fflush(out_file);
+			pos_max_band = times;
+			max_band = results[times].bandwidth;
+		}
+		else if (results[times].bandwidth < min_band)
+		{
+			pos_min_band = times;
+			min_band = results[times].bandwidth;
+		}
+		
+		if (results[times].time > max_time)
+		{
+			pos_max_time = times;
+			max_time = results[times].time;
+		}
+		else if (results[times].time < min_time)
+		{
+			pos_min_time = times;
+			min_time = results[times].time;
 		}
 	}
 	
-}
-
-
-void run_all_tests_serial_rcm(FILE* out_file, char* matrix, int root)
-{
-	int count_exec;
-	test_def tresult;
-	
-	fprintf(out_file, "|Serial      |    1    |");
-			
-	for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
+	for (times = 0; times < TEST_EXEC_TIMES; ++times)
 	{
-		tresult = test_serial_rcm(matrix, root);
-		fprintf(out_file, "%.6f |", tresult.time);
+		if (times != pos_min_band && times != pos_max_band)
+			sum_band += results[times].bandwidth;
+		
+		if (times != pos_max_time && times != pos_min_time)
+			sum_time += results[times].time;
 	}
 	
-	fprintf(out_file, "\n\n");
-	fflush(out_file);
-	
-}
-
-
-
-void run_all_tests_leveled_rcm(FILE* out_file, int* nthreads, int num_nthreads, char* matrix, int root, reorder_algorithm alg)
-{
-	int count_nthreads, count_exec;
-	test_def tresult;
-	char* alg_name;
-	
-	print_head_table_result(out_file);
-	
-	switch (alg)
-	{
-		case (leveled_rcm) :
-			alg_name = "Leveled";
-			break;
-			
-		case (leveled_rcm_v1) :
-			alg_name = "Leveled v1";
-			break;
-			
-		case (leveled_rcm_v2) :
-			alg_name = "Leveled v2";
-			break;
-			
-		default :
-			break;
-		
-	}
-	
-	for (count_nthreads = 0; count_nthreads < num_nthreads; ++count_nthreads)
-	{
-		fprintf(out_file, "|%s      |   %d    |", alg_name, nthreads[count_nthreads]);
-		
-		long int vec_band[TEST_EXEC_TIMES];
-		
-		for (count_exec = 1; count_exec <= TEST_EXEC_TIMES; ++count_exec)
-		{
-			switch (alg)
-			{
-				case (leveled_rcm) :
-					tresult = test_leveled_rcm(matrix, nthreads[count_nthreads], root);
-					
-					break;
-					
-				case (leveled_rcm_v1) :
-					tresult = test_leveled_rcm_v1(matrix, nthreads[count_nthreads], root);
-					break;
-					
-				case (leveled_rcm_v2) :
-					tresult = test_leveled_rcm_v2(matrix, nthreads[count_nthreads], root);
-					break;
-					
-				default :
-					break;
-				
-			}
-			
-			vec_band[count_exec-1] = tresult.bandwidth;
-			fprintf(out_file, "%.6f |", tresult.time);
-			
-			
-		}
-		
-		fprintf(out_file, "\n");
-		fprintf(out_file, "|%s      |   %d    |", alg_name, nthreads[count_nthreads]);
-		
-		for (count_exec = 0; count_exec < TEST_EXEC_TIMES; ++count_exec)
-			fprintf(out_file, "%ld    |", vec_band[count_exec]);
-		
-		fprintf(out_file, "\n");
-		fflush(out_file);
-	}
-	
+	result->bandwidth = sum_band / (TEST_EXEC_TIMES - 2);
+	result->time      = sum_time / (TEST_EXEC_TIMES - 2);
 }
 
 
 
 void run_all_tests()
 {
-	int root, count_matrix, count_alg;
+	int root, count_matrix, count_alg, count_exec, count_nthreads, num_matrices, num_nthreads, num_algorithms;
 	FILE* out_file;
+	test_def* test_results;
+	test_def result;
 	
-	int num_matrices = 4;
+	/* *******************************
+	 * Definition of tests parameters
+	 * *******************************
+	 */
+	float bfs_chunk_percent = .5;
+	
 	char* matrices[] = {
 // 		"../Big-Matrices/dw8192.mtx",
-		"../Big-Matrices/rail_79841.mtx",
+// 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
 // 		"../Big-Matrices/inline_1.mtx",
-		"../Big-Matrices/audikw_1.mtx",
-		"../Big-Matrices/dielFilterV3real.mtx",
+// 		"../Big-Matrices/audikw_1.mtx",
+// 		"../Big-Matrices/dielFilterV3real.mtx",
 // 		"../Big-Matrices/atmosmodj.mtx",
-		"../Big-Matrices/G3_circuit.mtx"
-// 		"../Matrices/aft01.mtx",
-// 		"../Matrices/bcspwr01.mtx",
-// 		"../Matrices/bcspwr02.mtx",
+// 		"../Big-Matrices/G3_circuit.mtx"
+// 		"../Matrices/rail_5177.mtx",
+		"../Matrices/bcspwr01.mtx",
+		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx"
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx"
 	};
 	
-	int num_nthreads = 6;
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	int num_algorithms = 2;
-	reorder_algorithm algorithm[] = { leveled_rcm_v1, leveled_rcm_v2 };
+	reorder_algorithm algorithm[] = { serial_sloan, parallel_sloan };
 	
-	if ((out_file = fopen("run_all_tests_output.txt", "w")) == NULL) 
+	/* *****************
+	 * Tests execution
+	 * *****************
+	 */
+	
+	if ((out_file = fopen("run_all_tests_normalized_output.txt", "w")) == NULL) 
 		exit(1);
-
 	
+	num_matrices   = sizeof(matrices)/sizeof(matrices[0]);
+	num_nthreads   = sizeof(nthreads)/sizeof(nthreads[0]);
+	num_algorithms = sizeof(algorithm)/sizeof(algorithm[0]);
+
 	for (count_matrix = 0; count_matrix < num_matrices; ++count_matrix)
 	{
-		fprintf(out_file, "-----------------------------------------------------------------------\n");
-		fprintf(out_file, "Tests Execution - Matrix: %s\n", matrices[count_matrix]);
-		fprintf(out_file, "-----------------------------------------------------------------------\n");
-		fflush(out_file);
-		printf("-------------- Matrix: %s\n", matrices[count_matrix]);
-		
 		root = get_node_peripheral(matrices[count_matrix]);
 		
-		print_head_table_result(out_file);
+		fprintf(out_file, "-----------------------------------------------------------------------\n");
+		fprintf(out_file, "Tests Execution - Matrix: %s\n", matrices[count_matrix]);
 		
 		for (count_alg = 0; count_alg < num_algorithms; ++count_alg)
 		{
-			switch (algorithm[count_alg])
+			fprintf(out_file, "-----------------------------------------------------------------------\n");
+			fprintf(out_file, "Algorithm: %d\n", algorithm[count_alg]);
+			fprintf(out_file, "-----------------------------------------------------------------------\n");
+
+			for (count_nthreads = 0; count_nthreads < num_nthreads; ++count_nthreads)
 			{
-				case unordered_rcm :
-					run_all_tests_unordered_rcm(out_file, nthreads, num_nthreads, matrices[count_matrix], root);
-					break;
-					
-				case rcm :
-					run_all_tests_serial_rcm(out_file, matrices[count_matrix], root);
-					break;
-					
-				case leveled_rcm :
-				case leveled_rcm_v1 :
-				case leveled_rcm_v2 :
-					run_all_tests_leveled_rcm(out_file, nthreads, num_nthreads, matrices[count_matrix], root, algorithm[count_alg]);
-					break;
-					
-				default :
-					break;
+				test_results = calloc(TEST_EXEC_TIMES, sizeof(test_def));
 				
+				for (count_exec = 0; count_exec < TEST_EXEC_TIMES; ++count_exec)
+				{
+					switch (algorithm[count_alg])
+					{
+						case unordered_rcm :
+							test_results[count_exec] = test_unordered_rcm(matrices[count_matrix], nthreads[count_nthreads], bfs_chunk_percent, root);
+							break;
+							
+						case serial_rcm :
+							test_results[count_exec] = test_serial_rcm(matrices[count_matrix], root);
+							break;
+							
+						case leveled_rcm :
+							test_results[count_exec] = test_leveled_rcm(matrices[count_matrix], nthreads[count_nthreads], root);
+							break;
+							
+						case serial_sloan :
+							test_results[count_exec] = test_serial_sloan(matrices[count_matrix]);
+							break;
+							
+						case parallel_sloan :
+							test_results[count_exec] = test_parallel_sloan(matrices[count_matrix], nthreads[count_nthreads]);
+							break;
+							
+						default :
+							break;
+						
+					}
+				}
+				
+				normalize_tests(test_results, &result);
+				fprintf(out_file, "Threads: %d -- Bandwidth: %ld -- Time: %.6f\n", nthreads[count_nthreads], result.bandwidth, result.time);
+				
+				free(test_results);
 			}
-			
 		}
 		
 	}
 	
 	fclose(out_file);
 }
+
