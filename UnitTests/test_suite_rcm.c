@@ -460,7 +460,6 @@ void normalize_tests(const test_def* results, test_def* result)
 }
 
 
-
 void run_all_tests()
 {
 	int root, count_matrix, count_alg, count_exec, count_nthreads, num_matrices, num_nthreads, num_algorithms;
@@ -493,7 +492,7 @@ void run_all_tests()
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { serial_sloan, parallel_sloan };
+	reorder_algorithm algorithm[] = { leveled_rcm, serial_sloan, parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
@@ -555,7 +554,8 @@ void run_all_tests()
 				}
 				
 				normalize_tests(test_results, &result);
-				fprintf(out_file, "Threads: %d -- Bandwidth: %ld -- Time: %.6f\n", nthreads[count_nthreads], result.bandwidth, result.time);
+				fprintf(out_file, "[%s] Threads: %d -- Bandwidth: %ld -- Time: %.6f\n", 
+					test_results[0].algorithm_name, nthreads[count_nthreads], result.bandwidth, result.time);
 				
 				free(test_results);
 			}

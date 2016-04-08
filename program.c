@@ -39,10 +39,7 @@ int main (int argc, char* argv[]){
 	
 	if (exec_type == ALL_TESTS)
 	{
-		reorder_algorithm algorithm[] = { serial_sloan, parallel_sloan, serial_rcm };
-		
-		printf("Size of x: %ld\n", sizeof(algorithm)/sizeof(algorithm[0]));
-// 		run_all_tests();
+		run_all_tests();
 	}
 	else 
 	{
