@@ -1372,22 +1372,25 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 { 
 
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads,
-		children_offset_gen;
+		children_offset_gen, generation_size;
 	GRAPH* graph;
 	genealogy* generation;
 	
 	graph_size = mat->n;
 	perm_size  = perm_offset = total_size_children = 0;
 	
+	printf("root: %d\n", root);fflush(stdout);
+	
 	#pragma omp parallel
 	{
-		int node, n_par, n_ch, degree, size_children, size_ch_per_parent, gen_pos, pos_child_gen, 
-			generation_size, pos_parent_gen;
+		int node, n_par, n_ch, degree, gen_pos, pos_child_gen, pos_parent_gen;
 		int* neighbors;
-		GRAPH* children;
 		
 		#pragma omp single nowait
-		num_threads = omp_get_num_threads();
+		{
+			num_threads = omp_get_num_threads();
+			printf("num_threads: %d\n", num_threads);fflush(stdout);
+		}
 		
 		#pragma omp single nowait
 		*perm  = calloc(graph_size, sizeof(int));
@@ -1421,35 +1424,23 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 	
 		while (perm_size < graph_size)
 		{
-			children         = NULL;
-			size_children    = 0;
-			pos_child_gen    = 0;
+			pos_child_gen = 0;
 			
 			#pragma omp single
 			generation_size = perm_size - perm_offset;
 			
 			#pragma omp single nowait
-			chunk_size = ceil((float) generation_size / num_threads);
-			
-			#pragma omp single nowait
-			generation = calloc(generation_size, sizeof(genealogy));
+			{
+				chunk_size = ceil((float) generation_size / num_threads);
+				printf("[offset = %d, size = %d, chunksize = %d]\n", perm_offset, perm_size, chunk_size);fflush(stdout);
+			}
 			
 			#pragma omp single 
-			printf("[offset = %d, size = %d, chunksize = %d]\n", perm_offset, perm_size, chunk_size);fflush(stdout);
-			
-// 			#pragma omp single 
-// 			printf("------------------------------------------------------- processing\n");fflush(stdout);
-
-// 			#pragma omp single 
-// 			{
-// 				pos_generation = 0;
-// 				printf("Reseting pos_mem_size_children\n");fflush(stdout);
-// 			}
+			generation = calloc(generation_size, sizeof(genealogy));
 			
 			#pragma omp for schedule(static, chunk_size) ordered
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
-				size_ch_per_parent = 0;
 // 				printf("Thread %d Processing n_par %d => node %d from [%d, %d] chunk_size %d\n", omp_get_thread_num(), n_par, (*perm)[n_par], perm_offset, perm_size, chunk_size);fflush(stdout);
 				degree    = graph[(*perm)[n_par]].degree;
 				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
@@ -1483,12 +1474,9 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 									
 								if (graph[neighbors[n_ch]].status == UNREACHED)
 								{
-									children[size_children++] = graph[neighbors[n_ch]]; 
 									graph[neighbors[n_ch]].status = LABELED;
-									size_ch_per_parent++;
 									generation[pos_parent_gen].children[generation[pos_parent_gen].num_children++] =  graph[neighbors[n_ch]];
-// 									printf("Adding child %d at position %d\n", graph[neighbors[n_ch]].label, size_children-1);fflush(stdout);
-// 									printf("Child %d added at position %d\n", children[size_children-1].label, size_children-1);
+// 									printf("Adding child %d \n", graph[neighbors[n_ch]].label);fflush(stdout);
 								}
 							}
 						}
@@ -1502,32 +1490,24 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 					}
 				}
 				
-// 				if (size_ch_per_parent > 1) 
-// 				{
-// 					int i;
-// 					printf("Before sorting\n");fflush(stdout);
-// 					for (i = 0; i< size_ch_per_parent; i++) printf("%d(%d) ", children[i].label, children[i].degree); fflush(stdout);
-// 					printf("\n");fflush(stdout);
-					
-// 					qsort(&(children[th_size_children]), size_ch_per_parent, sizeof(GRAPH), COMPARE_degr_ASC);
-					
-// 					printf("After sorting\n");fflush(stdout);
-// 					for (i = 0; i< size_ch_per_parent; i++) printf("%d ", children[i].label); fflush(stdout);
-// 					printf("\n");fflush(stdout);
-// 				}
-				
-// 				th_size_children += size_ch_per_parent;
-				
-// 				printf("Children: ");fflush(stdout);
-// 				for (i = 0; i< size_children; i++) printf("%d ", children[i].label); fflush(stdout);
-// 				printf("\n");fflush(stdout);
-				
 				free(neighbors);
 			}
 			
 			#pragma omp for
 			for (node = 0; node < generation_size; ++node)
 				qsort(generation[node].children, generation[node].num_children, sizeof(GRAPH), COMPARE_degr_ASC);
+			
+			#pragma omp single
+			{
+				int i;
+				for (node = 0; node < generation_size; ++node)
+				{
+					printf("Father (%d): %d => ", generation[node].num_children, (*perm)[node+perm_offset]);fflush(stdout);
+					for (i = 0; i < generation[node].num_children; ++i)
+						printf("%d ", generation[node].children[i].label);fflush(stdout);
+					printf("\n");fflush(stdout);
+				}
+			}
 			
 			#pragma omp single nowait
 			total_size_children = 0;
@@ -1541,22 +1521,18 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 			#pragma omp for schedule(static, chunk_size) ordered 
 			for (gen_pos = 0; gen_pos < generation_size; ++gen_pos)
 			{
-				pos_child_gen = gen_pos + perm_offset;
+				pos_child_gen = gen_pos + perm_size;
 				
 				#pragma omp critical
 				{
 					pos_child_gen += children_offset_gen;
-					children_offset_gen += chunk_size;
+					printf("Thread %d get pos_child_gen %d from gen_pos %d\n", omp_get_thread_num(), pos_child_gen, gen_pos);fflush(stdout);
+					children_offset_gen += generation[gen_pos].num_children - 1; // excluding itself node
 					total_size_children += generation[gen_pos].num_children;
-					perm_size += generation[gen_pos].num_children;
 				}
 				
-				if (generation[gen_pos].num_children > 0)
-				{
-					for (node = 0; node < generation[gen_pos].num_children; ++node)
-						(*perm)[pos_child_gen + node] = generation[gen_pos].children[node].label;
-				}
-
+				for (node = 0; node < generation[gen_pos].num_children; ++node)
+					(*perm)[pos_child_gen + node] = generation[gen_pos].children[node].label;
 			}
 						
 			#pragma omp for
@@ -1567,26 +1543,23 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 			free(generation);
 			
 			#pragma omp barrier
-			
+
 			#pragma omp single
-			{
-			printf("Permutation vector of size %d: ", perm_size);fflush(stdout);
-			int i;
-			for (i = 0; i < perm_size; ++i)
-				printf("%d ", (*perm)[i]);
-			printf("\n");fflush(stdout);
-			}
-// 			#pragma omp single 
-// 			printf("AFTER LOADING ................\n");fflush(stdout);
-			
-// 			#pragma omp single nowait
-// 			free(children);
+			perm_size += total_size_children;
 			
 			#pragma omp single
 			perm_offset = perm_size - total_size_children;
 			
-// 			#pragma omp single 
-// 			printf("------------------------------------------------------- finish\n");fflush(stdout);
+			#pragma omp single
+			{
+				printf("Permutation vector of size %d: ", perm_size);fflush(stdout);
+				int i;
+				for (i = 0; i < perm_size; ++i) printf("%d ", (*perm)[i]);
+				printf("\n");fflush(stdout);
+			}
+			
+
+
 		}
 	}
 		
