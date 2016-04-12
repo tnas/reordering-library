@@ -460,6 +460,16 @@ void normalize_tests(const test_def* results, test_def* result)
 }
 
 
+int is_serial_algorithm(reorder_algorithm algorithm)
+{
+	if (algorithm == serial_rcm || algorithm == serial_sloan ||
+		algorithm == hsl_rcm || algorithm == hsl_spectral)
+		return 1;
+	
+	return 0;
+}
+
+
 void run_all_tests()
 {
 	int root, count_matrix, count_alg, count_exec, count_nthreads, num_matrices, num_nthreads, num_algorithms;
@@ -478,13 +488,13 @@ void run_all_tests()
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
 // 		"../Big-Matrices/inline_1.mtx",
-// 		"../Big-Matrices/audikw_1.mtx",
+		"../Big-Matrices/audikw_1.mtx",
 // 		"../Big-Matrices/dielFilterV3real.mtx",
 // 		"../Big-Matrices/atmosmodj.mtx",
 // 		"../Big-Matrices/G3_circuit.mtx"
 // 		"../Matrices/rail_5177.mtx",
-		"../Matrices/bcspwr01.mtx",
-		"../Matrices/bcspwr02.mtx",
+// 		"../Matrices/bcspwr01.mtx",
+// 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx"
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx"
@@ -492,7 +502,7 @@ void run_all_tests()
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { leveled_rcm, serial_sloan, parallel_sloan };
+	reorder_algorithm algorithm[] = { leveled_rcm };
 	
 	/* *****************
 	 * Tests execution
@@ -512,13 +522,18 @@ void run_all_tests()
 		
 		fprintf(out_file, "-----------------------------------------------------------------------\n");
 		fprintf(out_file, "Tests Execution - Matrix: %s\n", matrices[count_matrix]);
+		fflush(out_file);
 		
 		for (count_alg = 0; count_alg < num_algorithms; ++count_alg)
 		{
 			fprintf(out_file, "-----------------------------------------------------------------------\n");
 			fprintf(out_file, "Algorithm: %d\n", algorithm[count_alg]);
 			fprintf(out_file, "-----------------------------------------------------------------------\n");
-
+			fflush(out_file);
+			
+// 			count_nthreads = is_serial_algorithm(algorithm[count_alg]) ?
+// 				num_nthreads - 1 : 0;
+			
 			for (count_nthreads = 0; count_nthreads < num_nthreads; ++count_nthreads)
 			{
 				test_results = calloc(TEST_EXEC_TIMES, sizeof(test_def));
@@ -543,6 +558,10 @@ void run_all_tests()
 							test_results[count_exec] = test_serial_sloan(matrices[count_matrix]);
 							break;
 							
+						case hsl_spectral :
+							test_results[count_exec] = test_hsl_spectral(matrices[count_matrix]);
+							break;
+							
 						case parallel_sloan :
 							test_results[count_exec] = test_parallel_sloan(matrices[count_matrix], nthreads[count_nthreads]);
 							break;
@@ -556,6 +575,7 @@ void run_all_tests()
 				normalize_tests(test_results, &result);
 				fprintf(out_file, "[%s] Threads: %d -- Bandwidth: %ld -- Time: %.6f\n", 
 					test_results[0].algorithm_name, nthreads[count_nthreads], result.bandwidth, result.time);
+				fflush(out_file);
 				
 				free(test_results);
 			}

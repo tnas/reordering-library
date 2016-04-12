@@ -35,6 +35,13 @@ typedef struct
 } offspring;
 
 
+typedef struct
+{
+	int num_children;
+	GRAPH* children;
+} genealogy;
+
+
 extern void	GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const float percent_chunk);
 extern int* 	GRAPH_LS_peripheral_PARALLEL (MAT* A, int *node_s, int* node_e);
 extern int 	GRAPH_LS_depth_PARALLEL(int* LS, int n);
