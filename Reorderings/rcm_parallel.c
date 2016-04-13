@@ -1372,24 +1372,24 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 { 
 
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads,
-		children_offset_gen, generation_size;
+		children_offset_gen, generation_size, gen_pos_reference;
 	GRAPH* graph;
 	genealogy* generation;
 	
 	graph_size = mat->n;
 	perm_size  = perm_offset = total_size_children = 0;
 	
-	printf("root: %d\n", root);fflush(stdout);
+// 	printf("root: %d\n", root);fflush(stdout);
 	
 	#pragma omp parallel
 	{
-		int node, n_par, n_ch, degree, gen_pos, pos_child_gen, pos_parent_gen;
+		int node, n_par, n_ch, degree, pos_child_gen, pos_parent_gen, gen_pos, num_children;
 		int* neighbors;
 		
 		#pragma omp single nowait
 		{
 			num_threads = omp_get_num_threads();
-			printf("num_threads: %d\n", num_threads);fflush(stdout);
+// 			printf("num_threads: %d\n", num_threads);fflush(stdout);
 		}
 		
 		#pragma omp single nowait
@@ -1432,7 +1432,7 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 			#pragma omp single nowait
 			{
 				chunk_size = ceil((float) generation_size / num_threads);
-				printf("[offset = %d, size = %d, chunksize = %d]\n", perm_offset, perm_size, chunk_size);fflush(stdout);
+// 				printf("[offset = %d, size = %d, chunksize = %d]\n", perm_offset, perm_size, chunk_size);fflush(stdout);
 			}
 			
 			#pragma omp single 
@@ -1457,12 +1457,12 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 				// Processing children from a parent
 				for (n_ch = 0; n_ch < degree; ++n_ch)
 				{
-					#pragma omp critical
-					{
+// 					#pragma omp critical
+// 					{
 						// TODO: Avaliar ser precisa ser critical
 						if (graph[neighbors[n_ch]].parent == ORPHAN_NODE)
 							graph[neighbors[n_ch]].parent = (*perm)[n_par];
-					}
+// 					}
 					
 					if (graph[neighbors[n_ch]].distance > graph[(*perm)[n_par]].distance)
 					{
@@ -1481,95 +1481,91 @@ void Leveled_RCM_v2(MAT* mat, int** perm, int root)
 							}
 						}
 						
-						#pragma omp critical
-						{
-							// TODO: Avaliar a necessidade desta verificacao dado que todos os pais estao no mesmo nivel
-							if (graph[(*perm)[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
-								graph[neighbors[n_ch]].parent = (*perm)[n_par];
-						}
+// 						#pragma omp critical
+// 						{
+// 							// TODO: Avaliar a necessidade desta verificacao dado que todos os pais estao no mesmo nivel
+// 							if (graph[(*perm)[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
+// 								graph[neighbors[n_ch]].parent = (*perm)[n_par];
+// 						}
 					}
 				}
 				
 				free(neighbors);
 			}
 			
-			#pragma omp for
-			for (node = 0; node < generation_size; ++node)
-				qsort(generation[node].children, generation[node].num_children, sizeof(GRAPH), COMPARE_degr_ASC);
-			
-			#pragma omp single
-			{
-				int i;
-				for (node = 0; node < generation_size; ++node)
-				{
-					printf("Father (%d): %d => ", generation[node].num_children, (*perm)[node+perm_offset]);fflush(stdout);
-					for (i = 0; i < generation[node].num_children; ++i)
-						printf("%d ", generation[node].children[i].label);fflush(stdout);
-					printf("\n");fflush(stdout);
-				}
-			}
+// 			#pragma omp single
+// 			{
+// 				int i;
+// 				for (node = 0; node < generation_size; ++node)
+// 				{
+// 					printf("Father (%d): %d => ", generation[node].num_children, (*perm)[node+perm_offset]);fflush(stdout);
+// 					for (i = 0; i < generation[node].num_children; ++i)
+// 						printf("%d ", generation[node].children[i].label);fflush(stdout);
+// 					printf("\n");fflush(stdout);
+// 				}
+// 			}
 			
 			#pragma omp single nowait
 			total_size_children = 0;
 			
-			#pragma omp single 
-			{
-				printf(">>Intermediate reseting pos_mem_size_children\n");fflush(stdout);
-				children_offset_gen = 0;
-			}
+			#pragma omp single nowait
+			children_offset_gen = 0;
 			
-			#pragma omp for schedule(static, chunk_size) ordered 
-			for (gen_pos = 0; gen_pos < generation_size; ++gen_pos)
+			#pragma omp single
+			gen_pos_reference = 0;
+			
+			while (gen_pos_reference < generation_size)
 			{
-				pos_child_gen = gen_pos + perm_size;
+				gen_pos = generation_size;
 				
 				#pragma omp critical
 				{
-					pos_child_gen += children_offset_gen;
-					printf("Thread %d get pos_child_gen %d from gen_pos %d\n", omp_get_thread_num(), pos_child_gen, gen_pos);fflush(stdout);
-					children_offset_gen += generation[gen_pos].num_children - 1; // excluding itself node
-					total_size_children += generation[gen_pos].num_children;
+					if (gen_pos_reference < generation_size)
+					{
+						gen_pos       = gen_pos_reference++;
+						num_children  = generation[gen_pos].num_children;
+						pos_child_gen = gen_pos + perm_size + children_offset_gen;
+// 						printf("Thread %d get pos_child_gen %d from gen_pos %d\n", omp_get_thread_num(), pos_child_gen, gen_pos);fflush(stdout);
+						children_offset_gen += num_children - 1; // excluding itself node
+						total_size_children += num_children;
+					}
 				}
 				
-				for (node = 0; node < generation[gen_pos].num_children; ++node)
-					(*perm)[pos_child_gen + node] = generation[gen_pos].children[node].label;
+				if (gen_pos < generation_size)
+				{
+					qsort(generation[gen_pos].children, num_children, sizeof(GRAPH), COMPARE_degr_ASC);
+				
+					for (node = 0; node < num_children; ++node)
+						(*perm)[pos_child_gen + node] = generation[gen_pos].children[node].label;
+				}
 			}
-						
+				
+			#pragma omp barrier
+			
 			#pragma omp for
 			for (node = 0; node < generation_size; ++node)
 				free(generation[node].children);
 			
-			#pragma omp single
+			#pragma omp single nowait
 			free(generation);
 			
-			#pragma omp barrier
-
 			#pragma omp single
 			perm_size += total_size_children;
 			
 			#pragma omp single
 			perm_offset = perm_size - total_size_children;
 			
-			#pragma omp single
-			{
-				printf("Permutation vector of size %d: ", perm_size);fflush(stdout);
-				int i;
-				for (i = 0; i < perm_size; ++i) printf("%d ", (*perm)[i]);
-				printf("\n");fflush(stdout);
-			}
-			
-
-
+// 			#pragma omp single
+// 			{
+// 				printf("Permutation vector of size %d: ", perm_size);fflush(stdout);
+// 				int i;
+// 				for (i = 0; i < perm_size; ++i) printf("%d ", (*perm)[i]);
+// 				printf("\n");fflush(stdout);
+// 			}
 		}
 	}
 		
 	free(graph);
-		
-// 	printf("Permutation vector of size %d: ", perm_size);fflush(stdout);
-// 	int i;
-// 	for int (i = 0; i < perm_size; ++i)
-// 		printf("%d ", (*perm)[i]);
-// 	printf("\n");fflush(stdout);
 }
 
 
