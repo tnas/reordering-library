@@ -1368,7 +1368,7 @@ void Leveled_RCM_v1(MAT* mat, int** perm, int root)
 
 
 
-void Leveled_RCM_v2(MAT* mat, int** perm, int root) 
+void Bucket_RCM(MAT* mat, int** perm, int root) 
 { 
 
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads,

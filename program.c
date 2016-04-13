@@ -62,38 +62,33 @@ int main (int argc, char* argv[]){
 				test_hsl_spectral(matrix_name);
 				break;
 				
-			case leveled_rcm :
-				// t = 3
-				test_leveled_rcm(matrix_name, num_threads, root);
-				break;
-				
-			case leveled_rcm_v1 :
-				// t = 4
-				test_leveled_rcm_v1(matrix_name, num_threads, root);
-				break;
-				
-			case leveled_rcm_v2 :
-				// t = 5
-				test_leveled_rcm_v2(matrix_name, num_threads, root);
-				break;
-				
-			case unordered_rcm :
-				// t = 6
-				test_unordered_rcm(matrix_name, num_threads, bfs_chunk_size, root);
-				break;
-				
 			case serial_sloan :
-				// t = 7
+				// t = 3
 				test_serial_sloan(matrix_name);
 				break;
 				
+			case unordered_rcm :
+				// t = 4
+				test_unordered_rcm(matrix_name, num_threads, bfs_chunk_size, root);
+				break;
+				
+			case leveled_rcm :
+				// t = 5
+				test_leveled_rcm(matrix_name, num_threads, root);
+				break;
+				
+			case bucket_rcm :
+				// t = 6
+				test_bucket_rcm(matrix_name, num_threads, root);
+				break;
+				
 			case parallel_sloan :
-				// t = 8
+				// t = 7
 				test_parallel_sloan(matrix_name, num_threads);
 				break;
 				
 			default :
-				printf("*** [Error] Algorithm must be between 0 and 8 ***\n");
+				printf("*** [Error] Algorithm must be between 0 and 7 ***\n");
 				exit(1);
 		}
 	}

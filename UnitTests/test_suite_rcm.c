@@ -119,23 +119,12 @@ test_def test_reorder_algorithm(test_def defs)
 			defs.time = time;
 			break;
 			
-		case leveled_rcm :
-			time = get_time(); 
-			Leveled_RCM(matrix, &permutation, defs.root);
-			time = (get_time() - time)/100.0;
-			defs.time = time;
-			break;
+		case serial_sloan :
+			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
+			free(g);
 			
-		case leveled_rcm_v1 :
-			time = get_time(); 
-			Leveled_RCM_v1(matrix, &permutation, defs.root);
-			time = (get_time() - time)/100.0;
-			defs.time = time;
-			break;
-			
-		case leveled_rcm_v2 :
-			time = get_time(); 
-			Leveled_RCM_v2(matrix, &permutation, defs.root);
+			time = get_time();
+			REORDERING_SLOAN(matrix, &permutation, node_s, node_e);
 			time = (get_time() - time)/100.0;
 			defs.time = time;
 			break;
@@ -147,12 +136,16 @@ test_def test_reorder_algorithm(test_def defs)
 			defs.time = time;
 			break;
 			
-		case serial_sloan :
-			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
-			free(g);
+		case leveled_rcm :
+			time = get_time(); 
+			Leveled_RCM(matrix, &permutation, defs.root);
+			time = (get_time() - time)/100.0;
+			defs.time = time;
+			break;
 			
-			time = get_time();
-			REORDERING_SLOAN(matrix, &permutation, node_s, node_e);
+		case bucket_rcm :
+			time = get_time(); 
+			Bucket_RCM(matrix, &permutation, defs.root);
 			time = (get_time() - time)/100.0;
 			defs.time = time;
 			break;
@@ -185,6 +178,11 @@ test_def test_reorder_algorithm(test_def defs)
 	return defs;
 }
 
+
+/* ******************************************************
+ * **************** Serial Strategies *******************
+ * ******************************************************
+ */
 
 
 test_def test_serial_rcm(const char* path_matrix_file, int root)
@@ -303,6 +301,28 @@ test_def test_hsl_rcm(const char* path_matrix_file)
 }
 
 
+/* ******************************************************
+ * ************** Parallel Strategies *******************
+ * ******************************************************
+ */
+
+test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_percent, int root)
+{
+	test_def defs;
+	
+	defs.path_matrix_file = path_matrix_file;
+	defs.algorithm_name = "Unordered RCM";
+	defs.algorithm = unordered_rcm;
+	defs.root = root;
+	defs.percent_chunk = bfs_chunk_percent;
+	defs.num_threads = num_threads;
+	defs.strategy = parallel;
+	
+	defs = test_reorder_algorithm(defs);
+	
+	return defs;
+}
+
 
 test_def test_leveled_rcm(const char* path_matrix_file, const int num_threads, int root)
 {
@@ -321,69 +341,14 @@ test_def test_leveled_rcm(const char* path_matrix_file, const int num_threads, i
 }
 
 
-
-
-test_def test_leveled_rcm_v1(const char* path_matrix_file, const int num_threads, int root)
+test_def test_bucket_rcm(const char* path_matrix_file, const int num_threads, int root)
 {
 	test_def defs;
 	
 	defs.path_matrix_file = path_matrix_file;
-	defs.algorithm_name = "Leveled RCM v1";
-	defs.algorithm = leveled_rcm_v1;
+	defs.algorithm_name = "Bucket RCM";
+	defs.algorithm = bucket_rcm;
 	defs.root = root;
-	defs.num_threads = num_threads;
-	defs.strategy = parallel;
-	
-	defs = test_reorder_algorithm(defs);
-	
-	return defs;
-}
-
-
-
-test_def test_leveled_rcm_v2(const char* path_matrix_file, const int num_threads, int root)
-{
-	test_def defs;
-	
-	defs.path_matrix_file = path_matrix_file;
-	defs.algorithm_name = "Leveled RCM v2";
-	defs.algorithm = leveled_rcm_v2;
-	defs.root = root;
-	defs.num_threads = num_threads;
-	defs.strategy = parallel;
-	
-	defs = test_reorder_algorithm(defs);
-	
-	return defs;
-}
-
-
-test_def test_sloan(const char* path_matrix_file, const int num_threads, int root)
-{
-	test_def defs;
-	
-	defs.path_matrix_file = path_matrix_file;
-	defs.algorithm_name = "Leveled RCM v2";
-	defs.algorithm = leveled_rcm_v2;
-	defs.root = root;
-	defs.num_threads = num_threads;
-	defs.strategy = parallel;
-	
-	defs = test_reorder_algorithm(defs);
-	
-	return defs;
-}
-
-
-test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_percent, int root)
-{
-	test_def defs;
-	
-	defs.path_matrix_file = path_matrix_file;
-	defs.algorithm_name = "Unordered RCM";
-	defs.algorithm = unordered_rcm;
-	defs.root = root;
-	defs.percent_chunk = bfs_chunk_percent;
 	defs.num_threads = num_threads;
 	defs.strategy = parallel;
 	
@@ -488,10 +453,10 @@ void run_all_tests()
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
 // 		"../Big-Matrices/inline_1.mtx",
-		"../Big-Matrices/audikw_1.mtx",
+// 		"../Big-Matrices/audikw_1.mtx",
 // 		"../Big-Matrices/dielFilterV3real.mtx",
 // 		"../Big-Matrices/atmosmodj.mtx",
-// 		"../Big-Matrices/G3_circuit.mtx"
+		"../Big-Matrices/G3_circuit.mtx"
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
@@ -502,7 +467,7 @@ void run_all_tests()
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { leveled_rcm };
+	reorder_algorithm algorithm[] = { bucket_rcm };
 	
 	/* *****************
 	 * Tests execution
@@ -552,6 +517,10 @@ void run_all_tests()
 							
 						case leveled_rcm :
 							test_results[count_exec] = test_leveled_rcm(matrices[count_matrix], nthreads[count_nthreads], root);
+							break;
+							
+						case bucket_rcm :
+							test_results[count_exec] = test_bucket_rcm(matrices[count_matrix], nthreads[count_nthreads], root);
 							break;
 							
 						case serial_sloan :
