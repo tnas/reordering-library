@@ -128,7 +128,7 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	int nsup     = n;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
-	int lirn     = 3 * (icptr[n]-1);
+	int lirn     = 2 * (icptr[n]-1);
 	int vars[n];
 	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
 	double weight[2];
@@ -136,6 +136,7 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	int info[4];
 	int iw[3*n + 1];
 	double w[n];
+	
 	
 	*p = calloc(nsup, sizeof(int));
 	
@@ -146,13 +147,13 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	
 	for (i = 0; i < n; i++) vars[i] = 1;
 	
-	printf("irn vector: ");
-	for (i = 0; i < lirn; i++) printf("%d ", irn[i]);
-	printf("\n");fflush(stdout);
-	
-	printf("icptr vector: ");
-	for (i = 0; i <= n; i++) printf("%d ", icptr[i]);
-	printf("\n");fflush(stdout);
+// 	printf("irn vector: ");
+// 	for (i = 0; i < lirn; i++) printf("%d ", irn[i]);
+// 	printf("\n");fflush(stdout);
+// 	
+// 	printf("icptr vector: ");
+// 	for (i = 0; i <= n; i++) printf("%d ", icptr[i]);
+// 	printf("\n");fflush(stdout);
 	
 // 	int icntl[2] = { 0, 6 };	
 // 	int iiw[n];
