@@ -6,6 +6,9 @@
 void mc60ad_(int* n, int* lirn, int* irn, int* icptr, int* icntl, int* iw, int* info);
 void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int** pair, int* info, int* iw, double* w);
 
+void mc61id_(int* icntl, double* cntl);
+void mc61ad_(int* job, int* n, int* lirn, int* irn, int* icptr, int* perm, int* liw, int* iw, double* w, int* icntl, double* cntl, int* info, double* rinfo);
+
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm
  *--------------------------------------------------------------------------*/
@@ -121,45 +124,93 @@ void REORDERING_RCM (MAT* A, int** Fp)
 /*----------------------------------------------------------------------------
  * HSL_MC60 RCM Reordering
  *--------------------------------------------------------------------------*/
+// void REORDERING_HSL_RCM (MAT* A, int** p)
+// {
+// 	int i;
+// 	int n        = A->n; 
+// 	int nsup     = n;
+// 	int *irn     = A->JA;
+// 	int *icptr   = A->IA;
+// 	int lirn     = 2 * (icptr[n]-1);
+// 	int vars[n];
+// 	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
+// 	double weight[2];
+// 	int pair[nsup/2][2];
+// 	int info[4];
+// 	int iw[3*n + 1];
+// 	double w[n];
+// 	
+// 	
+// 	*p = calloc(nsup, sizeof(int));
+// 	
+// 	/* -------------------------------------------------------------------- */    
+// 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
+// 	/* -------------------------------------------------------------------- */
+// 	for (i = 0; i < lirn; i++) ++irn[i];
+// 	
+// 	for (i = 0; i < n; i++) vars[i] = 1;
+// 	
+// // 	printf("irn vector: ");
+// // 	for (i = 0; i < lirn; i++) printf("%d ", irn[i]);
+// // 	printf("\n");fflush(stdout);
+// // 	
+// // 	printf("icptr vector: ");
+// // 	for (i = 0; i <= n; i++) printf("%d ", icptr[i]);
+// // 	printf("\n");fflush(stdout);
+// 	
+// // 	int icntl[2] = { 0, 6 };	
+// // 	int iiw[n];
+// // 	mc60ad_(&n, &lirn, irn, icptr, icntl, iiw, info);
+// 	
+// // 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, *p, weight, (int**) pair, info, iw, w);
+// 	
+// 	
+// 
+// 	/* -------------------------------------------------------------------- */    
+// 	/* Convert matrix back to 0-based C-notation.                           */
+// 	/* -------------------------------------------------------------------- */
+// 	for (i = 0; i < lirn; i++) --irn[i];
+// 	
+// 	for (i = 0; i < n; i++) --((*p)[i]);
+// 	
+// 	printf("Permutation vector: ");
+// 	for (i = 0; i < n; i++) printf("%d ", (*p)[i]);
+// 	printf("\n");fflush(stdout);
+// }
+
 void REORDERING_HSL_RCM (MAT* A, int** p)
 {
 	int i;
-	int n        = A->n; 
-	int nsup     = n;
-	int *irn     = A->JA;
-	int *icptr   = A->IA;
-	int lirn     = 2 * (icptr[n]-1);
-	int vars[n];
-	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
-	double weight[2];
-	int pair[nsup/2][2];
-	int info[4];
-	int iw[3*n + 1];
+	
+	int icntl[10];
+	double cntl[5];
+	int job = 2; // variable permutation to reduce bandwidth
+	int n = A->n;
+	int *icptr = A->IA;
+	int *irn = A->JA;
+	int lirn = 2 * (icptr[n-1]-1);
+	int liw = 2 + 8*n;
+	int iw[liw];
 	double w[n];
+	int info[5];
+	double rinfo[15];
 	
+	printf("icptr[n] = %d, lirn = %d\n", icptr[n-1], lirn);fflush(stdout);
 	
-	*p = calloc(nsup, sizeof(int));
+	printf("icptr vector: ");
+	for (i = 0; i < n; i++) printf("%d ", icptr[i]);
+	printf("\n");fflush(stdout);
+	
+	mc61id_(icntl, cntl);
+	
+	*p = calloc(n, sizeof(int));
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
 	/* -------------------------------------------------------------------- */
 	for (i = 0; i < lirn; i++) ++irn[i];
 	
-	for (i = 0; i < n; i++) vars[i] = 1;
-	
-// 	printf("irn vector: ");
-// 	for (i = 0; i < lirn; i++) printf("%d ", irn[i]);
-// 	printf("\n");fflush(stdout);
-// 	
-// 	printf("icptr vector: ");
-// 	for (i = 0; i <= n; i++) printf("%d ", icptr[i]);
-// 	printf("\n");fflush(stdout);
-	
-// 	int icntl[2] = { 0, 6 };	
-// 	int iiw[n];
-// 	mc60ad_(&n, &lirn, irn, icptr, icntl, iiw, info);
-	
-	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, *p, weight, (int**) pair, info, iw, w);
+	mc61ad_(&job, &n, &lirn, irn, icptr, *p, &liw, iw, w, icntl, cntl, info, rinfo);
 
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
@@ -172,5 +223,4 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	for (i = 0; i < n; i++) printf("%d ", (*p)[i]);
 	printf("\n");fflush(stdout);
 }
-
 

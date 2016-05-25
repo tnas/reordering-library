@@ -75,6 +75,7 @@ typedef enum MC60_ALGORITHM { SLOAN, RCM } MC60_ALGORITHM;
 typedef enum MC60_CONTROL { 
 	AUTOMATIC_PERIPHERAL, ESPECIFIED_PERIPHERAL, GLOBAL_PRIORITY_VECTOR } MC60_CONTROL;
 
+
 #endif
 
 /*----------------------------------------------------------------------------
