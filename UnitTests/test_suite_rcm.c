@@ -456,18 +456,18 @@ void run_all_tests()
 // 		"../Big-Matrices/audikw_1.mtx",
 // 		"../Big-Matrices/dielFilterV3real.mtx",
 // 		"../Big-Matrices/atmosmodj.mtx",
-		"../Big-Matrices/G3_circuit.mtx"
+// 		"../Big-Matrices/G3_circuit.mtx"
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx"
-// 		"../Matrices/FEM_3D_thermal1.mtx",
+		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx"
 	};
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { bucket_rcm };
+	reorder_algorithm algorithm[] = { serial_rcm };
 	
 	/* *****************
 	 * Tests execution
