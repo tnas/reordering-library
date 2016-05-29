@@ -3,6 +3,7 @@
  *--------------------------------------------------------------------------*/
 #include "../CommonFiles/protos.h"
 
+void mc60bd_(int* n, int* lirn, int* irn, int* icptr, int* nsup, int* svar, int* vars, int* iw);
 void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int** pair, int* info, int* iw, double* w);
 void mc60dd_(int* n, int* nsup, int* svar, int* vars, int* permsv, int* perm, int* possv);
 
@@ -140,6 +141,17 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	int svar[n];
 	int possv[n];
 	int perm[n];
+// 	double* w;
+// 	int* permsv;
+// 	int* svar;
+// 	int* possv;
+// 	int* perm;
+	
+// 	w = calloc(n, sizeof(double));
+// 	permsv = calloc(nsup, sizeof(int));
+// 	svar = calloc(n, sizeof(int));
+// 	possv = calloc(n, sizeof(int));
+// 	perm = calloc(n, sizeof(int));
 	
 	*p = calloc(nsup, sizeof(int));
 	
@@ -151,13 +163,15 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	{
 		++irn[i];
 		++icptr[i];
-		vars[i] = 1;
-		svar[i] = i + 1;
+// 		vars[i] = 1;
+// 		svar[i] = i + 1;
 	}
 	
 	++icptr[nsup];
 	
 	for (i = n; i < lirn; i++) ++irn[i];
+	
+	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
 	
 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, (int**) pair, info, iw, w);
 	
@@ -176,4 +190,10 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	--icptr[nsup];
 	
 	for (i = n; i < lirn; i++) --irn[i];
+	
+// 	free(w);
+// 	free(permsv);
+// 	free(svar);
+// 	free(possv);
+// 	free(perm);
 }

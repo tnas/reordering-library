@@ -1,5 +1,6 @@
 #include "test_suite_rcm.h"
 
+void mc60hd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* mask, int* ls, int* xls, int* list, int* info);
 
 void test_prefix_sum()
 {
@@ -66,6 +67,49 @@ int get_node_peripheral(const char* path_matrix_file) {
 	
 	MATRIX_clean(matrix);
 	free(level_structure);
+	
+	return root;
+}
+
+
+int get_node_peripheral_hsl(const char* path_matrix_file) {
+	
+	int root;
+	MAT* matrix;
+	FILE* matrix_file;
+	
+	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
+		exit(1);
+	
+	matrix = (MAT*) malloc (sizeof(MAT));
+	MATRIX_readCSR (matrix, matrix_file);
+	fclose(matrix_file);
+
+	int i;
+	int n        = matrix->n; 
+	int nsup     = n;
+	int *irn     = matrix->JA;
+	int *icptr   = matrix->IA;
+	int lirn     = matrix->nz;
+	int vars[n];
+	int mask[n];
+	int ls[n];
+	int xls[n];
+	int list[n];
+	int info[6];
+	
+	for (i = 0; i < n; i++) 
+	{
+		++irn[i];
+		++icptr[i];
+		vars[i] = mask[i] = 1;
+	}
+	
+	mc60hd_(&n, &nsup, &lirn, irn, icptr, vars, mask, ls, xls, list, info);
+	
+	root = info[0];
+	
+	MATRIX_clean(matrix);
 	
 	return root;
 }
@@ -537,7 +581,6 @@ void run_all_tests()
 							
 						default :
 							break;
-						
 					}
 				}
 				
