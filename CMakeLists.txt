@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(reordering-library C Fortran)
 
+# set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
 add_executable(reordering-library program.c 
 	./CommonFiles/util.c 
 	./CommonFiles/blas.c 
@@ -14,6 +16,7 @@ add_executable(reordering-library program.c
 	./Reorderings/rcm_parallel.c 
 	./Reorderings/sloan.c
 	./Reorderings/sloan_parallel.c
+	./Reorderings/rcm_galois.cpp
 	./UnitTests/test_suite_rcm.c)
 
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)
@@ -25,6 +28,7 @@ install(TARGETS reordering-library RUNTIME DESTINATION bin)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fopenmp")
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
+
 set_property(TARGET reordering-library PROPERTY LINKER_LANGUAGE C)
 
 add_subdirectory(CommonFiles)
