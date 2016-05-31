@@ -55,7 +55,7 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 
 		L = LIST_remove (L,i);
 		
-		if (status[i] == -1)
+		if (status[i] == -1) // PREACTIVE
 		{
 			adj1  = GRAPH_adjacent(A,i);
 			nadj1 = GRAPH_degree  (A,i);
@@ -63,7 +63,7 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 			{
 				j = adj1[J];
 				P[j] += W2;
-				if (status[j] == -2)
+				if (status[j] == -2) // INACTIVE
 				{
 					L = LIST_insert_IF_NOT_EXIST (L,j);
 					status[j] = -1;
@@ -80,10 +80,10 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 		for (J = 0; J < nadj1; ++J)
 		{
 			j = adj1[J];
-			if (status[j] == -1)
+			if (status[j] == -1) // PREACTIVE
 			{
 				P[j] += W2;
-				status[j] = 0;
+				status[j] = 0; // ACTIVE
 				adj2  = GRAPH_adjacent(A,j);
 				nadj2 = GRAPH_degree  (A,j);
 				for (K = 0; K < nadj2; ++K)
