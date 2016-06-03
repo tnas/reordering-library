@@ -77,28 +77,4 @@ typedef enum MC60_CONTROL {
 
 
 #endif
-
-/*----------------------------------------------------------------------------
- * PRECONDITIONERS STRUCTURES
- *--------------------------------------------------------------------------*/
-#ifndef PRECONDITIONERS_H
-#define PRECONDITIONERS_H
-
-typedef struct
-{
-	int           n;
-	int*    nzcount;  /* length of each row                          */
-	int**        ja;  /* pointer-to-pointer to store column indices  */
-	double**     ma;  /* pointer-to-pointer to store nonzero entries */
-} SparMAT;
-
-typedef struct
-{
-	int         n;
-	SparMAT*    L;   /* L part elements   */
-	double*     D;   /* diagonal elements */
-	SparMAT*    U;   /* U part elements   */
-	int*     work;   /* working buffer    */
-} SparILU;
-
-#endif /* PRECONDITIONERS_H */
+	

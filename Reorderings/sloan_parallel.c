@@ -7,7 +7,7 @@
  * SLOAN reordering
  *--------------------------------------------------------------------------*/
 
-void update_far_neighbors(MAT* A, int** status, int** priority, int node, LIST** worklist) 
+void inline update_far_neighbors(MAT* A, int** status, int** priority, int node, LIST** worklist) 
 {
 	int node_degree, ngb, neighbor;
 	int* neighbors;
@@ -53,6 +53,9 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 	queue = NULL;
 	next_id = 0;
 	
+	int min = 999999;
+	int max = -999999;
+	
 	#pragma omp parallel 
 	{
 		#pragma omp for private(node)
@@ -60,7 +63,17 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		{
 			status[node]   = INACTIVE;
 			priority[node] = SLOAN_W1*distance[node] - SLOAN_W2*(GRAPH_degree(adjacency, node) + 1);
+			if (priority[node] < min) min = priority[node];
+			if (priority[node] > max) max = priority[node];
+// 			printf("priority of node %d: %d\n", node, priority[node]);fflush(stdout);
 		}
+		printf("minimum priority: %d\n", min);fflush(stdout);
+		printf("max priority: %d\n", max);fflush(stdout);
+		min *= -1;
+		
+		#pragma omp for private(node)
+		for (node = 0; node < num_nodes; ++node)
+			priority[node] += min;
 		
 		#pragma omp single nowait
 		queue = LIST_insert_IF_NOT_EXIST(queue, start_node);
@@ -170,6 +183,21 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 			}
 		}
 	}
+	
+	min = 999999;
+	max = -999999;
+	
+	#pragma omp single
+	for (node = 0; node < num_nodes; ++node)
+	{
+		if (priority[node] < min) min = priority[node];
+		if (priority[node] > max) max = priority[node];
+	}
+	
+	printf("minimum priority: %d\n", min);fflush(stdout);
+	printf("max priority: %d\n", max);fflush(stdout);
+	printf("start/end node: %d/%d\n", start_node, end_node);fflush(stdout);
+	
 	
 	#pragma omp parallel
 	{

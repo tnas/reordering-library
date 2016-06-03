@@ -73,29 +73,6 @@ extern int      LIST_first               (LIST* L);
 extern void     LIST_destroy             (LIST* L);
 extern LIST*    LIST_insert		 (LIST* L, int x);
 
-/*----------------------------------------------------------------------------
- * SOLVERS FUNCTIONS PROTOTYPE
- *--------------------------------------------------------------------------*/
-extern double   GMRES_algorithm          (MAT* A, double *x, double *b, int n, int k, int *iter, double eps);
-extern void     GMRES                    (MAT* A, double *x, double *b, double tol, int restart, int maxiter);
-extern double   PGMRES_algorithm         (MAT* A, MAT* L, MAT* U, double *x, double *b, int n, int k, int *iter, double eps);
-extern void     PGMRES                   (MAT* A, MAT* L, MAT* U, double *x, double *b, double tol, int restart, int maxiter);
-
-/*----------------------------------------------------------------------------
- * PRECONDITIONERS FUNCTIONS PROTOTYPE
- *--------------------------------------------------------------------------*/
-extern void     SPARMAT_setup            (SparMAT* mat, int n);
-extern void     SPARILU_setup            (SparILU* lu, int n);
-extern void     SPARILU_row              (SparILU* lu, int nrow);
-extern void     CSR_to_SPARMAT           (MAT* A, SparMAT* mat);
-extern void     SPARILU_to_CSR           (SparILU* lu, MAT* L, MAT* U);
-extern int      LEVEL_OF_FILL            (SparMAT* csmat, SparILU* lu, int p);
-extern void     ILUP                     (SparMAT* csmat, SparILU* lu, int p);
-extern void     SPARMAT_clean            (SparMAT* mat);
-extern void     SPARILU_clean            (SparILU* lu);
-extern void     SPARILU_print            (SparILU* lu);
-extern void     QSPLIT                   (double *a, int *ind, int n, int Ncut);
-extern void     ILUT                     (SparMAT* csmat, SparILU* lu, int lfil, double tol);
 
 /*----------------------------------------------------------------------------
  * REORDERING FUNCTIONS PROTOTYPE
