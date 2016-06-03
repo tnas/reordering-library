@@ -39,8 +39,9 @@ void inline update_far_neighbors(MAT* A, int** status, int** priority, int node,
 
 void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 {
-	int node, next_id, num_nodes;
+	int node, next_id, num_nodes, min_priority, size_prior_bags;
 	LIST* queue;
+	LIST** priority_bags;
 	omp_lock_t lock_queue;
 	
 	num_nodes        = adjacency->n;
@@ -52,9 +53,11 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 	GRAPH_bfs(adjacency, end_node, distance);
 	queue = NULL;
 	next_id = 0;
+	min_priority = INFINITY_LEVEL;
 	
-	int min = 999999;
-	int max = -999999;
+	size_prior_bags = 2 * 
+		(SLOAN_W1*distance[start_node] - SLOAN_W2*(GRAPH_degree(adjacency, start_node) + 1));
+	priority_bags = calloc(size_prior_bags, sizeof(LIST));
 	
 	#pragma omp parallel 
 	{
@@ -63,29 +66,37 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		{
 			status[node]   = INACTIVE;
 			priority[node] = SLOAN_W1*distance[node] - SLOAN_W2*(GRAPH_degree(adjacency, node) + 1);
-			if (priority[node] < min) min = priority[node];
-			if (priority[node] > max) max = priority[node];
-// 			printf("priority of node %d: %d\n", node, priority[node]);fflush(stdout);
+			if (priority[node] < min_priority) min_priority = priority[node];
 		}
-		printf("minimum priority: %d\n", min);fflush(stdout);
-		printf("max priority: %d\n", max);fflush(stdout);
-		min *= -1;
+
+		#pragma omp single
+		if (min_priority > 0) 
+		{
+			printf("*** [Error] Sloan minimum initial priority is higher than 0 ***\n");
+			exit(1);
+		}
 		
 		#pragma omp for private(node)
-		for (node = 0; node < num_nodes; ++node)
-			priority[node] += min;
+		for (node = 0; node < num_nodes; ++node) 
+		{
+			priority[node] -= min_priority;
+			priority_bags[priority[node]] = 
+				LIST_add_IF_NOT_EXIST(priority_bags[priority[node]], node, INACTIVE);
+		}
 		
 		#pragma omp single nowait
-		queue = LIST_insert_IF_NOT_EXIST(queue, start_node);
+		priority_bags[priority[start_node]] = 
+			LIST_update(priority_bags[priority[start_node]], start_node, PREACTIVE);
 		
 		#pragma omp single nowait
-		status[start_node] = PREACTIVE;
+		free(priority);
 		
 		#pragma omp single nowait
 		omp_init_lock(&lock_queue);
 	}
 	
-	
+	// Until here!!!
+		
 	#pragma omp parallel 
 	{
 		int vertex, max_priority, vertex_degree, neighbor, ngb;
@@ -94,7 +105,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		
 		while (queue != NULL || next_id < num_nodes)
 		{
-			max_priority = INIT_PRIORITY;
+			max_priority = INFINITY_LEVEL;
 			vertex       = UNDEF_NODE;
 			
 // 			printf("worklist: ");LIST_print(queue);fflush(stdout);
@@ -184,21 +195,6 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		}
 	}
 	
-	min = 999999;
-	max = -999999;
-	
-	#pragma omp single
-	for (node = 0; node < num_nodes; ++node)
-	{
-		if (priority[node] < min) min = priority[node];
-		if (priority[node] > max) max = priority[node];
-	}
-	
-	printf("minimum priority: %d\n", min);fflush(stdout);
-	printf("max priority: %d\n", max);fflush(stdout);
-	printf("start/end node: %d/%d\n", start_node, end_node);fflush(stdout);
-	
-	
 	#pragma omp parallel
 	{
 		#pragma omp single nowait
@@ -272,7 +268,7 @@ void Parallel_Sloan_v1(MAT* adjacency, int** Fp, int start_node, int end_node)
 		
 		while (queue != NULL || next_id < num_nodes)
 		{
-			max_priority = INIT_PRIORITY;
+			max_priority = MIN_PRIORITY;
 			vertex       = UNDEF_NODE;
 			
 // 			printf("worklist: ");LIST_print(queue);fflush(stdout);

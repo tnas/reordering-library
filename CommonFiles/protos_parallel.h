@@ -12,7 +12,7 @@
 
 #define SLOAN_W1 1
 #define SLOAN_W2 2
-#define INIT_PRIORITY -9999999
+#define MIN_PRIORITY -9999999
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
 #define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))

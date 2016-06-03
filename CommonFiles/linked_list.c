@@ -40,6 +40,63 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 }
 
 
+LIST* LIST_add_IF_NOT_EXIST (LIST* L, int data, int status)
+{
+	/* creating new list element */
+	if (L == NULL)
+	{
+		LIST *N = (LIST*) malloc (sizeof(LIST));
+		N->data = data;
+		N->status = status;
+		N->next = NULL;
+		N->size = 1;
+		return N;		
+	}
+		
+	LIST *P;
+	
+	/* if already exist, return */
+	for (P = L; P->next != NULL; P = P->next)
+	{
+		if (P->data == data)
+			return L;
+	}
+	if (P->data == data) 
+		return L;
+
+	LIST *N = (LIST*) malloc (sizeof(LIST));
+	N->data = data;
+	N->status = status;
+	N->next = NULL;
+	
+	P->next = N;
+	L->size++;
+	
+	return L;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Update the status of an element in the LIST structure 
+ *--------------------------------------------------------------------------*/
+LIST* LIST_update (LIST* L, int data, int status)
+{
+	LIST *P;
+	
+	/* if already exist, return */
+	for (P = L; P->next != NULL; P = P->next)
+	{
+		if (P->data == data)
+		{
+			P->status = status;
+			return L;
+		}
+	}
+		
+	return L;
+}
+
+
 
 /*----------------------------------------------------------------------------
  * Insert a element in the head of LIST structure 
