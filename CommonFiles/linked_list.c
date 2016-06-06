@@ -11,6 +11,7 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 	/* creating new list element */
 	if (L == NULL)
 	{
+		printf("adding vertex %d\n", x);fflush(stdout);
 		LIST *N = (LIST*) malloc (sizeof(LIST));
 		N->data = x;
 		N->next = NULL;
@@ -35,67 +36,9 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 	
 	P->next = N;
 	L->size++;
-	
+	printf("adding vertex %d\n", x);fflush(stdout);
 	return L;
 }
-
-
-LIST* LIST_add_IF_NOT_EXIST (LIST* L, int data, int status)
-{
-	/* creating new list element */
-	if (L == NULL)
-	{
-		LIST *N = (LIST*) malloc (sizeof(LIST));
-		N->data = data;
-		N->status = status;
-		N->next = NULL;
-		N->size = 1;
-		return N;		
-	}
-		
-	LIST *P;
-	
-	/* if already exist, return */
-	for (P = L; P->next != NULL; P = P->next)
-	{
-		if (P->data == data)
-			return L;
-	}
-	if (P->data == data) 
-		return L;
-
-	LIST *N = (LIST*) malloc (sizeof(LIST));
-	N->data = data;
-	N->status = status;
-	N->next = NULL;
-	
-	P->next = N;
-	L->size++;
-	
-	return L;
-}
-
-
-/*----------------------------------------------------------------------------
- * Update the status of an element in the LIST structure 
- *--------------------------------------------------------------------------*/
-LIST* LIST_update (LIST* L, int data, int status)
-{
-	LIST *P;
-	
-	/* if already exist, return */
-	for (P = L; P->next != NULL; P = P->next)
-	{
-		if (P->data == data)
-		{
-			P->status = status;
-			return L;
-		}
-	}
-		
-	return L;
-}
-
 
 
 /*----------------------------------------------------------------------------
@@ -154,11 +97,12 @@ LIST* LIST_remove (LIST* L, int x)
 		L = P->next;
 	else
 		Q->next = P->next;
-	
+	printf("removing vertex %d\n", x);fflush(stdout);
 	free(P);
 	
 	return L;
 }
+
 
 /*----------------------------------------------------------------------------
  * Print all elements in the LIST structure

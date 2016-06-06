@@ -66,8 +66,6 @@ extern int* 	GRAPH_fixedpoint_bfs	 (MAT* adjacency, int root, int* levels);
  * LINKED LIST FUNCTIONS PROTOTYPE
  *--------------------------------------------------------------------------*/
 extern LIST*    LIST_insert_IF_NOT_EXIST (LIST* L, int x);
-extern LIST*    LIST_add_IF_NOT_EXIST    (LIST* L, int data, int status);
-extern LIST* 	LIST_update 		 (LIST* L, int data, int status);
 extern LIST*    LIST_remove              (LIST* L, int x);
 extern LIST*    LIST_remove_first        (LIST* L);
 extern void     LIST_print               (LIST* L);
