@@ -59,13 +59,14 @@ void inline update_far_neighbors(MAT* A, int** status, int** priority, int node,
 			(*worklist)[(*priority)[neighbor]] = 
 				LIST_insert_IF_NOT_EXIST((*worklist)[(*priority)[neighbor]], neighbor);
 		}
-		printf("updating priority of node %d\n", node);fflush(stdout);
+		
 		if ((*worklist)[(*priority)[node]] != NULL)
 			(*worklist)[(*priority)[node]] = 
 					LIST_remove((*worklist)[(*priority)[node]], node);
 		(*priority)[node] += SLOAN_W2;
 		(*worklist)[(*priority)[node]] = 
 				LIST_insert_IF_NOT_EXIST((*worklist)[(*priority)[node]], node);
+		printf("updating priority of node %d to %d\n", node, (*priority)[node]);fflush(stdout);
 	}
 	
 	free(neighbors);
@@ -78,16 +79,20 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 	LIST** priority_bags;
 	omp_lock_t lock_queue;
 	
+	// TODO: paralelizar as alocações
 	num_nodes        = adjacency->n;
 	int* distance    = calloc (num_nodes,sizeof (int));
 	int* permutation = calloc (num_nodes,sizeof (int));
 	int* priority    = calloc (num_nodes,sizeof (int));
 	int* status      = calloc (num_nodes,sizeof (int));
 	
+	// TODO: Usar a BFS paralela
 	GRAPH_bfs(adjacency, end_node, distance);
 	next_id = 0;
 	min_priority = INFINITY_LEVEL;
+	
 	printf("**************Sloan start*****************\n");fflush(stdout);	
+	
 	#pragma omp parallel 
 	{
 		#pragma omp for private(node)
@@ -114,11 +119,6 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		for (node = 0; node < num_nodes; ++node) 
 			priority[node] -= min_priority;
 		
-		int j;
-		printf("Priorities After: ");fflush(stdout);
-		for (j = 0; j< num_nodes; j++) printf("%d ", priority[j]); fflush(stdout);
-		printf("\n");fflush(stdout);
-		
 		printf("Priority start node %d: %d\n", start_node, priority[start_node]);fflush(stdout);
 		
 		#pragma omp single
@@ -138,6 +138,8 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		omp_init_lock(&lock_queue);
 	}
 	
+	// TODO: eliminar essa divisão e fazer um único bloco paralelo
+	
 	#pragma omp parallel 
 	{
 		int vertex, vertex_degree, neighbor, ngb, prior;
@@ -145,6 +147,15 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		
 		while (next_id < num_nodes)
 		{
+			
+			int j;
+			printf("Priorities : ");fflush(stdout);
+			for (j = 0; j< num_nodes; j++) printf("%02d ", priority[j]); fflush(stdout);
+			printf("\n");fflush(stdout);
+			printf("Status     : ");fflush(stdout);
+			for (j = 0; j< num_nodes; j++) printf("%02d ", status[j]); fflush(stdout);
+			printf("\n");fflush(stdout);
+			
 			vertex = UNDEF_NODE;
 			
 // 			printf("worklist: ");LIST_print(queue);fflush(stdout);
@@ -154,13 +165,39 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 			// Chosing vertex that maximizes the priority
 			for (prior = size_prior_bags-1; prior >=0; --prior)
 			{
+				if (priority_bags[prior] != NULL)
+				{
+					printf("Priority bag BEFORE %d: ", prior);
+					LIST_print(priority_bags[prior]);
+					fflush(stdout);
+				}
+			}
+
+			
+			// Chosing vertex that maximizes the priority
+			for (prior = size_prior_bags-1; prior >=0; --prior)
+			{
 // 				printf("Searching vertex at position %d\n", prior);
 				
-				if (priority_bags[prior] != NULL && priority_bags[prior]->size > 0)
+				if (priority_bags[prior] != NULL)
 				{
 					vertex = priority_bags[prior]->data;
+					printf("Getting vertex to processing: %d\n", vertex);fflush(stdout);
 					priority_bags[prior] = LIST_remove(priority_bags[prior], vertex);
+// 					if (priority_bags[prior] != NULL)
+// 						printf("Next vertex from this Bag: %d\n", priority_bags[prior]->data);fflush(stdout);
 					prior = 0;
+				}
+			}
+			
+			// Chosing vertex that maximizes the priority
+			for (prior = size_prior_bags-1; prior >=0; --prior)
+			{
+				if (priority_bags[prior] != NULL)
+				{
+					printf("Priority bag AFTER %d: ", prior);
+					LIST_print(priority_bags[prior]);
+					fflush(stdout);
 				}
 			}
 			
@@ -170,7 +207,9 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 			
 			if (vertex != UNDEF_NODE) 
 			{
-				printf("Processing vertex %d\n", vertex);fflush(stdout);
+				printf("---------------------------------------\n");
+				printf("Processing vertex %d\n", vertex);
+				printf("---------------------------------------\n");fflush(stdout);
 				
 				neighbors     = GRAPH_adjacent(adjacency, vertex);
 				vertex_degree = GRAPH_degree  (adjacency, vertex);
