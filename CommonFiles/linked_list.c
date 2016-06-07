@@ -11,7 +11,6 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 	/* creating new list element */
 	if (L == NULL)
 	{
-		if (x == 6) printf("adding vertex %d\n", x);fflush(stdout);
 		LIST *N = (LIST*) malloc (sizeof(LIST));
 		N->data = x;
 		N->next = NULL;
@@ -36,7 +35,7 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 	
 	P->next = N;
 	L->size++;
-	if (x == 6) printf("adding vertex %d\n", x);fflush(stdout);
+	
 	return L;
 }
 
@@ -97,7 +96,7 @@ LIST* LIST_remove (LIST* L, int x)
 		L = P->next;
 	else
 		Q->next = P->next;
-	if (x == 6) printf("removing vertex %d\n", x);fflush(stdout);
+	
 	free(P);
 	
 	return L;
