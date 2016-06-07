@@ -72,8 +72,252 @@ void inline update_far_neighbors(MAT* A, int** status, int** priority, int node,
 	free(neighbors);
 }
 
-
 void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
+{
+	int num_nodes, node, next_id, min_priority, max_priority, size_prior_bags;
+	LIST** priority_bags;
+	omp_lock_t lock_queue;
+	int* distance;
+	int* permutation;
+	int* priority;
+	int* status;
+	
+	#pragma omp parallel 
+	{
+		int vertex, vertex_degree, neighbor, ngb, prior;
+		int* neighbors;
+		
+		#pragma omp single nowait
+		num_nodes = adjacency->n;
+		
+		#pragma omp single nowait
+		permutation = calloc (num_nodes,sizeof (int));
+		
+		#pragma omp single nowait
+		priority = calloc (num_nodes,sizeof (int));
+		
+		#pragma omp single nowait
+		status = calloc (num_nodes,sizeof (int));
+		
+		#pragma omp single nowait
+		min_priority = INFINITY_LEVEL;
+		
+		#pragma omp single
+		{
+			distance = calloc (num_nodes,sizeof (int));
+			// TODO: Usar a BFS paralela
+			GRAPH_bfs(adjacency, end_node, distance);
+		}
+		
+		#pragma omp for private(node)
+		for (node = 0; node < num_nodes; ++node)
+		{
+			status[node]   = INACTIVE;
+			priority[node] = SLOAN_W1*distance[node] - SLOAN_W2*(GRAPH_degree(adjacency, node) + 1);
+			if (priority[node] < min_priority) min_priority = priority[node];
+		}
+
+// 		int i;
+// 		printf("Priorities before: ");fflush(stdout);
+// 		for (i = 0; i< num_nodes; i++) printf("%d ", priority[i]); fflush(stdout);
+// 		printf("\n");fflush(stdout);
+		
+		#pragma omp single
+		if (min_priority > 0) 
+		{
+			printf("*** [Error] Sloan minimum initial priority is higher than 0 ***\n");
+			exit(1);
+		}
+		
+		#pragma omp for private(node)
+		for (node = 0; node < num_nodes; ++node) 
+			priority[node] -= min_priority;
+		
+// 		printf("Priority start node %d: %d\n", start_node, priority[start_node]);fflush(stdout);
+		
+		#pragma omp single
+		{
+			size_prior_bags = 2 * priority[start_node];
+			priority_bags = calloc(size_prior_bags, sizeof(LIST*));
+		}
+		
+		#pragma omp single nowait
+		priority_bags[priority[start_node]] = 
+				LIST_insert_IF_NOT_EXIST(priority_bags[priority[start_node]], start_node);
+		
+		#pragma omp single nowait
+		status[start_node] = PREACTIVE;
+		
+		#pragma omp single nowait
+		omp_init_lock(&lock_queue);
+		
+		/* ************************************
+		 * ********** Processing nodes ********
+		 * ************************************/
+		
+		#pragma omp single nowait
+		next_id = 0;
+		
+		#pragma omp single nowait
+		max_priority = priority[start_node];
+		
+		while (next_id < num_nodes)
+		{
+			vertex = UNDEF_NODE;
+			
+			#pragma omp critical
+			{
+				if (priority_bags[max_priority] == NULL)
+				{
+					max_priority = MIN_PRIORITY;
+					
+					// Chosing maximum priority
+					for (prior = size_prior_bags - 1; prior >= 0; --prior)
+					{
+						if (priority_bags[prior] != NULL)
+						{
+							max_priority = prior;
+							prior = 0;
+						}
+					}
+				}
+				
+				if (max_priority != MIN_PRIORITY)
+				{
+					vertex = priority_bags[max_priority]->data;
+					
+					omp_set_lock(&lock_queue);
+					priority_bags[max_priority] = LIST_remove(priority_bags[max_priority], vertex);
+					printf(">>Thread %d get node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+					omp_unset_lock(&lock_queue);
+				}
+			}
+			
+			if (vertex != UNDEF_NODE) 
+			{
+				neighbors     = GRAPH_adjacent(adjacency, vertex);
+				vertex_degree = GRAPH_degree  (adjacency, vertex);
+				
+				for (ngb = 0; ngb < vertex_degree; ++ngb)
+				{
+					neighbor = neighbors[ngb];
+					
+					if ((status[vertex] == PREACTIVE) && (status[neighbor] == INACTIVE))
+					{
+						
+// 						if (status[neighbor] == INACTIVE)
+// 						{
+// 							#pragma omp atomic
+// 							priority[neighbor] += SLOAN_W2; 
+// 							
+// 							#pragma omp critical
+// 							status[neighbor] = ACTIVE;
+// 							
+// 							#pragma omp critical
+// 							priority_bags[priority[neighbor]] = 
+// 								LIST_insert_IF_NOT_EXIST(priority_bags[priority[neighbor]], neighbor);
+// 						}
+// 						else if (status[neighbor] == PREACTIVE) 
+// 						{
+// 						}
+// 						else  // status[neighbor] == ACTIVE
+// 						{
+// 							
+// 						}
+						
+						omp_set_lock(&lock_queue);
+						priority[neighbor] += SLOAN_W2; 
+						status[neighbor]    = ACTIVE;
+						priority_bags[priority[neighbor]] = 
+							LIST_insert_IF_NOT_EXIST(priority_bags[priority[neighbor]], neighbor);
+						
+						update_far_neighbors(adjacency, &status, &priority, neighbor, &priority_bags);
+						omp_unset_lock(&lock_queue);
+					}
+					else if ((status[vertex] == PREACTIVE) && (status[neighbor] == PREACTIVE))
+					{
+						omp_set_lock(&lock_queue);
+						
+						priority_bags[priority[neighbor]] = 
+							LIST_remove(priority_bags[priority[neighbor]], neighbor);
+						priority[neighbor] += SLOAN_W2;
+						priority_bags[priority[neighbor]] = 
+							LIST_insert_IF_NOT_EXIST(priority_bags[priority[neighbor]], neighbor);
+						status[neighbor] = ACTIVE;
+						
+						update_far_neighbors(adjacency, &status, &priority, neighbor, &priority_bags);
+						omp_unset_lock(&lock_queue);
+					}
+					else if ((status[vertex] == PREACTIVE) && (status[neighbor] == ACTIVE))
+					{
+						omp_set_lock(&lock_queue);
+						priority_bags[priority[neighbor]] = 
+							LIST_remove(priority_bags[priority[neighbor]], neighbor);
+						priority[neighbor] += SLOAN_W2;
+						priority_bags[priority[neighbor]] = 
+							LIST_insert_IF_NOT_EXIST(priority_bags[priority[neighbor]], neighbor);
+						omp_unset_lock(&lock_queue);
+					}
+					else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
+					{
+						omp_set_lock(&lock_queue);
+						priority_bags[priority[neighbor]] = 
+							LIST_remove(priority_bags[priority[neighbor]], neighbor);
+						priority[neighbor] += SLOAN_W2;
+						priority_bags[priority[neighbor]] = 
+							LIST_insert_IF_NOT_EXIST(priority_bags[priority[neighbor]], neighbor);
+							
+						status[neighbor] = ACTIVE;
+						
+						update_far_neighbors(adjacency, &status, &priority, neighbor, &priority_bags);
+						omp_unset_lock(&lock_queue);
+					}
+				}
+				
+				#pragma omp critical
+				{
+					printf("Thread %d setting node %d at position %d of permutation\n", omp_get_thread_num(), vertex, next_id);fflush(stdout);
+					permutation[next_id++] = vertex;
+					status[vertex] = NUMBERED;
+				}
+				
+				free(neighbors);
+			}
+		}
+	}
+	
+	#pragma omp parallel
+	{
+		#pragma omp single nowait
+		omp_destroy_lock(&lock_queue);
+		
+		#pragma omp single nowait
+		free(distance);
+		
+		#pragma omp single nowait
+		free(priority);
+		
+		#pragma omp single nowait
+		free(status);
+		
+		#pragma omp single nowait
+		free(priority_bags);
+		
+		#pragma omp single nowait
+		*Fp = permutation;
+	}
+	
+	printf("Permutation vector of size %d: ", num_nodes);fflush(stdout);
+	int i;
+	for (i = 0; i < num_nodes; ++i)
+		printf("%d ", (*Fp)[i]);
+	printf("\n");fflush(stdout);
+}
+
+
+
+
+void Parallel_Sloan_v2 (MAT* adjacency, int** Fp, int start_node, int end_node)
 {
 	int node, next_id, num_nodes, min_priority, size_prior_bags;
 	LIST** priority_bags;
@@ -176,6 +420,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 			
 			
 			// Chosing vertex that maximizes the priority
+			
 			for (prior = size_prior_bags-1; prior >=0; --prior)
 			{
 				if (priority_bags[prior] != NULL)
