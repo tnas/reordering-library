@@ -69,28 +69,28 @@ void inline update_far_neighbors(MAT* A, int** status, int** priority, int node,
 
 void inline update_far_log_neighbors(MAT* A, int** status, int node, LIST** local_log) 
 {
-	int node_degree, ngb, neighbor;
-	int* neighbors;
+	int neighbor_degree, far_ngb, far_neighbor;
+	int* far_neighbors;
 	
-	neighbors   = GRAPH_adjacent(A, node);
-	node_degree = GRAPH_degree(A, node);
+	far_neighbors   = GRAPH_adjacent(A, node);
+	neighbor_degree = GRAPH_degree(A, node);
 	
-	for (ngb = 0; ngb < node_degree; ++ngb) 
+	for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
 	{
-		neighbor = neighbors[ngb];
+		far_neighbor = far_neighbors[far_ngb];
 		
-		if ((*status)[neighbor] == INACTIVE)
+		if ((*status)[far_neighbor] == INACTIVE)
 		{
 			#pragma omp critical
-			(*status)[neighbor] = PREACTIVE;
+			(*status)[far_neighbor] = PREACTIVE;
 			
-			*local_log = LIST_add_IF_NOT_EXIST(*local_log, neighbor, SLOAN_W2, omp_get_thread_num());
+			*local_log = LIST_add_IF_NOT_EXIST(*local_log, far_neighbor, SLOAN_W2, omp_get_thread_num());
 		}
 		
 		*local_log = LIST_add_IF_NOT_EXIST(*local_log, node, SLOAN_W2, omp_get_thread_num());
 	}
 	
-	free(neighbors);
+	free(far_neighbors);
 }
 
 
@@ -107,10 +107,12 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 	#pragma omp parallel 
 	{
 		int node, vertex, vertex_degree, neighbor, ngb, prior;
+		int neighbor_degree, far_ngb, far_neighbor;
 		int* neighbors;
+		int* far_neighbors;
 		LIST* log;
 		LIST* p_log;
-		
+	
 		#pragma omp single nowait
 		num_nodes = adjacency->n;
 		
@@ -214,40 +216,46 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 					for (ngb = 0; ngb < vertex_degree; ++ngb)
 					{
 						neighbor = neighbors[ngb];
-						
-						if ((status[vertex] == PREACTIVE) && (status[neighbor] == INACTIVE))
+						// there is an error among the states: ACTIVE ACTIVE is not allowed!
+						if ((status[vertex] == PREACTIVE) || (status[vertex] == ACTIVE))
 						{
-							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
-							
-							#pragma omp critical
-							status[neighbor] = ACTIVE;
-							
-							update_far_log_neighbors(adjacency, &status, neighbor, &log);
+							if (status[neighbor] == ACTIVE)
+							{
+								log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+							}
+							else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
+							{
+								log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+								
+								#pragma omp critical
+								status[neighbor] = ACTIVE;
+								
+								/* ***********************
+								 * Updating far neighbors
+								 * ***********************
+								 */
+								
+								far_neighbors   = GRAPH_adjacent(adjacency, neighbor);
+								neighbor_degree = GRAPH_degree(adjacency, neighbor);
+								
+								for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
+								{
+									far_neighbor = far_neighbors[far_ngb];
+									
+									if (status[far_neighbor] == INACTIVE)
+									{
+										#pragma omp critical
+										status[far_neighbor] = PREACTIVE;
+										
+										log = LIST_add_IF_NOT_EXIST(log, far_neighbor, SLOAN_W2, omp_get_thread_num());
+									}
+									
+									log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+								}
+								
+								free(far_neighbors);
+							}
 						}
-						else if ((status[vertex] == PREACTIVE) && (status[neighbor] == PREACTIVE))
-						{
-							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
-							
-							#pragma omp critical
-							status[neighbor] = ACTIVE;
-							
-							update_far_log_neighbors(adjacency, &status, neighbor, &log);
-						}
-						else if ((status[vertex] == PREACTIVE) && (status[neighbor] == ACTIVE))
-						{
-							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
-						}
-						else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
-						{
-							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
-							
-							#pragma omp critical
-							status[neighbor] = ACTIVE;
-							
-							update_far_log_neighbors(adjacency, &status, neighbor, &log);
-						}
-						
-						// TODO: put the update_far_log_neighbors here!
 					}
 					
 					free(neighbors);
