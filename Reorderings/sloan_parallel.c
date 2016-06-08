@@ -107,7 +107,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 	#pragma omp parallel 
 	{
 		int node, vertex, vertex_degree, neighbor, ngb, prior;
-		int neighbor_degree, far_ngb, far_neighbor;
+		int neighbor_degree, far_ngb, far_neighbor, update_far;
 		int* neighbors;
 		int* far_neighbors;
 		LIST* log;
@@ -130,7 +130,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		
 		#pragma omp single
 		{
-			distance = calloc (num_nodes,sizeof (int));
+			distance = calloc (num_nodes, sizeof (int));
 			// TODO: Usar a BFS paralela
 			GRAPH_bfs(adjacency, end_node, distance);
 		}
@@ -179,6 +179,8 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		
 		while (next_id < num_nodes)
 		{
+			printf(">>Thread %d working over the next_id = %d\n", omp_get_thread_num(), next_id);fflush(stdout);
+			
 			// Chosing maximum priority
 			#pragma omp single
 			{
@@ -194,30 +196,41 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 				printf(">>Thread %d set maximum priority: %d\n", omp_get_thread_num(), max_priority);fflush(stdout);
 			}
 			
+			log = NULL;
+			
 			while (priority_bags[max_priority] != NULL)
 			{
-				log = NULL;
+				#pragma omp single
+				{
+					printf("Priority Bag: ");LIST_print(priority_bags[max_priority]);fflush(stdout);
+				}
+				
 				printf(">>Thread %d start processing\n", omp_get_thread_num());fflush(stdout);
 				vertex = UNDEF_NODE;
 				
 				#pragma omp critical
 				{
-					vertex = priority_bags[max_priority]->data;
-					printf(">>Thread %d getting node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
-					priority_bags[max_priority] = LIST_remove(priority_bags[max_priority], vertex);
+					if (priority_bags[max_priority] != NULL)
+					{
+						vertex = priority_bags[max_priority]->data;
+						printf(">>Thread %d getting node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+						priority_bags[max_priority] = LIST_remove(priority_bags[max_priority], vertex);
+					}
 				}
 				
 				if (vertex != UNDEF_NODE)
 				{
-				
+					printf(">>Thread %d processing node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+					
 					neighbors     = GRAPH_adjacent(adjacency, vertex);
 					vertex_degree = GRAPH_degree  (adjacency, vertex);
 					
 					for (ngb = 0; ngb < vertex_degree; ++ngb)
 					{
-						neighbor = neighbors[ngb];
-						// there is an error among the states: ACTIVE ACTIVE is not allowed!
-						if ((status[vertex] == PREACTIVE) || (status[vertex] == ACTIVE))
+						update_far = 0;
+						neighbor   = neighbors[ngb];
+						
+						if (status[vertex] == PREACTIVE)
 						{
 							if (status[neighbor] == ACTIVE)
 							{
@@ -230,31 +243,45 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 								#pragma omp critical
 								status[neighbor] = ACTIVE;
 								
-								/* ***********************
-								 * Updating far neighbors
-								 * ***********************
-								 */
+								update_far = 1;
+							}
+						}
+						else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
+						{
+							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
 								
-								far_neighbors   = GRAPH_adjacent(adjacency, neighbor);
-								neighbor_degree = GRAPH_degree(adjacency, neighbor);
+							#pragma omp critical
+							status[neighbor] = ACTIVE;
+							
+							update_far = 1;
+						}
+				
+						if (update_far)
+						{
+							/* ***********************
+							* Updating far neighbors
+							* ***********************
+							*/
+							
+							far_neighbors   = GRAPH_adjacent(adjacency, neighbor);
+							neighbor_degree = GRAPH_degree(adjacency, neighbor);
+							
+							for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
+							{
+								far_neighbor = far_neighbors[far_ngb];
 								
-								for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
+								if (status[far_neighbor] == INACTIVE)
 								{
-									far_neighbor = far_neighbors[far_ngb];
+									#pragma omp critical
+									status[far_neighbor] = PREACTIVE;
 									
-									if (status[far_neighbor] == INACTIVE)
-									{
-										#pragma omp critical
-										status[far_neighbor] = PREACTIVE;
-										
-										log = LIST_add_IF_NOT_EXIST(log, far_neighbor, SLOAN_W2, omp_get_thread_num());
-									}
-									
-									log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+									log = LIST_add_IF_NOT_EXIST(log, far_neighbor, SLOAN_W2, omp_get_thread_num());
 								}
 								
-								free(far_neighbors);
+								log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
 							}
+							
+							free(far_neighbors);
 						}
 					}
 					
@@ -268,6 +295,8 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 					}
 				}
 			}
+			
+			#pragma omp barrier
 			
 			#pragma omp critical
 			{
@@ -292,11 +321,11 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 			printf(">>Thread %d waiting ...\n", omp_get_thread_num());fflush(stdout);
 			// Waiting all threads finalize the bag processing
 			#pragma omp barrier
+			
+			#pragma omp single
+			printf("NEXT ID: %d\n", next_id);fflush(stdout);
 		}
-	}
-	
-	#pragma omp parallel
-	{
+		
 		#pragma omp single nowait
 		free(distance);
 		
