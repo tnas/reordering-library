@@ -45,12 +45,26 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 /*----------------------------------------------------------------------------
  * Add the value val to the element cell of the LIST list 
  *--------------------------------------------------------------------------*/
-LIST* LIST_add_IF_NOT_EXIST(LIST* list, int node, int val)
+LIST* LIST_add_IF_NOT_EXIST(LIST* list, int node, int val, int id)
 {
+	printf("Thread %d adding into log the node %d\n", id, node);fflush(stdout);
 	LIST* cell;
+	LIST* new_cell;
 	
-	// if already exist, update and return
-	for (cell = list; cell != NULL; cell = cell->next)
+	cell = list;
+	
+	if (cell == NULL)
+	{
+		new_cell = (LIST*) malloc (sizeof(LIST));
+		new_cell->data = node;
+		new_cell->next = NULL;
+		new_cell->value = val;
+		new_cell->next = NULL;
+		
+		return new_cell;
+	}
+	
+	for (; cell->next != NULL; cell = cell->next)
 	{
 		if (cell->data == node)
 		{
@@ -59,12 +73,20 @@ LIST* LIST_add_IF_NOT_EXIST(LIST* list, int node, int val)
 		}
 	}
 	
+	if (cell->data == node)
+	{
+		cell->value += val;
+		return list;
+	}
+	
 	// Creating a new element when list is NULL
-	cell = (LIST*) malloc (sizeof(LIST));
-	cell->data = node;
-	cell->next = NULL;
-	cell->value = val;
-	cell->next = NULL;
+	new_cell = (LIST*) malloc (sizeof(LIST));
+	new_cell->data = node;
+	new_cell->next = NULL;
+	new_cell->value = val;
+	new_cell->next = NULL;
+	
+	cell->next = new_cell;
 	
 	return list;
 }

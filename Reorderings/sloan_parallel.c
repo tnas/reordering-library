@@ -84,10 +84,10 @@ void inline update_far_log_neighbors(MAT* A, int** status, int node, LIST** loca
 			#pragma omp critical
 			(*status)[neighbor] = PREACTIVE;
 			
-			*local_log = LIST_add_IF_NOT_EXIST(*local_log, neighbor, SLOAN_W2);
+			*local_log = LIST_add_IF_NOT_EXIST(*local_log, neighbor, SLOAN_W2, omp_get_thread_num());
 		}
 		
-		*local_log = LIST_add_IF_NOT_EXIST(*local_log, node, SLOAN_W2);
+		*local_log = LIST_add_IF_NOT_EXIST(*local_log, node, SLOAN_W2, omp_get_thread_num());
 	}
 	
 	free(neighbors);
@@ -156,6 +156,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		{
 			size_prior_bags = 2 * priority[start_node];
 			priority_bags = calloc(size_prior_bags, sizeof(LIST*));
+			printf(">>Thread %d - priority start node %d: %d\n", omp_get_thread_num(), start_node, priority[start_node]);fflush(stdout);
 		}
 		
 		#pragma omp single nowait
@@ -172,11 +173,13 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		#pragma omp single nowait
 		next_id = 0;
 		
+		#pragma omp barrier
+		
 		while (next_id < num_nodes)
 		{
+			// Chosing maximum priority
 			#pragma omp single
 			{
-				// Chosing maximum priority
 				for (prior = size_prior_bags - 1; prior >= 0; --prior)
 				{
 					if (priority_bags[prior] != NULL)
@@ -185,86 +188,102 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 						prior = 0;
 					}
 				}
+				
+				printf(">>Thread %d set maximum priority: %d\n", omp_get_thread_num(), max_priority);fflush(stdout);
 			}
 			
 			while (priority_bags[max_priority] != NULL)
 			{
+				log = NULL;
+				printf(">>Thread %d start processing\n", omp_get_thread_num());fflush(stdout);
+				vertex = UNDEF_NODE;
+				
 				#pragma omp critical
 				{
 					vertex = priority_bags[max_priority]->data;
+					printf(">>Thread %d getting node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
 					priority_bags[max_priority] = LIST_remove(priority_bags[max_priority], vertex);
-					printf(">>Thread %d get node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
 				}
 				
-				neighbors     = GRAPH_adjacent(adjacency, vertex);
-				vertex_degree = GRAPH_degree  (adjacency, vertex);
-				
-				for (ngb = 0; ngb < vertex_degree; ++ngb)
+				if (vertex != UNDEF_NODE)
 				{
-					neighbor = neighbors[ngb];
+				
+					neighbors     = GRAPH_adjacent(adjacency, vertex);
+					vertex_degree = GRAPH_degree  (adjacency, vertex);
 					
-					if ((status[vertex] == PREACTIVE) && (status[neighbor] == INACTIVE))
+					for (ngb = 0; ngb < vertex_degree; ++ngb)
 					{
-						log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2);
+						neighbor = neighbors[ngb];
 						
-						#pragma omp critical
-						status[neighbor] = ACTIVE;
+						if ((status[vertex] == PREACTIVE) && (status[neighbor] == INACTIVE))
+						{
+							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+							
+							#pragma omp critical
+							status[neighbor] = ACTIVE;
+							
+							update_far_log_neighbors(adjacency, &status, neighbor, &log);
+						}
+						else if ((status[vertex] == PREACTIVE) && (status[neighbor] == PREACTIVE))
+						{
+							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+							
+							#pragma omp critical
+							status[neighbor] = ACTIVE;
+							
+							update_far_log_neighbors(adjacency, &status, neighbor, &log);
+						}
+						else if ((status[vertex] == PREACTIVE) && (status[neighbor] == ACTIVE))
+						{
+							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+						}
+						else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
+						{
+							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
+							
+							#pragma omp critical
+							status[neighbor] = ACTIVE;
+							
+							update_far_log_neighbors(adjacency, &status, neighbor, &log);
+						}
 						
-						update_far_log_neighbors(adjacency, &status, neighbor, &log);
+						// TODO: put the update_far_log_neighbors here!
 					}
-					else if ((status[vertex] == PREACTIVE) && (status[neighbor] == PREACTIVE))
+					
+					free(neighbors);
+					
+					#pragma omp critical
 					{
-						log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2);
-						
-						#pragma omp critical
-						status[neighbor] = ACTIVE;
-						
-						update_far_log_neighbors(adjacency, &status, neighbor, &log);
+						printf("Thread %d setting node %d at position %d of permutation\n", omp_get_thread_num(), vertex, next_id);fflush(stdout);
+						permutation[next_id++] = vertex;
+						status[vertex] = NUMBERED;
 					}
-					else if ((status[vertex] == PREACTIVE) && (status[neighbor] == ACTIVE))
-					{
-						log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2);
-					}
-					else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
-					{
-						log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2);
-						
-						#pragma omp critical
-						status[neighbor] = ACTIVE;
-						
-						update_far_log_neighbors(adjacency, &status, neighbor, &log);
-					}
-				}
-				
-				free(neighbors);
-				
-				#pragma omp critical
-				{
-					printf("Thread %d setting node %d at position %d of permutation\n", omp_get_thread_num(), vertex, next_id);fflush(stdout);
-					permutation[next_id++] = vertex;
-					status[vertex] = NUMBERED;
 				}
 			}
 			
 			#pragma omp critical
 			{
-				p_log = log;
-				
-				while (p_log != NULL)
+				while (log != NULL)
 				{
-					node = p_log->data;
-					
-					priority_bags[priority[node]] = 
-						LIST_remove(priority_bags[priority[node]], node);
-					priority[node] += p_log->value;
+					node = log->data;
+					printf(">>Thread %d updating node %d\n", omp_get_thread_num(), node);fflush(stdout);
+					if (priority_bags[priority[node]] != NULL)
+						priority_bags[priority[node]] = 
+							LIST_remove(priority_bags[priority[node]], node);
+					priority[node] += log->value;
 					priority_bags[priority[node]] =	
 						LIST_insert_IF_NOT_EXIST(priority_bags[priority[node]], node);
 						
-					p_log = p_log->next;
+					p_log = log->next;
+					free(log);
+					log = p_log;
 				}
 				
-				LIST_destroy(log);
 			}
+			
+			printf(">>Thread %d waiting ...\n", omp_get_thread_num());fflush(stdout);
+			// Waiting all threads finalize the bag processing
+			#pragma omp barrier
 		}
 	}
 	
