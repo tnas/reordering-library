@@ -15,6 +15,7 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 		N->data = x;
 		N->next = NULL;
 		N->size = 1;
+		N->value = 0;
 		return N;		
 	}
 		
@@ -32,6 +33,7 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 	LIST *N = (LIST*) malloc (sizeof(LIST));
 	N->data = x;
 	N->next = NULL;
+	N->value = 0;
 	
 	P->next = N;
 	L->size++;
@@ -41,29 +43,31 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 
 
 /*----------------------------------------------------------------------------
- * Insert a element in the head of LIST structure 
+ * Add the value val to the element cell of the LIST list 
  *--------------------------------------------------------------------------*/
-LIST* LIST_insert(LIST* L, int x)
+LIST* LIST_add_IF_NOT_EXIST(LIST* list, int node, int val)
 {
-	/* creating new list element */
-	if (L == NULL)
-	{
-		LIST *N = (LIST*) malloc (sizeof(LIST));
-		N->data = x;
-		N->next = NULL;
-		N->size = 1;
-		return N;		
-	}
-		
-
-	LIST *N = (LIST*) malloc (sizeof(LIST));
-	N->data = x;
-	N->next = L;
-	N->size++;
+	LIST* cell;
 	
-	return N;
+	// if already exist, update and return
+	for (cell = list; cell != NULL; cell = cell->next)
+	{
+		if (cell->data == node)
+		{
+			cell->value += val;
+			return list;
+		}
+	}
+	
+	// Creating a new element when list is NULL
+	cell = (LIST*) malloc (sizeof(LIST));
+	cell->data = node;
+	cell->next = NULL;
+	cell->value = val;
+	cell->next = NULL;
+	
+	return list;
 }
-
 
 
 /*----------------------------------------------------------------------------

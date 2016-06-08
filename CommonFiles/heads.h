@@ -59,6 +59,7 @@ typedef struct node
 {
 	int          data;
 	int	     size;
+	int	     value;
 	struct node* next;
 } LIST;
 
