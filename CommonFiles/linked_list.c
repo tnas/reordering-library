@@ -130,6 +130,22 @@ LIST* LIST_remove (LIST* L, int x)
 
 
 /*----------------------------------------------------------------------------
+ * Returns 1 if the LIST contains the specified element
+ *--------------------------------------------------------------------------*/
+int LIST_contains (LIST* list, int element)
+{
+	LIST* cell = list;
+	
+	if (list == NULL) return 0;
+	
+	while (cell != NULL && cell->data != element) cell = cell->next;
+
+	if (cell == NULL) return 0;		
+	else return 1;
+}
+
+
+/*----------------------------------------------------------------------------
  * Print all elements in the LIST structure
  *--------------------------------------------------------------------------*/
 void LIST_print (LIST* L)

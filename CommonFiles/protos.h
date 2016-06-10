@@ -72,7 +72,7 @@ extern void     LIST_print               (LIST* L);
 extern int      LIST_first               (LIST* L);
 extern void     LIST_destroy             (LIST* L);
 extern LIST*    LIST_add_IF_NOT_EXIST	 (LIST* list, int node, int val, int id);
-
+extern int 	LIST_contains 		 (LIST* list, int element);
 
 /*----------------------------------------------------------------------------
  * REORDERING FUNCTIONS PROTOTYPE
