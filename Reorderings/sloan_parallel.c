@@ -107,15 +107,14 @@ int threads_is_working(const int num_threads, const int* status_threads)
 }
 
 
-void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
+void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, min_priority, max_priority, num_prior_bags, 
-	    threads_working, num_threads, size_max_bag;
+	    num_threads, size_max_bag;
 	LIST** priority_bags;
 	LIST** logs;
 	LIST* p_bag;
 	int* distance;
-	int* permutation;
 	int* priority;
 	int* status;
 	int* status_threads;
@@ -128,7 +127,6 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		    neighbor_degree, far_ngb, far_neighbor, update_far, thread, id;
 		int* neighbors;
 		int* far_neighbors;
-		LIST* log;
 		LIST* p_log;
 		
 	
@@ -142,7 +140,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		num_nodes = adjacency->n;
 		
 		#pragma omp single nowait
-		permutation = calloc (num_nodes, sizeof (int));
+		*permutation = calloc (num_nodes, sizeof (int));
 		
 		#pragma omp single nowait
 		priority = calloc (num_nodes, sizeof (int));
@@ -151,7 +149,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		status = calloc (num_nodes,sizeof (int));
 		
 		#pragma omp single nowait
-		logs = malloc(num_threads * sizeof(LIST*));
+		logs = (LIST**) malloc(num_threads * sizeof(LIST*));
 		
 		#pragma omp single nowait
 		min_priority = INFINITY_LEVEL;
@@ -168,8 +166,16 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		{
 			status[node]   = INACTIVE;
 			priority[node] = SLOAN_W1*distance[node] - SLOAN_W2*(GRAPH_degree(adjacency, node) + 1);
+			#pragma omp critical
 			if (priority[node] < min_priority) min_priority = priority[node];
 		}
+		
+// 		#pragma omp single
+// 		{
+// 			printf("Original Initial nodes priority: ");
+// 			for (id = 0; id < num_nodes; ++id) printf("%d ", priority[id]);fflush(stdout);
+// 			printf("\n");
+// 		}
 
 		#pragma omp single
 		if (min_priority > 0) 
@@ -178,12 +184,25 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 			exit(1);
 		}
 		
+// 		#pragma omp single
+// 		printf("Minimum priority: %d\n", min_priority);
+		
 		#pragma omp for 
 		for (node = 0; node < num_nodes; ++node) 
 			priority[node] -= min_priority;
 		
+// 		#pragma omp single
+// 		{
+// 			printf("Updated Initial nodes priority: ");
+// 			for (id = 0; id < num_nodes; ++id) printf("%d ", priority[id]);fflush(stdout);
+// 			printf("\n");
+// 		}
+		
 		#pragma omp single
 		num_prior_bags = 10 * priority[start_node];
+		
+// 		#pragma omp single
+// 		printf("Num priority bags: %d\n", num_prior_bags);fflush(stdout);
 		
 		#pragma omp single
 		priority_bags = calloc(num_prior_bags, sizeof(LIST*));
@@ -208,9 +227,6 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		#pragma omp single nowait
 		next_id = 0;
 		
-		#pragma omp single nowait
-		threads_working = 0;
-		
 		#pragma omp for
 		for (thread = 0; thread < num_threads; ++thread)
 			status_threads[thread] = THREAD_OFF;
@@ -224,19 +240,19 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 			// Chosing maximum priority
 			#pragma omp single
 			{
-				printf("----------------------------------------------\n");fflush(stdout);
-				
-				for (prior = num_prior_bags-1; prior >=0; --prior)
-				{
-					if (priority_bags[prior] != NULL)
-					{
-						printf("[Thread %d] Priority bag %d: ", omp_get_thread_num(), prior);
-						LIST_print(priority_bags[prior]);
-						fflush(stdout);
-					}
-				}
-				printf("----------------------------------------------\n");fflush(stdout);
-				
+// 				printf("----------------------------------------------\n");fflush(stdout);
+// 				
+// 				for (prior = num_prior_bags-1; prior >=0; --prior)
+// 				{
+// 					if (priority_bags[prior] != NULL)
+// 					{
+// 						printf("[Thread %d] Priority bag %d: ", omp_get_thread_num(), prior);
+// 						LIST_print(priority_bags[prior]);
+// 						fflush(stdout);
+// 					}
+// 				}
+// 				printf("----------------------------------------------\n");fflush(stdout);
+// 				
 				for (prior = num_prior_bags - 1; prior >= 0; --prior)
 				{
 					if (priority_bags[prior] != NULL)
@@ -246,7 +262,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 					}
 				}
 				
-				printf(">>Thread %d set maximum priority: %d\n", omp_get_thread_num(), max_priority);fflush(stdout);
+// 				printf(">>Thread %d set maximum priority: %d\n", omp_get_thread_num(), max_priority);fflush(stdout);
 			
 				// Cloning bag for processing
 				current_bag  = calloc(size_bags[max_priority], sizeof(int));
@@ -263,21 +279,19 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 				
 				priority_bags[max_priority] = p_bag;
 				
-				printf("Size of current bag: %d\n", size_max_bag);fflush(stdout);
-				printf("Current bag: ");
-				for (id = 0; id < size_max_bag; ++id) printf("%d ", current_bag[id]);fflush(stdout);
-				printf("\n");
+// 				printf("Size of current bag: %d\n", size_max_bag);fflush(stdout);
+// 				printf("Current bag: ");
+// 				for (id = 0; id < size_max_bag; ++id) printf("%d ", current_bag[id]);fflush(stdout);
+// 				printf("\n");
 			}
 			
-			log = NULL;
 			logs[thread] = NULL;
 			
 			#pragma omp for
 			for (n_node = 0; n_node < size_max_bag; ++n_node)
 			{
 				vertex = current_bag[n_node];
-// 				status_threads[thread] = THREAD_ON;
-				printf(">>>>Thread %d getting node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+// 				printf(">>>>Thread %d getting node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
 				
 				neighbors     = GRAPH_adjacent(adjacency, vertex);
 				vertex_degree = GRAPH_degree  (adjacency, vertex);
@@ -291,12 +305,10 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 					{
 						if (status[neighbor] == ACTIVE)
 						{
-// 							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
 							logs[thread] = LIST_add_IF_NOT_EXIST(logs[thread], neighbor, SLOAN_W2, omp_get_thread_num());
 						}
 						else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
 						{
-// 							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
 							logs[thread] = LIST_add_IF_NOT_EXIST(logs[thread], neighbor, SLOAN_W2, omp_get_thread_num());
 							
 							#pragma omp critical
@@ -307,7 +319,6 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 					}
 					else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
 					{
-// 						log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
 						logs[thread] = LIST_add_IF_NOT_EXIST(logs[thread], neighbor, SLOAN_W2, omp_get_thread_num());
 						
 						#pragma omp critical
@@ -335,12 +346,10 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 								#pragma omp critical
 								status[far_neighbor] = PREACTIVE;
 								
-// 								log = LIST_add_IF_NOT_EXIST(log, far_neighbor, SLOAN_W2, omp_get_thread_num());
 								logs[thread] = LIST_add_IF_NOT_EXIST(logs[thread], far_neighbor, SLOAN_W2, omp_get_thread_num());
 								
 							}
 							
-// 							log = LIST_add_IF_NOT_EXIST(log, neighbor, SLOAN_W2, omp_get_thread_num());
 							logs[thread] = LIST_add_IF_NOT_EXIST(logs[thread], neighbor, SLOAN_W2, omp_get_thread_num());
 						}
 						
@@ -352,8 +361,8 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 				
 				#pragma omp critical
 				{
-					printf("Thread %d setting node %d at position %d of permutation\n", omp_get_thread_num(), vertex, next_id);fflush(stdout);
-					permutation[next_id++] = vertex;
+// 					printf("Thread %d setting node %d at position %d of permutation\n", omp_get_thread_num(), vertex, next_id);fflush(stdout);
+					(*permutation)[next_id++] = vertex;
 					status[vertex] = NUMBERED;
 				}
 			}
@@ -370,7 +379,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 					
 					#pragma omp critical
 					{
-						printf(">>Thread %d current priority of the node %d: %d\n", omp_get_thread_num(), node, priority[node]);fflush(stdout);
+// 						printf(">>Thread %d current priority of the node %d: %d\n", omp_get_thread_num(), node, priority[node]);fflush(stdout);
 						
 						if (LIST_contains(priority_bags[priority[node]], node))
 						{
@@ -387,7 +396,7 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 							exit(1);
 						}
 						
-						printf(">>Thread %d updating node %d to priority %d\n", omp_get_thread_num(), node, priority[node]);fflush(stdout);
+// 						printf(">>Thread %d updating node %d to priority %d\n", omp_get_thread_num(), node, priority[node]);fflush(stdout);
 						size_bags[priority[node]]++;
 						priority_bags[priority[node]] =	
 							LIST_insert_IF_NOT_EXIST(priority_bags[priority[node]], node);
@@ -399,52 +408,6 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 				}
 				
 			}
-			
-// 			#pragma omp critical
-// 			{
-// 				while (log != NULL)
-// 				{
-// 					node = log->data;
-// 					
-// 					if (priority_bags[priority[node]] != NULL)
-// 					{
-// 						size_bags[priority[node]]--;
-// 						priority_bags[priority[node]] = 
-// 							LIST_remove(priority_bags[priority[node]], node);
-// 					}
-// 					
-// 					priority[node] += log->value;
-// 					
-// 					printf(">>Thread %d updating node %d to priority %d\n", omp_get_thread_num(), node, priority[node]);fflush(stdout);
-// 					size_bags[priority[node]]++;
-// 					priority_bags[priority[node]] =	
-// 						LIST_insert_IF_NOT_EXIST(priority_bags[priority[node]], node);
-// 						
-// 					p_log = log->next;
-// 					free(log);
-// 					log = p_log;
-// 				}
-// 				
-// 				if (status_threads[thread] == THREAD_ON)
-// 					status_threads[thread] = THREAD_OFF;
-// 				
-// 				printf(">>Thread %d - STATUS %d\n", omp_get_thread_num(), status_threads[thread]);fflush(stdout);
-// 				
-// 			}
-				
-// 				#pragma omp critical
-// 				{
-// 					printf("status threads array: ");
-// 					for (id = 0; id < num_threads; ++id) printf("%d ", status_threads[id]);fflush(stdout);
-// 					printf("\n");
-// 					
-// 					threads_working = 0;
-// 					for (id = 0; id < num_threads; ++id)
-// 						threads_working |= status_threads[id]; 
-// 					printf("**Thread %d - threads working = %d\n", omp_get_thread_num(), threads_working);fflush(stdout);
-// 				}
-				
-				
 		}
 		
 		#pragma omp single nowait
@@ -467,16 +430,13 @@ void Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node)
 		
 		#pragma omp single nowait
 		free(logs);
-		
-		#pragma omp single nowait
-		*Fp = permutation;
 	}
 	
-	printf("Permutation vector of size %d: ", num_nodes);fflush(stdout);
-	int i;
-	for (i = 0; i < num_nodes; ++i)
-		printf("%d ", (*Fp)[i]);
-	printf("\n");fflush(stdout);
+// 	printf("Permutation vector of size %d: ", num_nodes);fflush(stdout);
+// 	int i;
+// 	for (i = 0; i < num_nodes; ++i)
+// 		printf("%d ", (*permutation)[i]);
+// 	printf("\n");fflush(stdout);
 }
 
 
