@@ -275,61 +275,6 @@ test_def test_serial_sloan(const char* path_matrix_file)
 }
 
 
-// test_def test_hsl_rcm(const char* path_matrix_file)
-// {
-// 	long int bandwidth, envelope, bandwidth_after, envelope_after;
-// 	int* permutation;
-// 	double time;
-// 	MAT* matrix;
-// 	FILE* matrix_file;
-// 	test_def defs;
-// 	
-// 	defs.algorithm_name = "HSL RCM";
-// 	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
-// 		exit(1);
-// 	
-// 	matrix = (MAT*) malloc (sizeof(MAT));
-// 	MATRIX_readCSR_SymmUpper (matrix, matrix_file);
-// 	fclose(matrix_file);
-// 	
-// 	MATRIX_printFULL(matrix);
-// 	write_output_before(matrix);
-// 	
-// 	time = get_time(); 
-// 	REORDERING_HSL_RCM(matrix, &permutation);
-// 	time = (get_time() - time)/100.0;
-// 	defs.time = time;
-// 	
-// 	MATRIX_clean(matrix);
-// 	
-// 	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
-// 		exit(1);
-// 	
-// 	matrix = (MAT*) malloc (sizeof(MAT));
-// 	MATRIX_readCSR (matrix, matrix_file);
-// 	fclose(matrix_file);
-// 		
-// 	bandwidth_after = MATRIX_bandwidth(matrix);
-// 	envelope_after  = MATRIX_envelope(matrix);
-// 	
-// 	MATRIX_permutation(matrix, permutation);
-// 	bandwidth = MATRIX_bandwidth(matrix);
-// 	envelope  = MATRIX_envelope(matrix);	
-// 	defs.bandwidth = bandwidth;
-// 	
-// 	write_output_after(matrix);
-// 	
-// 	free(permutation);
-// 	MATRIX_clean(matrix);
-// 	
-// 	printf("%s: Band/Env [ %ld / %ld => %ld / %ld ] Time [ %.6f ]\n",
-// 		defs.algorithm_name, bandwidth_after, envelope_after, bandwidth, envelope, time); 
-// 	fflush(stdout);
-// 	
-// 	return defs;
-// }
-
-
 test_def test_hsl_rcm(const char* path_matrix_file)
 {
 	test_def defs;
@@ -429,6 +374,13 @@ void normalize_tests(const test_def* results, test_def* result)
 	min_time = DBL_MAX;
 	sum_band = sum_time = 0;
 	
+	if (TEST_EXEC_TIMES == 1)
+	{
+		result->bandwidth = results[0].bandwidth;
+		result->time      = results[0].time;
+		return;
+	}
+	
 	// Finding out max/min bandwidth and time execution
 	for (times = 0; times < TEST_EXEC_TIMES; ++times)
 	{
@@ -496,22 +448,22 @@ void run_all_tests()
 // 		"../Big-Matrices/dw8192.mtx",
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
-// 		"../Big-Matrices/inline_1.mtx",
-// 		"../Big-Matrices/audikw_1.mtx",
-// 		"../Big-Matrices/dielFilterV3real.mtx",
-// 		"../Big-Matrices/atmosmodj.mtx",
-// 		"../Big-Matrices/G3_circuit.mtx"
+		"../Big-Matrices/inline_1.mtx",
+		"../Big-Matrices/audikw_1.mtx",
+		"../Big-Matrices/dielFilterV3real.mtx",
+		"../Big-Matrices/atmosmodj.mtx",
+		"../Big-Matrices/G3_circuit.mtx"
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx"
-		"../Matrices/FEM_3D_thermal1.mtx",
+// 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx"
 	};
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { serial_rcm };
+	reorder_algorithm algorithm[] = { parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
@@ -576,6 +528,7 @@ void run_all_tests()
 							break;
 							
 						case parallel_sloan :
+// 							sleep(1);
 							test_results[count_exec] = test_parallel_sloan(matrices[count_matrix], nthreads[count_nthreads]);
 							break;
 							
