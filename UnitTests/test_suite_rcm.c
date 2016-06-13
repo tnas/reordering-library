@@ -91,12 +91,18 @@ int get_node_peripheral_hsl(const char* path_matrix_file) {
 	int *irn     = matrix->JA;
 	int *icptr   = matrix->IA;
 	int lirn     = matrix->nz;
-	int vars[n];
-	int mask[n];
-	int ls[n];
-	int xls[n];
-	int list[n];
+	int *vars;
+	int *mask;
+	int *ls;
+	int *xls;
+	int *list;
 	int info[6];
+	
+	vars = calloc(n, sizeof(int));
+	mask = calloc(n, sizeof(int));
+	ls   = calloc(n, sizeof(int));
+	xls  = calloc(n, sizeof(int));
+	list = calloc(n, sizeof(int));
 	
 	for (i = 0; i < n; i++) 
 	{
@@ -110,6 +116,11 @@ int get_node_peripheral_hsl(const char* path_matrix_file) {
 	root = info[0];
 	
 	MATRIX_clean(matrix);
+	free(vars);
+	free(mask);
+	free(ls);
+	free(xls);
+	free(list);
 	
 	return root;
 }
@@ -448,7 +459,7 @@ void run_all_tests()
 // 		"../Big-Matrices/dw8192.mtx",
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
-		"../Big-Matrices/inline_1.mtx",
+// 		"../Big-Matrices/inline_1.mtx",
 		"../Big-Matrices/audikw_1.mtx",
 		"../Big-Matrices/dielFilterV3real.mtx",
 		"../Big-Matrices/atmosmodj.mtx",
@@ -463,7 +474,7 @@ void run_all_tests()
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { parallel_sloan };
+	reorder_algorithm algorithm[] = { serial_sloan };
 	
 	/* *****************
 	 * Tests execution

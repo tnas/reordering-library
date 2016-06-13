@@ -130,30 +130,32 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
 	int lirn     = A->nz;
-	int vars[n];
 	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
 	double weight[2];
-	int pair[nsup/2][2];
 	int info[4];
-	int iw[3*n + 1];
-	double w[n];
-	int permsv[nsup];
-	int svar[n];
-	int possv[n];
-	int perm[n];
-// 	double* w;
-// 	int* permsv;
-// 	int* svar;
-// 	int* possv;
-// 	int* perm;
+	int pair_lenght;
+	int* vars;
+	int** pair;
+	int* iw;
+	double* w;
+	int* permsv;
+	int* svar;
+	int* possv;
+	int* perm;
 	
-// 	w = calloc(n, sizeof(double));
-// 	permsv = calloc(nsup, sizeof(int));
-// 	svar = calloc(n, sizeof(int));
-// 	possv = calloc(n, sizeof(int));
-// 	perm = calloc(n, sizeof(int));
+	pair_lenght = nsup/2;
+	vars   = calloc(n, sizeof(int));
+	pair   = calloc(pair_lenght, sizeof(int*));
+	iw     = calloc(3*n + 1, sizeof(int));
+	w      = calloc(n, sizeof(double));
+	permsv = calloc(nsup, sizeof(int));
+	svar   = calloc(n, sizeof(int));
+	possv  = calloc(n, sizeof(int));
+	perm   = calloc(n, sizeof(int));
+	*p     = calloc(nsup, sizeof(int));
 	
-	*p = calloc(nsup, sizeof(int));
+	for (i = 0; i < pair_lenght; i++) 
+		pair[i] = calloc(2, sizeof(int));
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
@@ -163,8 +165,6 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	{
 		++irn[i];
 		++icptr[i];
-// 		vars[i] = 1;
-// 		svar[i] = i + 1;
 	}
 	
 	++icptr[nsup];
@@ -191,9 +191,12 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	
 	for (i = n; i < lirn; i++) --irn[i];
 	
-// 	free(w);
-// 	free(permsv);
-// 	free(svar);
-// 	free(possv);
-// 	free(perm);
+	free(vars);
+	free(iw);
+	free(w);
+	free(permsv);
+	free(svar);
+	free(possv);
+	free(perm);
+	free(pair);
 }

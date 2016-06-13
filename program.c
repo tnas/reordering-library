@@ -43,8 +43,8 @@ int main (int argc, char* argv[]){
 	}
 	else 
 	{
-// 		root = get_node_peripheral_hsl(matrix_name);
-		root = get_node_peripheral(matrix_name);
+		root = get_node_peripheral_hsl(matrix_name);
+// 		root = get_node_peripheral(matrix_name);
 		
 		switch (algorithm)
 		{
