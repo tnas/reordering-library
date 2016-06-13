@@ -459,15 +459,16 @@ void run_all_tests()
 // 		"../Big-Matrices/dw8192.mtx",
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
+		
 // 		"../Big-Matrices/inline_1.mtx",
-		"../Big-Matrices/audikw_1.mtx",
-		"../Big-Matrices/dielFilterV3real.mtx",
-		"../Big-Matrices/atmosmodj.mtx",
-		"../Big-Matrices/G3_circuit.mtx"
-// 		"../Matrices/rail_5177.mtx",
+// 		"../Big-Matrices/audikw_1.mtx",
+// 		"../Big-Matrices/dielFilterV3real.mtx",
+// 		"../Big-Matrices/atmosmodj.mtx",
+// 		"../Big-Matrices/G3_circuit.mtx"
+		
+		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx"
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx"
 	};
@@ -503,8 +504,7 @@ void run_all_tests()
 			fprintf(out_file, "-----------------------------------------------------------------------\n");
 			fflush(out_file);
 			
-// 			count_nthreads = is_serial_algorithm(algorithm[count_alg]) ?
-// 				num_nthreads - 1 : 0;
+			if (is_serial_algorithm(algorithm[count_alg])) num_nthreads = 1;
 			
 			for (count_nthreads = 0; count_nthreads < num_nthreads; ++count_nthreads)
 			{
@@ -538,8 +538,11 @@ void run_all_tests()
 							test_results[count_exec] = test_hsl_spectral(matrices[count_matrix]);
 							break;
 							
+						case hsl_rcm :
+							test_results[count_exec] = test_hsl_rcm(matrices[count_matrix]);
+							break;
+							
 						case parallel_sloan :
-// 							sleep(1);
 							test_results[count_exec] = test_parallel_sloan(matrices[count_matrix], nthreads[count_nthreads]);
 							break;
 							
@@ -550,7 +553,10 @@ void run_all_tests()
 				
 				normalize_tests(test_results, &result);
 				fprintf(out_file, "[%s] Threads: %d -- Bandwidth: %ld -- Time: %.6f\n", 
-					test_results[0].algorithm_name, nthreads[count_nthreads], result.bandwidth, result.time);
+					test_results[0].algorithm_name, 
+					is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads], 
+					result.bandwidth, 
+					result.time);
 				fflush(out_file);
 				
 				free(test_results);

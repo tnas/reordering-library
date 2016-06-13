@@ -2,7 +2,6 @@
 #include <assert.h>
 #include <limits.h>
 #include <float.h>
-#include <unistd.h>
 
 #define TEST_EXEC_TIMES 1
 
