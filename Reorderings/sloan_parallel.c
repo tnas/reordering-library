@@ -17,7 +17,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 	int* distance;
 	int* priority;
 	int* status;
-	int* status_threads;
 	int* size_bags;
 	int* current_bag;
 	int* degree;
@@ -36,9 +35,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 		
 		#pragma omp single 
 		num_threads = omp_get_num_threads();
-		
-		#pragma omp single nowait
-		status_threads = calloc(num_threads, sizeof(int));
 		
 		#pragma omp single nowait
 		*permutation = calloc (num_nodes, sizeof (int));
@@ -102,10 +98,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 		
 		#pragma omp single nowait
 		next_id = 0;
-		
-		#pragma omp for
-		for (id = 0; id < num_threads; ++id)
-			status_threads[id] = THREAD_OFF;
 		
 		thread = omp_get_thread_num();
 		
@@ -275,9 +267,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 		
 		#pragma omp single nowait
 		free(priority_bags);
-		
-		#pragma omp single nowait
-		free(status_threads);
 		
 		#pragma omp single nowait
 		free(size_bags);
