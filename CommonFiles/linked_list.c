@@ -45,9 +45,8 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 /*----------------------------------------------------------------------------
  * Add the value val to the element cell of the LIST list 
  *--------------------------------------------------------------------------*/
-LIST* LIST_add_IF_NOT_EXIST(LIST* list, int node, int val, int id)
+LIST* LIST_add_IF_NOT_EXIST(LIST* list, int node, int val)
 {
-// 	printf("Thread %d adding into log the node %d\n", id, node);fflush(stdout);
 	LIST* cell;
 	LIST* new_cell;
 	
