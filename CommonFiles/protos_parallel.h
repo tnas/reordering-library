@@ -18,6 +18,8 @@
 #define SLOAN_W1 1
 #define SLOAN_W2 2
 #define SLOAN_PRIORITY_FACTOR 10
+#define SLOAN_CURR_PRIOR 0
+#define SLOAN_NEW_PRIOR 1
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
 #define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
@@ -27,6 +29,8 @@ typedef enum REORDERING_ALGORITHM { SERIAL_RCM, UNORDERED_RCM, LEVELED_RCM }
 
 typedef enum SLOAN_STATE { INACTIVE, PREACTIVE, ACTIVE, NUMBERED }
 	SLOAN_STATE;
+
+typedef enum UPDATE { OFF, ON } UPDATE;
 	
 typedef struct 
 {
