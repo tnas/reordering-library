@@ -8,11 +8,12 @@
 #define UNDEF_THREAD -1
 #define INFINITY_LEVEL 2147483647
 #define BFS_WORK_CHUNK 1024
+#define BFS_PERCENT_CHUNK 0.5
 #define ORPHAN_NODE -1
-
 #define SLOAN_W1 1
 #define SLOAN_W2 2
 #define MIN_PRIORITY -9999999
+#define SLOAN_PRIORITY_FACTOR 10
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
 #define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
