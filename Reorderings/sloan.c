@@ -9,7 +9,6 @@
 void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 {
 	int i,j,k,I,J,K,n = A->n,max_P,nadj1,nadj2;
-// 	int node_e, node_s;
 	int *adj1,*adj2;
 	
 	int W1 = 1;
@@ -17,9 +16,6 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 	
 	LIST* L = NULL;
 	LIST* q;
-	
-// 	int* g = GRAPH_LS_peripheral (A,&node_s,&node_e);
-// 	free(g);
 	
 	int* d = calloc (n,sizeof (int));
 	int* p = calloc (n,sizeof (int));
@@ -107,4 +103,103 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 	free(P);
 	free(status);
 	(*Fp) = p;
+}
+
+/*----------------------------------------------------------------------------
+ * HSL Sloan Reordering
+ * 
+ * @author: Thiago Nascimento - nascimenthiago@gmail.com
+ * @since: 15-06-2016
+ *--------------------------------------------------------------------------*/
+void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
+{
+	int i;
+	int n        = A->n; 
+	int nsup     = n;
+	int *irn     = A->JA;
+	int *icptr   = A->IA;
+	int lirn     = A->nz;
+	int jcntl[2] = { SLOAN, AUTOMATIC_PERIPHERAL };
+	double weight[2];
+	int info[4];
+	int pair_lenght;
+	int* vars;
+	int** pair;
+	int* iw;
+	double* w;
+	int* permsv;
+	int* svar;
+	int* possv;
+	int* perm;
+	double rinfo[4];
+	
+	pair_lenght = nsup/2;
+	vars   = calloc(n, sizeof(int));
+	pair   = calloc(pair_lenght, sizeof(int*));
+	iw     = calloc(3*n + 1, sizeof(int));
+	w      = calloc(n, sizeof(double));
+	permsv = calloc(nsup, sizeof(int));
+	svar   = calloc(n, sizeof(int));
+	possv  = calloc(n, sizeof(int));
+	perm   = calloc(n, sizeof(int));
+	*p     = calloc(nsup, sizeof(int));
+	
+	for (i = 0; i < pair_lenght; i++) 
+		pair[i] = calloc(2, sizeof(int));
+	
+	/* -------------------------------------------------------------------- */    
+	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
+	/* -------------------------------------------------------------------- */
+	
+	for (i = 0; i < n; i++) 
+	{
+		++irn[i];
+		++icptr[i];
+	}
+	
+	++icptr[nsup];
+	
+	for (i = n; i < lirn; i++) ++irn[i];
+	
+	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
+	
+	printf("The number of supervariables is %d\n", nsup);fflush(stdout);
+	
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, (int**) pair, info, iw, w);
+	
+	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);	
+	
+	mc60dd_(&n, &nsup, svar, vars, permsv, perm, possv);
+
+	/* -------------------------------------------------------------------- */    
+	/* Convert matrix back to 0-based C-notation.                           */
+	/* -------------------------------------------------------------------- */
+	for (i = 0; i < n; i++) 
+	{
+		--irn[i];
+		--icptr[i];
+		--perm[i];
+	}
+	
+	--icptr[nsup];
+	
+	for (i = n; i < lirn; i++) --irn[i];
+	
+	printf("The chosen permutation is: ");
+	for (i = 0; i < n; ++i) printf("%d ", perm[i]);
+	printf("\n");fflush(stdout);
+	
+	printf("The profile is %f\n", rinfo[0]);fflush(stdout);
+	
+	free(vars);
+	free(iw);
+	free(w);
+	free(permsv);
+	free(svar);
+	free(possv);
+	free(perm);
+	free(pair);
+	
+	exit(0);
+	
 }

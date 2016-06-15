@@ -160,6 +160,16 @@ test_def test_reorder_algorithm(test_def defs)
 			defs.time = time;
 			break;
 			
+		case serial_sloan :
+			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
+			free(g);
+			
+			time = get_time();
+			REORDERING_SLOAN(matrix, &permutation, node_s, node_e);
+			time = (get_time() - time)/100.0;
+			defs.time = time;
+			break;
+			
 		case hsl_rcm :
 			time = get_time(); 
 			REORDERING_HSL_RCM(matrix, &permutation);
@@ -174,12 +184,12 @@ test_def test_reorder_algorithm(test_def defs)
 			defs.time = time;
 			break;
 			
-		case serial_sloan :
+		case hsl_sloan :
 			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
 			free(g);
 			
 			time = get_time();
-			REORDERING_SLOAN(matrix, &permutation, node_s, node_e);
+			REORDERING_SLOAN_HSL(matrix, &permutation, node_s, node_e);
 			time = (get_time() - time)/100.0;
 			defs.time = time;
 			break;
@@ -256,6 +266,19 @@ test_def test_serial_rcm(const char* path_matrix_file, int root)
 }
 
 
+test_def test_serial_sloan(const char* path_matrix_file)
+{
+	test_def defs;
+	
+	defs.path_matrix_file = path_matrix_file;
+	defs.algorithm_name = "Serial Sloan";
+	defs.algorithm = serial_sloan;
+	defs.strategy = serial;
+	defs = test_reorder_algorithm(defs);
+	
+	return defs;
+}
+
 
 test_def test_hsl_spectral(const char* path_matrix_file)
 {
@@ -266,20 +289,6 @@ test_def test_hsl_spectral(const char* path_matrix_file)
 	defs.algorithm = hsl_spectral;
 	defs.strategy = serial;
 	
-	defs = test_reorder_algorithm(defs);
-	
-	return defs;
-}
-
-
-test_def test_serial_sloan(const char* path_matrix_file)
-{
-	test_def defs;
-	
-	defs.path_matrix_file = path_matrix_file;
-	defs.algorithm_name = "Serial Sloan";
-	defs.algorithm = serial_sloan;
-	defs.strategy = serial;
 	defs = test_reorder_algorithm(defs);
 	
 	return defs;
@@ -300,6 +309,20 @@ test_def test_hsl_rcm(const char* path_matrix_file)
 	return defs;
 }
 
+
+test_def test_hsl_sloan(const char* path_matrix_file)
+{
+	test_def defs;
+	
+	defs.path_matrix_file = path_matrix_file;
+	defs.algorithm_name = "HSL Sloan";
+	defs.algorithm = hsl_sloan;
+	defs.strategy = serial;
+	
+	defs = test_reorder_algorithm(defs);
+	
+	return defs;
+}
 
 /* ******************************************************
  * ************** Parallel Strategies *******************

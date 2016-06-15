@@ -81,5 +81,14 @@ extern void     REORDERING_RCM_opt          (MAT* A, int** p, int s);
 extern void     REORDERING_RCM              (MAT* A, int** p);
 extern void     REORDERING_HSL_RCM          (MAT* A, int** p);
 extern void     REORDERING_SLOAN            (MAT* A, int** Fp, int node_s, int node_e);
+extern void	REORDERING_SLOAN_HSL 	    (MAT* A, int** p, int start_node, int end_node);
 extern void     REORDERING_HSL_SPECTRAL     (MAT* A, int** p);
 extern void     REORDERING_HSL_SPECTRAL_WGT (MAT* A, int** p);
+
+/*----------------------------------------------------------------------------
+ * HSL LIBRARY FUNCTIONS PROTOTYPE
+ *--------------------------------------------------------------------------*/
+void mc60bd_(int* n, int* lirn, int* irn, int* icptr, int* nsup, int* svar, int* vars, int* iw);
+void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int** pair, int* info, int* iw, double* w);
+void mc60dd_(int* n, int* nsup, int* svar, int* vars, int* permsv, int* perm, int* possv);
+void mc60fd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* permsv, int* iw, double* rinfo);

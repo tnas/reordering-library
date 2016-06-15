@@ -3,10 +3,6 @@
  *--------------------------------------------------------------------------*/
 #include "../CommonFiles/protos.h"
 
-void mc60bd_(int* n, int* lirn, int* irn, int* icptr, int* nsup, int* svar, int* vars, int* iw);
-void mc60cd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* jcntl, int* permsv, double* weight, int** pair, int* info, int* iw, double* w);
-void mc60dd_(int* n, int* nsup, int* svar, int* vars, int* permsv, int* perm, int* possv);
-
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm
  *--------------------------------------------------------------------------*/
@@ -152,7 +148,7 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	svar   = calloc(n, sizeof(int));
 	possv  = calloc(n, sizeof(int));
 	perm   = calloc(n, sizeof(int));
-	*p     = calloc(nsup, sizeof(int));
+// 	*p     = calloc(nsup, sizeof(int));
 	
 	for (i = 0; i < pair_lenght; i++) 
 		pair[i] = calloc(2, sizeof(int));
@@ -184,8 +180,16 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	{
 		--irn[i];
 		--icptr[i];
-		(*p)[--(perm[i])] = i;
+		--perm[i];
+// 		(*p)[--(perm[i])] = i;
+		
 	}
+	
+	*p = perm;
+	
+	printf("The chosen permutation is: ");
+	for (i = 0; i < n; ++i) printf("%d ", (*p)[i]);
+	printf("\n");fflush(stdout);
 	
 	--icptr[nsup];
 	
@@ -197,6 +201,6 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	free(permsv);
 	free(svar);
 	free(possv);
-	free(perm);
+// 	free(perm);
 	free(pair);
 }

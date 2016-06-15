@@ -12,9 +12,10 @@ typedef enum {
 
 typedef enum {
 	serial_rcm,
+	serial_sloan,
 	hsl_rcm,
 	hsl_spectral,
-	serial_sloan,
+	hsl_sloan,
 	unordered_rcm,
 	leveled_rcm,
 	bucket_rcm,
@@ -47,9 +48,11 @@ int get_node_peripheral(const char* path_matrix_file);
 int get_node_peripheral_hsl(const char* path_matrix_file);
 
 test_def test_serial_rcm(const char* path_matrix_file, int root);
+test_def test_serial_sloan(const char* path_matrix_file);
+
 test_def test_hsl_spectral(const char* path_matrix_file);
 test_def test_hsl_rcm(const char* path_matrix_file);
-test_def test_serial_sloan(const char* path_matrix_file);
+test_def test_hsl_sloan(const char* path_matrix_file);
 
 test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_percent, int root);
 test_def test_leveled_rcm(const char* path_matrix_file, const int num_threads, int root);

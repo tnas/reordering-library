@@ -16,67 +16,6 @@ int COMPARE_array (const void * a, const void * b)
 	return 0;
 }
 
-/*----------------------------------------------------------------------------
- * Read matrix from file in MM format to a CSR structure
- *--------------------------------------------------------------------------*/
-// void MATRIX_readCSR (MAT* A, char* p)
-// {
-// 	int M, N, nz;   
-// 	int i, j, row, colunm, elem = 0;
-// 	double value;
-// 	char line[1025];
-// 	FILE* f;
-// 
-// 	if ((f = fopen(p, "r")) == NULL) 
-// 		exit(1);
-// 
-// 	do 
-// 	{
-// 		if (fgets(line,1025,f) == NULL) 
-// 			exit(0);
-// 	}while (line[0] == '%');
-//    
-// 	sscanf(line,"%d %d %d", &N, &M, &nz);
-// 
-// 	/* reseve memory for matrices */
-// 	A->m   = M;
-// 	A->n   = N;
-// 	A->nz  = nz;
-//     
-// 	A->AA  = (double *) calloc(nz, sizeof (double));
-// 	A->D   = (double *) calloc(N,  sizeof (double));
-// 	A->JA  = (int    *) calloc(nz, sizeof (int));
-// 	A->IA  = (int    *) calloc(N+1,sizeof (int));
-// 	
-// 	for (i = 0; i < nz; ++i)
-// 	{
-// 		fscanf(f, "%d %d %lf\n", &colunm, &row, &value);
-// 		A->AA[i]   = value;
-// 		A->JA[i]   = colunm - 1;
-// 		elem      += 1;
-// 		A->IA[row] = elem;
-// 	}
-// 	
-// 	/* Adjusting IA array */
-// 	for (i = 1; i < N + 1; ++i)
-// 		if (A->IA[i] == 0) 
-// 			A->IA[i] = A->IA[i-1];
-// 	
-// 	/* Diagonal */
-// 	if (M == N) /* square matrix */
-// 	{
-// 		for (i = 0; i < A->n; ++i)
-// 		{
-// 			int k1 = A->IA[i];
-// 			int k2 = A->IA[i+1]-1;
-// 			for (j = k1; j <= k2; ++j)
-// 				if (i == A->JA[j]) 
-// 					A->D[i] = A->AA[j];
-// 		}
-// 	}
-// 	fclose(f);
-// }
-
 
 /*----------------------------------------------------------------------------
  * Read matrix from file in MM format to a CSR structure
@@ -481,7 +420,7 @@ void MATRIX_permutation (MAT* A, int* p)
 		{
 			B->AA[k] = A->AA[j];
 			B->JA[k] = A->JA[j];
-			      k  = k + 1;
+			k  = k + 1;
 		}
 		B->IA[i+1] = k;    
 	}
