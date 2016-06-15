@@ -460,13 +460,13 @@ void run_all_tests()
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
 		
-// 		"../Big-Matrices/inline_1.mtx",
-// 		"../Big-Matrices/audikw_1.mtx",
-// 		"../Big-Matrices/dielFilterV3real.mtx",
-// 		"../Big-Matrices/atmosmodj.mtx",
-// 		"../Big-Matrices/G3_circuit.mtx"
+		"../Big-Matrices/inline_1.mtx",
+		"../Big-Matrices/audikw_1.mtx",
+		"../Big-Matrices/dielFilterV3real.mtx",
+		"../Big-Matrices/atmosmodj.mtx",
+		"../Big-Matrices/G3_circuit.mtx"
 		
-		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
