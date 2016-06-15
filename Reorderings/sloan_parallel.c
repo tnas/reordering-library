@@ -176,11 +176,46 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 									
 									update_far = ON;
 								}
+								
+								
+// 								switch (status[neighbor])
+// 								{
+// 									case ACTIVE :
+// 										
+// 										#pragma omp atomic
+// 										priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+// 										
+// 										break;
+// 										
+// 									case INACTIVE :
+// 										
+// 										// Setting status to PREACTIVE
+// 										#pragma omp atomic
+// 										++status[neighbor];
+// 									
+// 									case PREACTIVE :
+// 										
+// 										// Setting status to ACTIVE
+// 										#pragma omp atomic
+// 										++status[neighbor];
+// 										
+// 										#pragma omp atomic
+// 										priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+// 										
+// 										update_far = ON;
+// 										
+// 										break;
+// 								}
+								
 							}
 							else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
 							{
 								#pragma omp atomic
 								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+								
+// 								// Setting status to ACTIVE
+// 								#pragma omp atomic
+// 								++status[neighbor];
 								
 								#pragma omp critical
 								status[neighbor] = ACTIVE;
@@ -204,6 +239,10 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 									
 									if (status[far_neighbor] == INACTIVE)
 									{
+										// Setting status to PREACTIVE
+// 										#pragma omp atomic
+// 										++status[far_neighbor];
+										
 										#pragma omp critical
 										status[far_neighbor] = PREACTIVE;
 										
