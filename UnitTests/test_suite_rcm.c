@@ -111,7 +111,17 @@ int get_node_peripheral_hsl(const char* path_matrix_file) {
 		vars[i] = mask[i] = 1;
 	}
 	
+	for (i = n; i < lirn; i++) ++irn[i];
+	
 	mc60hd_(&n, &nsup, &lirn, irn, icptr, vars, mask, ls, xls, list, info);
+	
+	for (i = 0; i < n; i++) 
+	{
+		++irn[i];
+		++icptr[i];
+	}
+	
+	for (i = n; i < lirn; i++) ++irn[i];
 	
 	root = info[0];
 	

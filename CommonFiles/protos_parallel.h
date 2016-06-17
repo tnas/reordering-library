@@ -15,8 +15,6 @@
 #define UNDEF_NODE -1
 #define ORPHAN_NODE -1
 
-#define SLOAN_W1 1
-#define SLOAN_W2 2
 #define SLOAN_PRIORITY_FACTOR 10
 #define SLOAN_CURR_PRIOR 0
 #define SLOAN_NEW_PRIOR 1

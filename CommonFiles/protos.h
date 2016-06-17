@@ -7,6 +7,9 @@
 #define min(a,b) (((a)>(b))?(b):(a))
 #define max(a,b) (((a)>(b))?(a):(b))
 
+#define SLOAN_W1 1
+#define SLOAN_W2 2
+
 typedef enum LABEL { UNREACHED, LABELED } LABEL;
 
 /*----------------------------------------------------------------------------

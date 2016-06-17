@@ -20,6 +20,10 @@ void REORDERING_RCM_opt (MAT* A, int** Fp, int s)
 	for (i = 0; i < n; ++i)
 		p[n-1-i] = q[i]; 
 	
+	printf("The vector permutation is: ");
+	for (i = 0; i < n; ++i) printf("%d ", p[i]);
+	printf("\n");fflush(stdout);
+	
 	(*Fp) = p;
 	
 	free(q);
@@ -120,7 +124,7 @@ void REORDERING_RCM (MAT* A, int** Fp)
  *--------------------------------------------------------------------------*/
 void REORDERING_HSL_RCM (MAT* A, int** p)
 {
-	int i;
+	int i, j;
 	int n        = A->n; 
 	int nsup     = n;
 	int *irn     = A->JA;
@@ -132,17 +136,18 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	double rinfo[4];
 	int pair_lenght;
 	int* vars;
-	int** pair;
+	int* pair;
 	int* iw;
 	double* w;
 	int* permsv;
 	int* svar;
 	int* possv;
 	int* perm;
+// 	int* perminv;
 	
 	pair_lenght = nsup/2;
 	vars   = calloc(n, sizeof(int));
-	pair   = calloc(pair_lenght, sizeof(int*));
+	pair   = calloc(2 * pair_lenght, sizeof(int));
 	iw     = calloc(3*n + 1, sizeof(int));
 	w      = calloc(n, sizeof(double));
 	permsv = calloc(nsup, sizeof(int));
@@ -150,9 +155,7 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	possv  = calloc(n, sizeof(int));
 	perm   = calloc(n, sizeof(int));
 	*p     = calloc(nsup, sizeof(int));
-	
-	for (i = 0; i < pair_lenght; i++) 
-		pair[i] = calloc(2, sizeof(int));
+// 	perminv = calloc(n, sizeof(int));
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
@@ -164,13 +167,11 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 		++icptr[i];
 	}
 	
-	++icptr[nsup];
-	
 	for (i = n; i < lirn; i++) ++irn[i];
 	
 	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
 	
-	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, (int**) pair, info, iw, w);
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
 	
 	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);
 	
@@ -183,19 +184,22 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	{
 		--irn[i];
 		--icptr[i];
-		(*p)[--(perm[i])] = i;
-// 		(*p)[i] = --perm[i];
-		
+// 		(*p)[--(perm[i])] = i;
+		(*p)[i] = --(perm[i]);
+// 		perminv[i] = --(perm[i]);
 	}
 	
-// 	printf("The chosen permutation is: ");
-// 	for (i = 0; i < n; ++i) printf("%d ", (*p)[i]);
-// 	printf("\n");fflush(stdout);
+	for (i = n; i < lirn; i++) --irn[i];
+	
+// 	/* Reverse order */
+// 	for (i = 0, j = n - 1; i < n; ++i, --j)
+// 		(*p)[j] = perminv[i];
+	
 	printf("The bandwidth is %f\n", rinfo[2]);fflush(stdout);
 	
-	--icptr[nsup];
-	
-	for (i = n; i < lirn; i++) --irn[i];
+	printf("The chosen permutation is: ");
+	for (i = 0; i < n; ++i) printf("%d ", (*p)[i]);
+	printf("\n");fflush(stdout);
 	
 	free(vars);
 	free(iw);
@@ -205,4 +209,5 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	free(possv);
 	free(perm);
 	free(pair);
+// 	free(perminv);
 }
