@@ -124,7 +124,7 @@ void REORDERING_RCM (MAT* A, int** Fp)
  *--------------------------------------------------------------------------*/
 void REORDERING_HSL_RCM (MAT* A, int** p)
 {
-	int i, j;
+	int i;
 	int n        = A->n; 
 	int nsup     = n;
 	int *irn     = A->JA;
@@ -171,7 +171,7 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	
 	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
 	
-	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, (int**)pair, info, iw, w);
 	
 	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);
 	
@@ -184,9 +184,7 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	{
 		--irn[i];
 		--icptr[i];
-// 		(*p)[--(perm[i])] = i;
-		(*p)[i] = --(perm[i]);
-// 		perminv[i] = --(perm[i]);
+		(*p)[--(perm[i])] = i;
 	}
 	
 	for (i = n; i < lirn; i++) --irn[i];
@@ -197,9 +195,9 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	
 	printf("The bandwidth is %f\n", rinfo[2]);fflush(stdout);
 	
-	printf("The chosen permutation is: ");
-	for (i = 0; i < n; ++i) printf("%d ", (*p)[i]);
-	printf("\n");fflush(stdout);
+// 	printf("The chosen permutation is: ");
+// 	for (i = 0; i < n; ++i) printf("%d ", (*p)[i]);
+// 	printf("\n");fflush(stdout);
 	
 	free(vars);
 	free(iw);
@@ -209,5 +207,4 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	free(possv);
 	free(perm);
 	free(pair);
-// 	free(perminv);
 }

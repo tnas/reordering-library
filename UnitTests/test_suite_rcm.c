@@ -72,11 +72,13 @@ int get_node_peripheral(const char* path_matrix_file) {
 }
 
 
-int get_node_peripheral_hsl(const char* path_matrix_file) {
+int* get_node_peripheral_hsl(const char* path_matrix_file) {
 	
-	int root;
 	MAT* matrix;
 	FILE* matrix_file;
+	int* peripheral_nodes;
+	
+	peripheral_nodes = calloc(2, sizeof(int));
 	
 	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
 		exit(1);
@@ -123,7 +125,8 @@ int get_node_peripheral_hsl(const char* path_matrix_file) {
 	
 	for (i = n; i < lirn; i++) ++irn[i];
 	
-	root = info[0];
+	peripheral_nodes[0] = info[0] - 1;
+	peripheral_nodes[1] = info[1] - 1;
 	
 	MATRIX_clean(matrix);
 	free(vars);
@@ -132,19 +135,19 @@ int get_node_peripheral_hsl(const char* path_matrix_file) {
 	free(xls);
 	free(list);
 	
-	return root;
+	return peripheral_nodes;
 }
 
 
 test_def test_reorder_algorithm(test_def defs)
 {
-	long int bandwidth, envelope, bandwidth_after, envelope_after;
+	long int bandwidth, envelope, bandwidth_before, envelope_before;
 	int* permutation;
 	double time;
 	MAT* matrix;
 	FILE* matrix_file;
 	int* g;
-	int node_s, node_e;
+	int start_node, end_node;
 	
 	if ((matrix_file = fopen(defs.path_matrix_file, "r")) == NULL) 
 		exit(1);
@@ -155,8 +158,8 @@ test_def test_reorder_algorithm(test_def defs)
 	
 	write_output_before(matrix);
 	
-	bandwidth_after = MATRIX_bandwidth(matrix);
-	envelope_after  = MATRIX_envelope(matrix);
+	bandwidth_before = MATRIX_bandwidth(matrix);
+	envelope_before  = MATRIX_envelope(matrix);
 	
 	if (defs.strategy == parallel)
 		omp_set_num_threads(defs.num_threads);
@@ -171,11 +174,11 @@ test_def test_reorder_algorithm(test_def defs)
 			break;
 			
 		case serial_sloan :
-			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
+			g = GRAPH_LS_peripheral (matrix, &start_node, &end_node);
 			free(g);
 			
 			time = get_time();
-			REORDERING_SLOAN(matrix, &permutation, node_s, node_e);
+			REORDERING_SLOAN(matrix, &permutation, start_node, end_node);
 			time = (get_time() - time)/100.0;
 			defs.time = time;
 			break;
@@ -195,11 +198,8 @@ test_def test_reorder_algorithm(test_def defs)
 			break;
 			
 		case hsl_sloan :
-			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
-			free(g);
-			
 			time = get_time();
-			REORDERING_SLOAN_HSL(matrix, &permutation, node_s, node_e);
+			REORDERING_SLOAN_HSL(matrix, &permutation, defs.start_node, defs.end_node);
 			time = (get_time() - time)/100.0;
 			defs.time = time;
 			break;
@@ -226,11 +226,8 @@ test_def test_reorder_algorithm(test_def defs)
 			break;
 			
 		case parallel_sloan :
-			g = GRAPH_LS_peripheral (matrix, &node_s, &node_e);
-			free(g);
-			
 			time = get_time();
-			Parallel_Sloan(matrix, &permutation, node_s, node_e);
+			Parallel_Sloan(matrix, &permutation, defs.start_node, defs.end_node);
 			time = (get_time() - time)/100.0;
 			defs.time = time;
 			break;
@@ -239,6 +236,7 @@ test_def test_reorder_algorithm(test_def defs)
 	MATRIX_permutation(matrix, permutation);
 	bandwidth = MATRIX_bandwidth(matrix);
 	envelope  = MATRIX_envelope(matrix);	
+// 	wavefront = MATRIX_wavefront(matrix, permutation);
 	defs.bandwidth = bandwidth;
 	
 	write_output_after(matrix);
@@ -247,7 +245,8 @@ test_def test_reorder_algorithm(test_def defs)
 	MATRIX_clean(matrix);
 	
 	printf("%s: Band/Env [ %ld / %ld => %ld / %ld ] Time [ %.6f ]\n",
-		defs.algorithm_name, bandwidth_after, envelope_after, bandwidth, envelope, time); 
+		defs.algorithm_name, bandwidth_before, envelope_before, bandwidth, envelope, time); 
+// 	printf("%s: Wavefront => [ %ld ]\n", defs.algorithm_name,  wavefront); 
 	fflush(stdout);
 	
 	return defs;
@@ -320,7 +319,7 @@ test_def test_hsl_rcm(const char* path_matrix_file)
 }
 
 
-test_def test_hsl_sloan(const char* path_matrix_file)
+test_def test_hsl_sloan(const char* path_matrix_file, const int* peripheral_nodes)
 {
 	test_def defs;
 	
@@ -328,6 +327,8 @@ test_def test_hsl_sloan(const char* path_matrix_file)
 	defs.algorithm_name = "HSL Sloan";
 	defs.algorithm = hsl_sloan;
 	defs.strategy = serial;
+	defs.start_node = peripheral_nodes[START];
+	defs.end_node = peripheral_nodes[END];
 	
 	defs = test_reorder_algorithm(defs);
 	
@@ -391,7 +392,7 @@ test_def test_bucket_rcm(const char* path_matrix_file, const int num_threads, in
 }
 
 
-test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads)
+test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads, const int* peripheral_nodes)
 {
 	test_def defs;
 	
@@ -400,6 +401,8 @@ test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads
 	defs.algorithm = parallel_sloan;
 	defs.strategy = parallel;
 	defs.num_threads = num_threads;
+	defs.start_node = peripheral_nodes[START];
+	defs.end_node = peripheral_nodes[END];
 	defs = test_reorder_algorithm(defs);
 	
 	return defs;
@@ -477,10 +480,12 @@ int is_serial_algorithm(reorder_algorithm algorithm)
 
 void run_all_tests()
 {
-	int root, count_matrix, count_alg, count_exec, count_nthreads, num_matrices, num_nthreads, num_algorithms;
+	int root, count_matrix, count_alg, count_exec, 
+	    count_nthreads, num_matrices, num_nthreads, num_algorithms;
 	FILE* out_file;
 	test_def* test_results;
 	test_def result;
+	int* peripheral_nodes;
 	
 	/* *******************************
 	 * Definition of tests parameters
@@ -489,10 +494,9 @@ void run_all_tests()
 	float bfs_chunk_percent = .5;
 	
 	char* matrices[] = {
-// 		"../Big-Matrices/dw8192.mtx",
-// 		"../Big-Matrices/rail_79841.mtx",
-// 		"../Big-Matrices/Dubcova3.mtx",
-		
+		"../Big-Matrices/dw8192.mtx",
+		"../Big-Matrices/rail_79841.mtx",
+		"../Big-Matrices/Dubcova3.mtx",
 		"../Big-Matrices/inline_1.mtx",
 		"../Big-Matrices/audikw_1.mtx",
 		"../Big-Matrices/dielFilterV3real.mtx",
@@ -508,7 +512,7 @@ void run_all_tests()
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { serial_sloan };
+	reorder_algorithm algorithm[] = { parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
@@ -524,7 +528,9 @@ void run_all_tests()
 
 	for (count_matrix = 0; count_matrix < num_matrices; ++count_matrix)
 	{
-		root = get_node_peripheral(matrices[count_matrix]);
+// 		root = get_node_peripheral(matrices[count_matrix]);
+		peripheral_nodes = get_node_peripheral_hsl(matrices[count_matrix]);
+		root = peripheral_nodes[START];
 		
 		fprintf(out_file, "-----------------------------------------------------------------------\n");
 		fprintf(out_file, "Tests Execution - Matrix: %s\n", matrices[count_matrix]);
@@ -576,7 +582,8 @@ void run_all_tests()
 							break;
 							
 						case parallel_sloan :
-							test_results[count_exec] = test_parallel_sloan(matrices[count_matrix], nthreads[count_nthreads]);
+							test_results[count_exec] = 
+								test_parallel_sloan(matrices[count_matrix], nthreads[count_nthreads], peripheral_nodes);
 							break;
 							
 						default :

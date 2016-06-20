@@ -10,6 +10,7 @@ int main (int argc, char* argv[]){
 	char* matrix_name;
 	EXECUTION exec_type;
 	int algorithm;
+	int* peripheral_nodes;
 
 	while ((opt = getopt(argc, argv, "m:p:b:t:a")) != -1)
 	{
@@ -43,8 +44,8 @@ int main (int argc, char* argv[]){
 	}
 	else 
 	{
-		root = get_node_peripheral_hsl(matrix_name);
-		--root;
+		peripheral_nodes = get_node_peripheral_hsl(matrix_name);
+		root = peripheral_nodes[0];
 // 		root = get_node_peripheral(matrix_name);
 		
 		switch (algorithm)
@@ -71,7 +72,7 @@ int main (int argc, char* argv[]){
 				
 			case hsl_sloan :
 				// t = 4
-				test_hsl_sloan(matrix_name);
+				test_hsl_sloan(matrix_name, peripheral_nodes);
 				break;
 				
 			case unordered_rcm :
@@ -91,13 +92,15 @@ int main (int argc, char* argv[]){
 				
 			case parallel_sloan :
 				// t = 8
-				test_parallel_sloan(matrix_name, num_threads);
+				test_parallel_sloan(matrix_name, num_threads, peripheral_nodes);
 				break;
 				
 			default :
 				printf("*** [Error] Algorithm must be between 0 and 8 ***\n");
 				exit(1);
 		}
+		
+		free(peripheral_nodes);
 	}
 	
 	return 0;

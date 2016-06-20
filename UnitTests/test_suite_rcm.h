@@ -39,24 +39,25 @@ typedef struct {
 
 
 typedef enum EXECUTION { ALL_TESTS, ONE_INSTANCE } EXECUTION;
+typedef enum PERIPHERAL_NODES { START, END } PERIPHERAL_NODES;
 
 
 
 extern void test_prefix_sum();
 extern void test_prefix_sum_parallel_serial(int* counts, int max_level);
 int get_node_peripheral(const char* path_matrix_file);
-int get_node_peripheral_hsl(const char* path_matrix_file);
+int* get_node_peripheral_hsl(const char* path_matrix_file);
 
 test_def test_serial_rcm(const char* path_matrix_file, int root);
 test_def test_serial_sloan(const char* path_matrix_file);
 
 test_def test_hsl_spectral(const char* path_matrix_file);
 test_def test_hsl_rcm(const char* path_matrix_file);
-test_def test_hsl_sloan(const char* path_matrix_file);
+test_def test_hsl_sloan(const char* path_matrix_file, const int* peripheral_nodes);
 
 test_def test_unordered_rcm(const char* path_matrix_file, const int num_threads, const float bfs_chunk_percent, int root);
 test_def test_leveled_rcm(const char* path_matrix_file, const int num_threads, int root);
 test_def test_bucket_rcm(const char* path_matrix_file, const int num_threads, int root);
-test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads);
+test_def test_parallel_sloan(const char* path_matrix_file, const int num_threads, const int* peripheral_nodes);
 
 extern void run_all_tests();

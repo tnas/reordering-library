@@ -119,12 +119,13 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
 	int lirn     = A->nz;
-	int jcntl[2] = { SLOAN, AUTOMATIC_PERIPHERAL };
+// 	int jcntl[2] = { SLOAN, AUTOMATIC_PERIPHERAL };
+	int jcntl[2] = { SLOAN, ESPECIFIED_PERIPHERAL };
 	double weight[2] = { SLOAN_W1, SLOAN_W2 };
 	int info[4];
 	int pair_lenght;
 	int* vars;
-	int* pair;
+	int** pair;
 	int* iw;
 	double* w;
 	int* permsv;
@@ -144,6 +145,12 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	perm   = calloc(n, sizeof(int));
 	*p     = calloc(nsup, sizeof(int));
 	
+	for (i = 0; i < pair_lenght; i++)
+	{
+		pair[0][i] = end_node;
+		pair[1][i] = start_node;
+	}
+	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
 	/* -------------------------------------------------------------------- */
@@ -158,8 +165,6 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	
 	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
 	
-	printf("The number of supervariables is %d\n", nsup);fflush(stdout);
-	
 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
 	
 	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);	
@@ -173,17 +178,10 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	{
 		--irn[i];
 		--icptr[i];
-// 		(*p)[--(perm[i])] = i;
-		(*p)[i] = --(perm[i]);
+		(*p)[--(perm[i])] = i;
 	}
 	
 	for (i = n; i < lirn; i++) --irn[i];
-	
-	printf("The chosen permutation is: ");
-	for (i = 0; i < n; ++i) printf("%d ", perm[i]);
-	printf("\n");fflush(stdout);
-	
-	printf("The profile is %f\n", rinfo[0]);fflush(stdout);
 	
 	free(vars);
 	free(iw);
@@ -193,7 +191,4 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	free(possv);
 	free(perm);
 	free(pair);
-	
-	exit(0);
-	
 }

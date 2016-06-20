@@ -48,6 +48,7 @@ extern void     MATRIX_backward          (MAT* U, double* y, double* x);
 extern void     MATRIX_permutation       (MAT* A, int* p);
 extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int bandwidth);
 extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
+extern long int MATRIX_wavefront	 (MAT* A, int* permsv);
 
 /*----------------------------------------------------------------------------
  * GRAPH FUNCTIONS PROTOTYPE IN CSR FORMAT
