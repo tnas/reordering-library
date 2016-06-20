@@ -141,13 +141,14 @@ int* get_node_peripheral_hsl(const char* path_matrix_file) {
 
 test_def test_reorder_algorithm(test_def defs)
 {
-	long int bandwidth, envelope, bandwidth_before, envelope_before;
+	long int bandwidth, bandwidth_before, wavefront;
 	int* permutation;
 	double time;
 	MAT* matrix;
 	FILE* matrix_file;
 	int* g;
 	int start_node, end_node;
+	int enable_permutation, enable_wavefront;
 	
 	if ((matrix_file = fopen(defs.path_matrix_file, "r")) == NULL) 
 		exit(1);
@@ -159,10 +160,12 @@ test_def test_reorder_algorithm(test_def defs)
 	write_output_before(matrix);
 	
 	bandwidth_before = MATRIX_bandwidth(matrix);
-	envelope_before  = MATRIX_envelope(matrix);
 	
 	if (defs.strategy == parallel)
 		omp_set_num_threads(defs.num_threads);
+	
+	enable_permutation = ON;
+	enable_wavefront   = OFF;
 	
 	switch (defs.algorithm)
 	{
@@ -185,8 +188,9 @@ test_def test_reorder_algorithm(test_def defs)
 			
 		case hsl_rcm :
 			time = get_time(); 
-			REORDERING_HSL_RCM(matrix, &permutation);
+			bandwidth = REORDERING_HSL_RCM(matrix);
 			time = (get_time() - time)/100.0;
+			enable_permutation = OFF;
 			defs.time = time;
 			break;
 			
@@ -199,9 +203,10 @@ test_def test_reorder_algorithm(test_def defs)
 			
 		case hsl_sloan :
 			time = get_time();
-			REORDERING_SLOAN_HSL(matrix, &permutation, defs.start_node, defs.end_node);
+			wavefront = REORDERING_SLOAN_HSL(matrix);
 			time = (get_time() - time)/100.0;
 			defs.time = time;
+			enable_wavefront = ON;
 			break;
 			
 		case unordered_rcm :
@@ -233,20 +238,29 @@ test_def test_reorder_algorithm(test_def defs)
 			break;
 	}
 	
-	MATRIX_permutation(matrix, permutation);
-	bandwidth = MATRIX_bandwidth(matrix);
-	envelope  = MATRIX_envelope(matrix);	
-// 	wavefront = MATRIX_wavefront(matrix, permutation);
-	defs.bandwidth = bandwidth;
+	if (enable_wavefront)
+	{
+		printf("%s: Wavefront [ %ld ] Time [ %.6f ]\n", defs.algorithm_name, wavefront, time); 
+		fflush(stdout);
+		MATRIX_clean(matrix);
+		
+		return defs;
+	}
 	
+	if (enable_permutation)
+	{
+		MATRIX_permutation(matrix, permutation);
+		bandwidth = MATRIX_bandwidth(matrix);
+		free(permutation);
+	}
+	
+	defs.bandwidth = bandwidth;
 	write_output_after(matrix);
 	
-	free(permutation);
 	MATRIX_clean(matrix);
 	
-	printf("%s: Band/Env [ %ld / %ld => %ld / %ld ] Time [ %.6f ]\n",
-		defs.algorithm_name, bandwidth_before, envelope_before, bandwidth, envelope, time); 
-// 	printf("%s: Wavefront => [ %ld ]\n", defs.algorithm_name,  wavefront); 
+	printf("%s: Bandwidth Before [ %ld ] => Bandwidth After [ %ld ] Time [ %.6f ]\n",
+		defs.algorithm_name, bandwidth_before, bandwidth, time); 
 	fflush(stdout);
 	
 	return defs;

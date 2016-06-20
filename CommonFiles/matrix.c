@@ -327,56 +327,10 @@ long int MATRIX_bandwidth (MAT* A)
 /*----------------------------------------------------------------------------
  * Compute the matrix wavefront
  *--------------------------------------------------------------------------*/
-long int MATRIX_wavefront(MAT* A, int* permsv)
+long int MATRIX_wavefront(MAT* A)
 {
-	int i;
-	int n        = A->n; 
-	int nsup     = n;
-	int *irn     = A->JA;
-	int *icptr   = A->IA;
-	int lirn     = A->nz;
-	int* vars;
-	int* iw;
-	double rinfo[4];
-	int* svar;
 	
-	svar   = calloc(n, sizeof(int));
-	vars   = calloc(n, sizeof(int));
-	iw     = calloc(3*n + 1, sizeof(int));
-	
-	/* -------------------------------------------------------------------- */    
-	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
-	/* -------------------------------------------------------------------- */
-	
-	for (i = 0; i < n; i++) 
-	{
-		++irn[i];
-		++icptr[i];
-		vars[i] = 1;
-	}
-	
-	for (i = n; i < lirn; i++) ++irn[i];
-
-	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);
-	
-	/* -------------------------------------------------------------------- */    
-	/* Convert matrix back to 0-based C-notation.                           */
-	/* -------------------------------------------------------------------- */
-	for (i = 0; i < n; i++) 
-	{
-		--irn[i];
-		--icptr[i];
-	}
-	
-	for (i = n; i < lirn; i++) --irn[i];
-	
-	free(vars);
-	free(svar);
-// 	free(iw);
-	
-// 	printf("Wavefront: %f\n", rinfo[1]);fflush(stdout);
-	
-	return rinfo[1];
+	return 0;
 }
 
 /*----------------------------------------------------------------------------

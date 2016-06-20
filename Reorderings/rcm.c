@@ -122,40 +122,26 @@ void REORDERING_RCM (MAT* A, int** Fp)
 /*----------------------------------------------------------------------------
  * HSL_MC60 RCM Reordering
  *--------------------------------------------------------------------------*/
-void REORDERING_HSL_RCM (MAT* A, int** p)
+long int REORDERING_HSL_RCM (MAT* A)
 {
-	int i;
+	int i, nsup, pair_lenght;
 	int n        = A->n; 
-	int nsup     = n;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
 	int lirn     = A->nz;
 	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
+// 	int jcntl[2] = { RCM, ESPECIFIED_PERIPHERAL };
 	double weight[2];
 	int info[4];
 	double rinfo[4];
-	int pair_lenght;
 	int* vars;
-	int* pair;
+	int** pair;
 	int* iw;
 	double* w;
 	int* permsv;
 	int* svar;
-	int* possv;
-	int* perm;
-// 	int* perminv;
-	
-	pair_lenght = nsup/2;
-	vars   = calloc(n, sizeof(int));
-	pair   = calloc(2 * pair_lenght, sizeof(int));
-	iw     = calloc(3*n + 1, sizeof(int));
-	w      = calloc(n, sizeof(double));
-	permsv = calloc(nsup, sizeof(int));
-	svar   = calloc(n, sizeof(int));
-	possv  = calloc(n, sizeof(int));
-	perm   = calloc(n, sizeof(int));
-	*p     = calloc(nsup, sizeof(int));
-// 	perminv = calloc(n, sizeof(int));
+// 	int* possv;
+// 	int* perm;
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
@@ -169,14 +155,40 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	
 	for (i = n; i < lirn; i++) ++irn[i];
 	
+	svar   = calloc(n, sizeof(int));
+	vars   = calloc(n, sizeof(int));
+	iw     = calloc(2*n + 2, sizeof(int));
+	
+	// To find supervariables and compress pattern
 	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
 	
-	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, (int**)pair, info, iw, w);
+	free(iw);
+	pair_lenght = nsup/2;
+	permsv = calloc(nsup, sizeof(int));
+	iw     = calloc(3*nsup + 1, sizeof(int));
+	w      = calloc(nsup, sizeof(double));
+	pair   = (int**) calloc(pair_lenght, sizeof(int*));
 	
+	for (i = 0; i < pair_lenght; ++i)
+		pair[i] = (int*) calloc(2, sizeof(int));
+	
+	// To find supervariable permutation
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
+	
+	free(iw);
+	iw = calloc(2*nsup + 1, sizeof(int));
+	
+	// To compute the profile and wavefront for a supervariable permutation
 	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);
 	
-	mc60dd_(&n, &nsup, svar, vars, permsv, perm, possv);
+// 	possv  = calloc(nsup, sizeof(int));
+// 	perm   = calloc(n, sizeof(int));
+	
+	// To find permutation for variables from supervariable permutation
+// 	mc60dd_(&n, &nsup, svar, vars, permsv, perm, possv);
 
+// 	*p = calloc(n, sizeof(int));
+	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
 	/* -------------------------------------------------------------------- */
@@ -184,27 +196,24 @@ void REORDERING_HSL_RCM (MAT* A, int** p)
 	{
 		--irn[i];
 		--icptr[i];
-		(*p)[--(perm[i])] = i;
+// 		(*p)[--(perm[i])] = i;
 	}
 	
 	for (i = n; i < lirn; i++) --irn[i];
 	
-// 	/* Reverse order */
-// 	for (i = 0, j = n - 1; i < n; ++i, --j)
-// 		(*p)[j] = perminv[i];
-	
-	printf("The bandwidth is %f\n", rinfo[2]);fflush(stdout);
-	
+// 	printf("The bandwidth is %f\n", rinfo[2]);fflush(stdout);
 // 	printf("The chosen permutation is: ");
 // 	for (i = 0; i < n; ++i) printf("%d ", (*p)[i]);
 // 	printf("\n");fflush(stdout);
 	
+// 	free(possv);
+// 	free(perm);
 	free(vars);
 	free(iw);
 	free(w);
 	free(permsv);
 	free(svar);
-	free(possv);
-	free(perm);
 	free(pair);
+	
+	return rinfo[2];
 }

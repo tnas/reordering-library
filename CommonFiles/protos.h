@@ -48,7 +48,7 @@ extern void     MATRIX_backward          (MAT* U, double* y, double* x);
 extern void     MATRIX_permutation       (MAT* A, int* p);
 extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int bandwidth);
 extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
-extern long int MATRIX_wavefront	 (MAT* A, int* permsv);
+extern long int MATRIX_wavefront	 (MAT* A);
 
 /*----------------------------------------------------------------------------
  * GRAPH FUNCTIONS PROTOTYPE IN CSR FORMAT
@@ -83,9 +83,9 @@ extern int 	LIST_contains 		 (LIST* list, int element);
  *--------------------------------------------------------------------------*/
 extern void     REORDERING_RCM_opt          (MAT* A, int** p, int s);
 extern void     REORDERING_RCM              (MAT* A, int** p);
-extern void     REORDERING_HSL_RCM          (MAT* A, int** p);
+long int REORDERING_HSL_RCM          (MAT* A);
 extern void     REORDERING_SLOAN            (MAT* A, int** Fp, int node_s, int node_e);
-extern void	REORDERING_SLOAN_HSL 	    (MAT* A, int** p, int start_node, int end_node);
+long int	REORDERING_SLOAN_HSL 	    (MAT* A);
 extern void     REORDERING_HSL_SPECTRAL     (MAT* A, int** p);
 extern void     REORDERING_HSL_SPECTRAL_WGT (MAT* A, int** p);
 

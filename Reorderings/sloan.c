@@ -111,45 +111,23 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
  * @author: Thiago Nascimento - nascimenthiago@gmail.com
  * @since: 15-06-2016
  *--------------------------------------------------------------------------*/
-void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
+long int REORDERING_SLOAN_HSL (MAT* A)
 {
-	int i;
+	int i, nsup, pair_lenght;
 	int n        = A->n; 
-	int nsup     = n;
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
 	int lirn     = A->nz;
-// 	int jcntl[2] = { SLOAN, AUTOMATIC_PERIPHERAL };
-	int jcntl[2] = { SLOAN, ESPECIFIED_PERIPHERAL };
+	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
 	double weight[2] = { SLOAN_W1, SLOAN_W2 };
 	int info[4];
-	int pair_lenght;
+	double rinfo[4];
 	int* vars;
 	int** pair;
 	int* iw;
 	double* w;
 	int* permsv;
 	int* svar;
-	int* possv;
-	int* perm;
-	double rinfo[4];
-	
-	pair_lenght = nsup/2;
-	vars   = calloc(n, sizeof(int));
-	pair   = calloc(2 * pair_lenght, sizeof(int));
-	iw     = calloc(3*n + 1, sizeof(int));
-	w      = calloc(n, sizeof(double));
-	permsv = calloc(nsup, sizeof(int));
-	svar   = calloc(n, sizeof(int));
-	possv  = calloc(n, sizeof(int));
-	perm   = calloc(n, sizeof(int));
-	*p     = calloc(nsup, sizeof(int));
-	
-	for (i = 0; i < pair_lenght; i++)
-	{
-		pair[0][i] = end_node;
-		pair[1][i] = start_node;
-	}
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
@@ -163,14 +141,32 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	
 	for (i = n; i < lirn; i++) ++irn[i];
 	
+	svar   = calloc(n, sizeof(int));
+	vars   = calloc(n, sizeof(int));
+	iw     = calloc(2*n + 2, sizeof(int));
+	
+	// To find supervariables and compress pattern
 	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
 	
+	free(iw);
+	pair_lenght = nsup/2;
+	permsv = calloc(nsup, sizeof(int));
+	iw     = calloc(3*nsup + 1, sizeof(int));
+	w      = calloc(nsup, sizeof(double));
+	pair   = (int**) calloc(pair_lenght, sizeof(int*));
+	
+	for (i = 0; i < pair_lenght; ++i)
+		pair[i] = (int*) calloc(2, sizeof(int));
+	
+	// To find supervariable permutation
 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
 	
-	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);	
+	free(iw);
+	iw = calloc(2*nsup + 1, sizeof(int));
 	
-	mc60dd_(&n, &nsup, svar, vars, permsv, perm, possv);
-
+	// To compute the profile and wavefront for a supervariable permutation
+	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);
+	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
 	/* -------------------------------------------------------------------- */
@@ -178,7 +174,6 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	{
 		--irn[i];
 		--icptr[i];
-		(*p)[--(perm[i])] = i;
 	}
 	
 	for (i = n; i < lirn; i++) --irn[i];
@@ -188,7 +183,7 @@ void REORDERING_SLOAN_HSL (MAT* A, int** p, int start_node, int end_node)
 	free(w);
 	free(permsv);
 	free(svar);
-	free(possv);
-	free(perm);
 	free(pair);
+	
+	return rinfo[1];
 }
