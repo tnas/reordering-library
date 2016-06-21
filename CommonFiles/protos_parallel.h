@@ -1,6 +1,7 @@
 #include <omp.h>
 #include "protos.h"
 #include "util.h"
+#include "matrix_parallel.h"
 
 #define THREAD_ON 1
 #define THREAD_OFF 0
@@ -19,9 +20,6 @@
 #define SLOAN_CURR_PRIOR 0
 #define SLOAN_NEW_PRIOR 1
 
-#define iseven(n) ((n)%(2)==(0)?(1):(0))
-#define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
-
 typedef enum REORDERING_ALGORITHM { SERIAL_RCM, UNORDERED_RCM, LEVELED_RCM } 
 	REORDERING_ALGORITHM;
 
@@ -30,15 +28,6 @@ typedef enum SLOAN_STATE { INACTIVE, PREACTIVE, ACTIVE, NUMBERED }
 
 typedef enum UPDATE { OFF, ON } UPDATE;
 	
-typedef struct 
-{
-	int initial_prefix_sum;
-	int curr_prefix_sum;
-	int curr_total_sum;
-	int last_prefix_sum;
-	int last_total_sum;
-} status_prefix_sum;
-
 
 typedef struct
 {
@@ -58,4 +47,3 @@ extern void	Unordered_RCM(MAT* A, int** perm, int root, const float percent_chun
 extern void	Leveled_RCM(MAT* mat, int** perm, int root);
 extern void	Bucket_RCM(MAT* mat, int** perm, int root);
 extern void 	Parallel_Sloan (MAT* adjacency, int** Fp, int start_node, int end_node);
-extern void 	prefix_sum(const int* counts, int** sums, const int max_level);

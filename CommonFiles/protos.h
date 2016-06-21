@@ -83,9 +83,9 @@ extern int 	LIST_contains 		 (LIST* list, int element);
  *--------------------------------------------------------------------------*/
 extern void     REORDERING_RCM_opt          (MAT* A, int** p, int s);
 extern void     REORDERING_RCM              (MAT* A, int** p);
-long int REORDERING_HSL_RCM          (MAT* A);
+extern long int REORDERING_HSL_RCM          (MAT* A);
 extern void     REORDERING_SLOAN            (MAT* A, int** Fp, int node_s, int node_e);
-long int	REORDERING_SLOAN_HSL 	    (MAT* A);
+extern long int	REORDERING_SLOAN_HSL 	    (MAT* A);
 extern void     REORDERING_HSL_SPECTRAL     (MAT* A, int** p);
 extern void     REORDERING_HSL_SPECTRAL_WGT (MAT* A, int** p);
 
