@@ -8,6 +8,7 @@ add_executable(reordering-library program.c
 	./CommonFiles/util.c 
 	./CommonFiles/blas.c 
 	./CommonFiles/matrix.c 
+	./CommonFiles/matrix_parallel.c
 	./CommonFiles/linked_list.c 
 	./CommonFiles/graph.c 
 	./CommonFiles/graph_parallel.c 
