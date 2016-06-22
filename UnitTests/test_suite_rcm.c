@@ -250,8 +250,9 @@ test_def test_reorder_algorithm(test_def defs)
 	if (enable_permutation)
 	{
 // 		MATRIX_permutation(matrix, permutation);
+// 		bandwidth = MATRIX_bandwidth(matrix);
 		MATRIX_PARALLEL_permutation(matrix, permutation);
-		bandwidth = MATRIX_bandwidth(matrix);
+		bandwidth = MATRIX_PARALLEL_bandwidth(matrix);
 		free(permutation);
 	}
 	

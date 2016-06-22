@@ -19,6 +19,7 @@
 #ifndef __MATRIX_PARALLEL_H__
 #define __MATRIX_PARALLEL_H__
 
-void MATRIX_PARALLEL_permutation (MAT* A, int* p);
+long int MATRIX_PARALLEL_bandwidth   (MAT* A);
+void     MATRIX_PARALLEL_permutation (MAT* A, int* p);
 
 #endif /* __MATRIX_PARALLEL_H__ */

@@ -18,12 +18,45 @@
 #include "protos_parallel.h"
 #include "matrix_parallel.h"
 
+
+/*---------------------------------------------------------------------------
+ * Compute matrix bandwidth
+ *--------------------------------------------------------------------------*/
+long int MATRIX_PARALLEL_bandwidth (MAT* A)
+{
+	int row, band, max_band;
+	int size = A->n;
+	unsigned long int bandwidth = 0;
+	
+	#pragma omp parallel private(row, max_band)
+	{
+		max_band = 0;
+		
+		#pragma omp for
+		for (row = 0; row < size; ++row)
+		{
+			band = row - A->JA[A->IA[row]];
+			if (band > max_band) max_band = band;
+		}
+		
+		if (max_band > bandwidth)
+		{
+			#pragma omp critical
+			bandwidth = max_band;
+		}
+	}
+	
+	return bandwidth;
+}
+
+
+
 /*----------------------------------------------------------------------------
- * Perform the operation P*A*P' in CSR format
+ * Perform operation P*A*P' in CSR format
  *--------------------------------------------------------------------------*/
 void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 {
-	int n, m, nz, num_threads, chunk_size;
+	int n, m, nz, n_nz, num_threads, chunk_size, chunk_size_nz;
 	MAT*  B;
 	ARRAY* a;
 	int* q;
@@ -36,7 +69,7 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 	
 	#pragma omp parallel 
 	{
-		int i, j, k;
+		int i;
 		
 		#pragma omp sections
 		{
@@ -45,8 +78,10 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 				B->n  = n;
 				B->m  = m;
 				B->nz = nz;
+				n_nz  = nz - n;
 				num_threads = omp_get_num_threads();
-				chunk_size = num_threads > n ? 1 : n/num_threads;
+				chunk_size     = num_threads > n ? 1 : n/num_threads;
+				chunk_size_nz  = num_threads > n_nz ? 1 : n_nz/num_threads;
 			}
 			
 			#pragma omp section
@@ -88,18 +123,6 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 	{
 		int i, j, k, index;
 		
-// 		#pragma omp single
-// 		{
-// 			printf("Array Counts: ");
-// 			for (i = 0; i< n+1; ++i) printf("%d ", counts[i]);fflush(stdout);
-// 			printf("\n");fflush(stdout);
-// 			
-// 			printf("Array B->IA: ");
-// 			for (i = 0; i< n+1; ++i) printf("%d ", B->IA[i]);fflush(stdout);
-// 			printf("\n");fflush(stdout);
-// 		}
-		
-		
 		#pragma omp for schedule(static, chunk_size)
 		for (i = 0; i < n; ++i)
 		{
@@ -114,36 +137,24 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 				++k;
 				++index;
 			}
-			
-// 			A->IA[i+1] = (B->IA[i+1]) - (B->IA[i]);    
 		}
-		
 		
 		#pragma omp single
-		{
-			printf("Array arr1: ");
-			for (i = 0; i< nz; ++i) printf("%d ", a[i].arr1);fflush(stdout);
-			printf("\n");fflush(stdout);
-			printf("Array arr2: ");
-			for (i = 0; i< nz; ++i) printf("%d ", a[i].arr2);fflush(stdout);
-			printf("\n");fflush(stdout);
-			printf("Array arr3: ");
-			for (i = 0; i< nz; ++i) printf("%d ", a[i].arr3);fflush(stdout);
-			printf("\n");fflush(stdout);
-		}
-		
-		#pragma omp single nowait
 		qsort(a, nz, sizeof(ARRAY), COMPARE_array);
 		
-		#pragma omp single
-		chunk_size = num_threads > nz ? 1 : nz/num_threads;
-		
 		#pragma omp for schedule(static, chunk_size)
-		for (i = 0; i < nz; ++i)
+		for (i = 0; i < n; ++i)
+		{
+			A->AA[i]   = a[i].arr1;
+			A->JA[i]   = a[i].arr2;
+			A->IA[i+1] = B->IA[i+1];
+		}
+		
+		#pragma omp for schedule(static, chunk_size_nz)
+		for (i = n; i < nz; ++i)
 		{
 			A->AA[i] = a[i].arr1;
 			A->JA[i] = a[i].arr2;
-			if (i < n) A->IA[i+1] = (B->IA[i+1]) - (B->IA[i]);
 		}
 		
 		#pragma omp sections

@@ -430,7 +430,6 @@ void MATRIX_permutation (MAT* A, int* p)
 		for (j = A->IA[p[i]]; j <= A->IA[p[i]+1] - 1; ++j)
 		{
 			B->AA[k] = A->AA[j];
-			printf("i = %d, k = %d, j = %d\n", i, k, j);fflush(stdout);
 			B->JA[k] = A->JA[j];
 			k  = k + 1;
 		}
@@ -455,16 +454,6 @@ void MATRIX_permutation (MAT* A, int* p)
 		}
 		A->IA[i+1] = k;    
 	}
-	
-	printf("Array arr1: ");
-	for (i = 0; i< nz; ++i) printf("%d ", a[i].arr1);fflush(stdout);
-	printf("\n");fflush(stdout);
-	printf("Array arr2: ");
-	for (i = 0; i< nz; ++i) printf("%d ", a[i].arr2);fflush(stdout);
-	printf("\n");fflush(stdout);
-	printf("Array arr3: ");
-	for (i = 0; i< nz; ++i) printf("%d ", a[i].arr3);fflush(stdout);
-	printf("\n");fflush(stdout);
 	
 	qsort(a,nz,sizeof(ARRAY),COMPARE_array);
 	
