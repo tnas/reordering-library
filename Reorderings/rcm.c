@@ -20,10 +20,6 @@ void REORDERING_RCM_opt (MAT* A, int** Fp, int s)
 	for (i = 0; i < n; ++i)
 		p[n-1-i] = q[i]; 
 	
-	printf("The vector permutation is: ");
-	for (i = 0; i < n; ++i) printf("%d ", p[i]);
-	printf("\n");fflush(stdout);
-	
 	(*Fp) = p;
 	
 	free(q);
