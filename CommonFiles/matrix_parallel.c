@@ -73,18 +73,10 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 			#pragma omp section
 			counts = calloc(n + 1, sizeof(int));
 		}
-		
 
 		#pragma omp for schedule(static, chunk_size)
 		for (i = 0; i < n; ++i)
 		{
-// 			for (j = A->IA[p[i]]; j <= A->IA[p[i]+1] - 1; ++j)
-// 			{
-// 				B->AA[k] = A->AA[j];
-// 				B->JA[k] = A->JA[j];
-// 				k  = k + 1;
-// 			}
-			
 			counts[i + 1] = (A->IA[p[i]+1]) - (A->IA[p[i]]);
 			q[p[i]] = i;
 		}
@@ -94,42 +86,36 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 	
 	#pragma omp parallel
 	{
-		int i, j, k, pos;
+		int i, j, k, index;
 		
-		#pragma omp single
-		{
-// 			printf("Array B->JA: ");
-// 			for (i = 0; i< nz; ++i) printf("%d ", B->JA[i]);fflush(stdout);
+// 		#pragma omp single
+// 		{
+// 			printf("Array Counts: ");
+// 			for (i = 0; i< n+1; ++i) printf("%d ", counts[i]);fflush(stdout);
 // 			printf("\n");fflush(stdout);
-			
-			printf("Array B->IA: ");
-			for (i = 0; i< n+1; ++i) printf("%d ", B->IA[i]);fflush(stdout);
-			printf("\n");fflush(stdout);
-		}
+// 			
+// 			printf("Array B->IA: ");
+// 			for (i = 0; i< n+1; ++i) printf("%d ", B->IA[i]);fflush(stdout);
+// 			printf("\n");fflush(stdout);
+// 		}
 		
-		k = 0;
-	
-		#pragma omp for 
+		
+		#pragma omp for schedule(static, chunk_size)
 		for (i = 0; i < n; ++i)
 		{
-			for (j = A->IA[p[i]]; j <= A->IA[p[i]+1] - 1; ++j)
+			k = B->IA[i];
+			index = A->IA[p[i]];
+			
+			for (j = B->IA[i]; j < B->IA[i+1]; ++j)
 			{
-				pos = B->IA[i] + k;
-				a[pos].arr1 = A->AA[j];
-				a[pos].arr2 = q[A->JA[j]];
-				a[pos].arr3 = i;
+				a[k].arr1 = A->AA[index];
+				a[k].arr2 = q[A->JA[index]];
+				a[k].arr3 = i;
 				++k;
+				++index;
 			}
 			
-// 			for (j = B->IA[i]; j <= B->IA[i+1] - 1; ++j)
-// 			{
-// 				a[k].arr1 = B->AA[j];
-// 				a[k].arr2 = q[B->JA[j]];
-// 				a[k].arr3 = i;
-// 				k  = k + 1;
-// 			}
-			
-			A->IA[i+1] = (B->IA[i+1]) - (B->IA[i]);    
+// 			A->IA[i+1] = (B->IA[i+1]) - (B->IA[i]);    
 		}
 		
 		
@@ -157,6 +143,7 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 		{
 			A->AA[i] = a[i].arr1;
 			A->JA[i] = a[i].arr2;
+			if (i < n) A->IA[i+1] = (B->IA[i+1]) - (B->IA[i]);
 		}
 		
 		#pragma omp sections
