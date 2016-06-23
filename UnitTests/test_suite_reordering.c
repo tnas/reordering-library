@@ -189,7 +189,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm = hsl_rcm;
 			defs.algorithm_name = "HSL RCM";
 			time = get_time(); 
-			defs.original_band = REORDERING_HSL_RCM(matrix);
+			defs.reorder_band = REORDERING_HSL_RCM(matrix);
 			defs.time_reordering = (get_time() - time)/100.0;
 			break;
 			
