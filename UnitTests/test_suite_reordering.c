@@ -101,6 +101,15 @@ int inline is_serial_algorithm(reorder_algorithm algorithm)
 	return 0;
 }
 
+int inline is_parallel_algorithm(reorder_algorithm algorithm)
+{
+	if (algorithm == unordered_rcm || algorithm == leveled_rcm ||
+	    algorithm == bucket_rcm    || algorithm == parallel_sloan)
+		return 1;
+	
+	return 0;
+}
+
 int inline is_hsl_algorithm(reorder_algorithm algorithm)
 {
 	if (algorithm == hsl_rcm || algorithm == hsl_spectral || 
@@ -127,7 +136,6 @@ double inline get_total_time(test defs)
 
 test test_reorder_algorithm(test defs)
 {
-	long int bandwidth_before, wavefront;
 	int* permutation;
 	double time;
 	MAT* matrix;
@@ -142,13 +150,10 @@ test test_reorder_algorithm(test defs)
 	MATRIX_readCSR (matrix, matrix_file);
 	fclose(matrix_file);
 	write_output_before(matrix);
-	bandwidth_before = MATRIX_bandwidth(matrix);
+	defs.original_band = MATRIX_bandwidth(matrix);
 	
 	// Setting threads for parallel algorithms
-	if (defs.strategy == parallel) omp_set_num_threads(defs.num_threads);
-	
-	// Setting execution algorithm strategy
-	defs.strategy = is_serial_algorithm(defs.algorithm) ? serial : parallel;
+	if (is_parallel_algorithm(defs.algorithm)) omp_set_num_threads(defs.num_threads);
 	
 	// Getting pseudo peripheral nodes
 	time = get_time();
@@ -184,7 +189,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm = hsl_rcm;
 			defs.algorithm_name = "HSL RCM";
 			time = get_time(); 
-			defs.bandwidth = REORDERING_HSL_RCM(matrix);
+			defs.original_band = REORDERING_HSL_RCM(matrix);
 			defs.time_reordering = (get_time() - time)/100.0;
 			break;
 			
@@ -200,7 +205,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "HSL Sloan";
 			defs.algorithm      = hsl_sloan;
 			time = get_time();
-			wavefront = REORDERING_SLOAN_HSL(matrix);
+			defs.wavefront = REORDERING_SLOAN_HSL(matrix);
 			defs.time_reordering = (get_time() - time)/100.0;
 			break;
 			
@@ -242,13 +247,13 @@ test test_reorder_algorithm(test defs)
 	}
 	
 	// Setting threads for parallel algorithms
-	if (defs.strategy == parallel) omp_set_num_threads(defs.num_threads);
+	if (is_parallel_algorithm(defs.algorithm)) omp_set_num_threads(defs.num_threads);
 	
 	if (is_sloan_algorithm(defs.algorithm))
 	{
 		if (is_hsl_algorithm(defs.algorithm))
 		{
-			printf("%s: Wavefront [ %ld ] Time [ %.6f ]\n", defs.algorithm_name, wavefront, defs.time_reordering); 
+			printf("%s: Wavefront [ %ld ] Time [ %.6f ]\n", defs.algorithm_name, defs.wavefront, defs.time_reordering); 
 			fflush(stdout);
 		}
 		else
@@ -259,7 +264,7 @@ test test_reorder_algorithm(test defs)
 			defs.time_permutation = (get_time() - time)/100.0;
 			
 			printf("%s: Wavefront [ %ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
-				defs.algorithm_name, wavefront, 
+				defs.algorithm_name, defs.wavefront, 
 				defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
 			fflush(stdout);
 			
@@ -271,18 +276,18 @@ test test_reorder_algorithm(test defs)
 		if (is_hsl_algorithm(defs.algorithm))
 		{
 			printf("%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", defs.algorithm_name, 
-			       bandwidth_before, defs.bandwidth, defs.time_reordering); 
+			       defs.original_band, defs.reorder_band, defs.time_reordering); 
 			fflush(stdout);
 		}
 		else 
 		{
 			time = get_time();
 			MATRIX_PARALLEL_permutation(matrix, permutation);
-			defs.bandwidth = MATRIX_PARALLEL_bandwidth(matrix);
+			defs.reorder_band = MATRIX_PARALLEL_bandwidth(matrix);
 			defs.time_permutation = (get_time() - time)/100.0;
 		
 			printf("%s: Bandwidth (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
-				defs.algorithm_name, bandwidth_before, defs.bandwidth, 
+				defs.algorithm_name, defs.original_band, defs.reorder_band, 
 				defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
 			fflush(stdout);
 			
@@ -311,11 +316,13 @@ void normalize_tests(const test* results, test* result)
 	min_time = DBL_MAX;
 	sum_band = sum_time = 0;
 	
-	result->algorithm = results[0].algorithm;
+	result->algorithm_name = results[0].algorithm_name;
+	result->algorithm      = results[0].algorithm;
+	result->original_band  = results[0].original_band;
 	
 	if (TEST_EXEC_TIMES == 1)
 	{
-		result->bandwidth       = results[0].bandwidth;
+		result->reorder_band    = results[0].reorder_band;
 		result->time_reordering = results[0].time_reordering;
 		
 		return;
@@ -324,15 +331,15 @@ void normalize_tests(const test* results, test* result)
 	// Finding out max/min bandwidth and time execution
 	for (times = 0; times < TEST_EXEC_TIMES; ++times)
 	{
-		if (results[times].bandwidth > max_band)
+		if (results[times].reorder_band > max_band)
 		{
 			pos_max_band = times;
-			max_band = results[times].bandwidth;
+			max_band = results[times].reorder_band;
 		}
-		else if (results[times].bandwidth < min_band)
+		else if (results[times].reorder_band < min_band)
 		{
 			pos_min_band = times;
-			min_band = results[times].bandwidth;
+			min_band = results[times].reorder_band;
 		}
 		
 		if (results[times].time_reordering > max_time)
@@ -350,13 +357,13 @@ void normalize_tests(const test* results, test* result)
 	for (times = 0; times < TEST_EXEC_TIMES; ++times)
 	{
 		if (times != pos_min_band && times != pos_max_band)
-			sum_band += results[times].bandwidth;
+			sum_band += results[times].reorder_band;
 		
 		if (times != pos_max_time && times != pos_min_time)
 			sum_time += results[times].time_reordering;
 	}
 	
-	result->bandwidth = sum_band / (TEST_EXEC_TIMES - 2);
+	result->reorder_band    = sum_band / (TEST_EXEC_TIMES - 2);
 	result->time_reordering = sum_time / (TEST_EXEC_TIMES - 2);
 }
 
@@ -395,7 +402,7 @@ void run_all_tests()
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { parallel_sloan };
+	reorder_algorithm algorithm[] = { leveled_rcm };
 	
 	/* *****************
 	 * Tests execution
@@ -439,9 +446,9 @@ void run_all_tests()
 				
 				normalize_tests(test_results, &result);
 				
-				if (is_sloan_algorithm(algorithm[count_alg]))
+				if (is_sloan_algorithm(result.algorithm))
 				{
-					if (is_hsl_algorithm(algorithm[count_alg]))
+					if (is_hsl_algorithm(result.algorithm))
 					{
 // 						printf("%s: Wavefront [ %ld ] Time [ %.6f ]\n", 
 // 						       test_results[0].algorithm_name, wavefront, defs.time_reordering); 
@@ -457,34 +464,22 @@ void run_all_tests()
 				}
 				else
 				{
-					if (is_hsl_algorithm(algorithm[count_alg]))
+					if (is_hsl_algorithm(result.algorithm))
 					{
-						printf("%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", defs.algorithm_name, 
-						bandwidth_before, defs.bandwidth, defs.time_reordering); 
-						fflush(stdout);
+						printf("%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", result.algorithm_name, 
+						result.original_band, result.reorder_band, result.time_reordering); 
+						fflush(out_file);
 					}
 					else 
 					{
-						time = get_time();
-						MATRIX_PARALLEL_permutation(matrix, permutation);
-						defs.bandwidth = MATRIX_PARALLEL_bandwidth(matrix);
-						defs.time_permutation = (get_time() - time)/100.0;
-					
-						printf("%s: Bandwidth (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
-							defs.algorithm_name, bandwidth_before, defs.bandwidth, 
-							defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
-						fflush(stdout);
-						
-						free(permutation);
+						fprintf(out_file, "[%s] Threads: %d -- Bandwidth (Before/After) [ %ld/%ld ] -- Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+							result.algorithm_name, is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads],
+							result.original_band, result.reorder_band, result.time_peripheral, 
+							result.time_reordering, result.time_permutation, get_total_time(result)); 
+						fflush(out_file);
 					}
 					
 				}
-				
-				fprintf(out_file, "[%s] Threads: %d -- Bandwidth: %ld -- Time: %.6f\n", 
-					test_results[0].algorithm_name, 
-					is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads], 
-					result.bandwidth, 
-					result.time_reordering); fflush(out_file);
 				
 				free(test_results);
 			}

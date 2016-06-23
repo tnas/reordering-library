@@ -27,7 +27,9 @@ typedef struct {
 	double time_peripheral;
 	double time_reordering;
 	double time_permutation;
-	long int bandwidth;
+	long int original_band;
+	long int reorder_band;
+	long int wavefront;
 	const char* path_matrix_file;
 	int root;
 	int start_node;
@@ -35,7 +37,6 @@ typedef struct {
 	char* algorithm_name;
 	int num_threads;
 	reorder_algorithm algorithm;
-	reordering_strategy strategy;
 	float percent_chunk;
 } test;
 
