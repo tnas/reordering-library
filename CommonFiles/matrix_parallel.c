@@ -24,12 +24,13 @@
  *--------------------------------------------------------------------------*/
 long int MATRIX_PARALLEL_bandwidth (MAT* A)
 {
-	int row, band, max_band;
 	int size = A->n;
 	unsigned long int bandwidth = 0;
 	
-	#pragma omp parallel private(row, max_band)
+	#pragma omp parallel
 	{
+		int row, band, max_band;
+		
 		max_band = 0;
 		
 		#pragma omp for
@@ -142,7 +143,7 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 		#pragma omp single
 		qsort(a, nz, sizeof(ARRAY), COMPARE_array);
 		
-		#pragma omp for schedule(static, chunk_size)
+		#pragma omp for schedule(static, chunk_size) 
 		for (i = 0; i < n; ++i)
 		{
 			A->AA[i]   = a[i].arr1;

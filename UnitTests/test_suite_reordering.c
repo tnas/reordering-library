@@ -241,6 +241,9 @@ test test_reorder_algorithm(test defs)
 			exit(1);
 	}
 	
+	// Setting threads for parallel algorithms
+	if (defs.strategy == parallel) omp_set_num_threads(defs.num_threads);
+	
 	if (is_sloan_algorithm(defs.algorithm))
 	{
 		if (is_hsl_algorithm(defs.algorithm))
@@ -436,6 +439,47 @@ void run_all_tests()
 				
 				normalize_tests(test_results, &result);
 				
+				if (is_sloan_algorithm(algorithm[count_alg]))
+				{
+					if (is_hsl_algorithm(algorithm[count_alg]))
+					{
+// 						printf("%s: Wavefront [ %ld ] Time [ %.6f ]\n", 
+// 						       test_results[0].algorithm_name, wavefront, defs.time_reordering); 
+// 						fflush(out_file);
+					}
+					else
+					{
+// 						printf("%s: Wavefront [ %ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+// 							defs.algorithm_name, wavefront, 
+// 							defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
+// 						fflush(stdout);
+					}
+				}
+				else
+				{
+					if (is_hsl_algorithm(algorithm[count_alg]))
+					{
+						printf("%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", defs.algorithm_name, 
+						bandwidth_before, defs.bandwidth, defs.time_reordering); 
+						fflush(stdout);
+					}
+					else 
+					{
+						time = get_time();
+						MATRIX_PARALLEL_permutation(matrix, permutation);
+						defs.bandwidth = MATRIX_PARALLEL_bandwidth(matrix);
+						defs.time_permutation = (get_time() - time)/100.0;
+					
+						printf("%s: Bandwidth (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+							defs.algorithm_name, bandwidth_before, defs.bandwidth, 
+							defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
+						fflush(stdout);
+						
+						free(permutation);
+					}
+					
+				}
+				
 				fprintf(out_file, "[%s] Threads: %d -- Bandwidth: %ld -- Time: %.6f\n", 
 					test_results[0].algorithm_name, 
 					is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads], 
@@ -450,4 +494,3 @@ void run_all_tests()
 	
 	fclose(out_file);
 }
-
