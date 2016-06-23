@@ -118,8 +118,8 @@ long int REORDERING_SLOAN_HSL (MAT* A)
 	int *irn     = A->JA;
 	int *icptr   = A->IA;
 	int lirn     = A->nz;
-	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
-	double weight[2] = { SLOAN_W1, SLOAN_W2 };
+	int jcntl[2] = { SLOAN, AUTOMATIC_PERIPHERAL };
+	double weight[2] = { SLOAN_W2, SLOAN_W1 };
 	int info[4];
 	double rinfo[4];
 	int* vars;
@@ -185,5 +185,5 @@ long int REORDERING_SLOAN_HSL (MAT* A)
 	free(svar);
 	free(pair);
 	
-	return rinfo[1];
+	return rinfo[MAX_WAVEFRONT];
 }

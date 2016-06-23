@@ -5,10 +5,6 @@
 
 #define TEST_EXEC_TIMES 1
 
-typedef enum {
-	serial,
-	parallel
-} reordering_strategy;
 
 typedef enum {
 	serial_rcm,
@@ -41,13 +37,11 @@ typedef struct {
 } test;
 
 
+typedef enum { ALL_TESTS, ONE_INSTANCE } EXECUTION;
+typedef enum { START, END } PERIPHERAL_NODES;
 
 
-typedef enum EXECUTION { ALL_TESTS, ONE_INSTANCE } EXECUTION;
-typedef enum PERIPHERAL_NODES { START, END } PERIPHERAL_NODES;
-
-
-int  get_node_peripheral(const char* path_matrix_file);
-int* get_node_peripheral_hsl(const char* path_matrix_file);
-test test_reorder_algorithm(test defs);
-void run_all_tests();
+int  get_node_peripheral     (const char* path_matrix_file);
+int* get_node_peripheral_hsl (const char* path_matrix_file);
+test test_reorder_algorithm  (test defs);
+void run_all_tests           ();

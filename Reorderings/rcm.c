@@ -126,7 +126,6 @@ long int REORDERING_HSL_RCM (MAT* A)
 	int *icptr   = A->IA;
 	int lirn     = A->nz;
 	int jcntl[2] = { RCM, AUTOMATIC_PERIPHERAL };
-// 	int jcntl[2] = { RCM, ESPECIFIED_PERIPHERAL };
 	double weight[2];
 	int info[4];
 	double rinfo[4];
@@ -136,8 +135,6 @@ long int REORDERING_HSL_RCM (MAT* A)
 	double* w;
 	int* permsv;
 	int* svar;
-// 	int* possv;
-// 	int* perm;
 	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
@@ -177,14 +174,6 @@ long int REORDERING_HSL_RCM (MAT* A)
 	// To compute the profile and wavefront for a supervariable permutation
 	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);
 	
-// 	possv  = calloc(nsup, sizeof(int));
-// 	perm   = calloc(n, sizeof(int));
-	
-	// To find permutation for variables from supervariable permutation
-// 	mc60dd_(&n, &nsup, svar, vars, permsv, perm, possv);
-
-// 	*p = calloc(n, sizeof(int));
-	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix back to 0-based C-notation.                           */
 	/* -------------------------------------------------------------------- */
@@ -192,18 +181,10 @@ long int REORDERING_HSL_RCM (MAT* A)
 	{
 		--irn[i];
 		--icptr[i];
-// 		(*p)[--(perm[i])] = i;
 	}
 	
 	for (i = n; i < lirn; i++) --irn[i];
 	
-// 	printf("The bandwidth is %f\n", rinfo[2]);fflush(stdout);
-// 	printf("The chosen permutation is: ");
-// 	for (i = 0; i < n; ++i) printf("%d ", (*p)[i]);
-// 	printf("\n");fflush(stdout);
-	
-// 	free(possv);
-// 	free(perm);
 	free(vars);
 	free(iw);
 	free(w);
@@ -211,5 +192,5 @@ long int REORDERING_HSL_RCM (MAT* A)
 	free(svar);
 	free(pair);
 	
-	return rinfo[2];
+	return rinfo[SEMI_BANDWIDTH];
 }

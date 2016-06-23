@@ -260,15 +260,13 @@ test test_reorder_algorithm(test defs)
 		{
 			time = get_time();
 			MATRIX_PARALLEL_permutation(matrix, permutation);
-			// TODO: Implement the wavefront computation
+			defs.wavefront = MATRIX_PARALLEL_wavefront(matrix);
 			defs.time_permutation = (get_time() - time)/100.0;
 			
 			printf("%s: Wavefront [ %ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
 				defs.algorithm_name, defs.wavefront, 
 				defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
 			fflush(stdout);
-			
-			free(permutation);
 		}
 	}
 	else
@@ -304,78 +302,89 @@ test test_reorder_algorithm(test defs)
 }
 
 
-
-void normalize_tests(const test* results, test* result)
+long int normalize_int_results(const long int* results)
 {
-	int pos_min_band, pos_max_band, pos_min_time, pos_max_time, times;
-	double sum_time, max_time, min_time;
-	long int sum_band, max_band, min_band;
+	int exec_min_val, exec_max_val, exec;
+	long int sum_val, max_val, min_val;
 	
-	max_band = max_time = 0;
-	min_band = INT_MAX;
-	min_time = DBL_MAX;
-	sum_band = sum_time = 0;
+	max_val = sum_val = 0;
+	min_val = INT_MAX;
 	
-	result->algorithm_name = results[0].algorithm_name;
-	result->algorithm      = results[0].algorithm;
-	result->original_band  = results[0].original_band;
+	if (TEST_EXEC_TIMES == 1) return results[0];
 	
-	if (TEST_EXEC_TIMES == 1)
+	// Finding out max/min value
+	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
 	{
-		result->reorder_band    = results[0].reorder_band;
-		result->time_reordering = results[0].time_reordering;
-		
-		return;
-	}
-	
-	// Finding out max/min bandwidth and time execution
-	for (times = 0; times < TEST_EXEC_TIMES; ++times)
-	{
-		if (results[times].reorder_band > max_band)
+		if (results[exec] > max_val)
 		{
-			pos_max_band = times;
-			max_band = results[times].reorder_band;
+			exec_max_val = exec;
+			max_val = results[exec];
 		}
-		else if (results[times].reorder_band < min_band)
+		else if (results[exec] < min_val)
 		{
-			pos_min_band = times;
-			min_band = results[times].reorder_band;
-		}
-		
-		if (results[times].time_reordering > max_time)
-		{
-			pos_max_time = times;
-			max_time = results[times].time_reordering;
-		}
-		else if (results[times].time_reordering < min_time)
-		{
-			pos_min_time = times;
-			min_time = results[times].time_reordering;
+			exec_min_val = exec;
+			min_val = results[exec];
 		}
 	}
 	
-	for (times = 0; times < TEST_EXEC_TIMES; ++times)
+	// Discarding max and min results value
+	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
 	{
-		if (times != pos_min_band && times != pos_max_band)
-			sum_band += results[times].reorder_band;
-		
-		if (times != pos_max_time && times != pos_min_time)
-			sum_time += results[times].time_reordering;
+		if (exec != exec_min_val && exec != exec_max_val)
+			sum_val += results[exec];
 	}
 	
-	result->reorder_band    = sum_band / (TEST_EXEC_TIMES - 2);
-	result->time_reordering = sum_time / (TEST_EXEC_TIMES - 2);
+	return sum_val / (TEST_EXEC_TIMES - 2);
 }
 
+
+double normalize_double_results(const double* results)
+{
+	int exec_min_val, exec_max_val, exec;
+	double sum_val, max_val, min_val;
+	
+	max_val = sum_val = 0;
+	min_val = INT_MAX;
+	
+	if (TEST_EXEC_TIMES == 1) return results[0];
+	
+	// Finding out max/min value
+	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
+	{
+		if (results[exec] > max_val)
+		{
+			exec_max_val = exec;
+			max_val = results[exec];
+		}
+		else if (results[exec] < min_val)
+		{
+			exec_min_val = exec;
+			min_val = results[exec];
+		}
+	}
+	
+	// Discarding max and min results value
+	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
+	{
+		if (exec != exec_min_val && exec != exec_max_val)
+			sum_val += results[exec];
+	}
+	
+	return sum_val / (TEST_EXEC_TIMES - 2);
+}
 
 
 void run_all_tests()
 {
-	int count_matrix, count_alg, count_exec, 
+	int count_matrix, count_alg, exec, 
 	    count_nthreads, num_matrices, num_nthreads, num_algorithms;
 	FILE* out_file;
-	test* test_results;
 	test result;
+	double time_reorderings[TEST_EXEC_TIMES];
+	double time_peripherals[TEST_EXEC_TIMES];
+	double time_permutations[TEST_EXEC_TIMES];
+	long int bandwidths[TEST_EXEC_TIMES];
+	long int wavefronts[TEST_EXEC_TIMES];
 	
 	/* *******************************
 	 * Definition of tests parameters
@@ -402,7 +411,7 @@ void run_all_tests()
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { leveled_rcm };
+	reorder_algorithm algorithm[] = { parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
@@ -432,41 +441,48 @@ void run_all_tests()
 			
 			for (count_nthreads = 0; count_nthreads < num_nthreads; ++count_nthreads)
 			{
-				test_results = calloc(TEST_EXEC_TIMES, sizeof(test));
-				
-				for (count_exec = 0; count_exec < TEST_EXEC_TIMES; ++count_exec)
-				{
-					test_results[count_exec].algorithm        = algorithm[count_alg];
-					test_results[count_exec].path_matrix_file = matrices[count_matrix];
-					test_results[count_exec].num_threads      = nthreads[count_nthreads];
-					test_results[count_exec].percent_chunk    = bfs_chunk_percent;
+				result.algorithm        = algorithm[count_alg];
+				result.path_matrix_file = matrices[count_matrix];
+				result.num_threads      = nthreads[count_nthreads];
+				result.percent_chunk    = bfs_chunk_percent;
 					
-					test_results[count_exec] = test_reorder_algorithm(test_results[count_exec]);
+				for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
+				{
+					result = test_reorder_algorithm(result);
+					time_reorderings[exec]  = result.time_reordering;
+					time_peripherals[exec]  = result.time_peripheral;
+					time_permutations[exec] = result.time_permutation;
+					bandwidths[exec]        = result.reorder_band;
+					wavefronts[exec]        = result.wavefront;
 				}
 				
-				normalize_tests(test_results, &result);
+				result.time_peripheral  = normalize_double_results(time_peripherals); 
+				result.time_reordering  = normalize_double_results(time_reorderings);
+				result.time_permutation = normalize_double_results(time_permutations);
+				result.reorder_band     = normalize_int_results(bandwidths);
+				result.wavefront        = normalize_int_results(wavefronts);
 				
 				if (is_sloan_algorithm(result.algorithm))
 				{
 					if (is_hsl_algorithm(result.algorithm))
 					{
-// 						printf("%s: Wavefront [ %ld ] Time [ %.6f ]\n", 
-// 						       test_results[0].algorithm_name, wavefront, defs.time_reordering); 
-// 						fflush(out_file);
+						fprintf(out_file, "%s: Wavefront [ %ld ] Time [ %.6f ]\n", 
+						       result.algorithm_name, result.wavefront, result.time_reordering); 
+						fflush(out_file);
 					}
 					else
 					{
-// 						printf("%s: Wavefront [ %ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
-// 							defs.algorithm_name, wavefront, 
-// 							defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
-// 						fflush(stdout);
+						fprintf(out_file, "[%s] Threads: %d -- Wavefront [ %ld ] -- Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+							result.algorithm_name, is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads],
+							result.wavefront, result.time_peripheral, result.time_reordering, result.time_permutation, get_total_time(result)); 
+						fflush(out_file);
 					}
 				}
 				else
 				{
 					if (is_hsl_algorithm(result.algorithm))
 					{
-						printf("%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", result.algorithm_name, 
+						fprintf(out_file, "%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", result.algorithm_name, 
 						result.original_band, result.reorder_band, result.time_reordering); 
 						fflush(out_file);
 					}
@@ -480,11 +496,8 @@ void run_all_tests()
 					}
 					
 				}
-				
-				free(test_results);
 			}
 		}
-		
 	}
 	
 	fclose(out_file);

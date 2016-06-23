@@ -51,6 +51,42 @@ long int MATRIX_PARALLEL_bandwidth (MAT* A)
 }
 
 
+/*---------------------------------------------------------------------------
+ * Compute matrix maximum wavefront
+ *--------------------------------------------------------------------------*/
+long int MATRIX_PARALLEL_wavefront (MAT* A)
+{
+	int size = A->n;
+	unsigned long int wavefront = 0;
+	
+	#pragma omp parallel
+	{
+		int row, ja, wfront, max_wfront;
+		
+		max_wfront = 0; 
+		
+		#pragma omp for
+		for (row = 0; row < size; ++row)
+		{
+			wfront = 0;
+			
+			// Computing row-th wavefront 
+			for (ja = A->IA[row]; ja < size; ++ja)
+				if (A->JA[ja] <= row) ++wfront;
+			
+			if (wfront > max_wfront) max_wfront = wfront;
+		}
+		
+		if (max_wfront > wavefront)
+		{
+			#pragma omp critical
+			wavefront = max_wfront;
+		}
+	}
+	
+	return wavefront;
+}
+
 
 /*----------------------------------------------------------------------------
  * Perform operation P*A*P' in CSR format
