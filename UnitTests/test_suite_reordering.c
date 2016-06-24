@@ -92,10 +92,21 @@ int* get_node_peripheral_hsl(const char* path_matrix_file) {
 	return peripheral_nodes;
 }
 
+int inline is_hsl_algorithm(reorder_algorithm algorithm)
+{
+	if (algorithm == hsl_rcm || 
+	    algorithm == hsl_spectral || 
+	    algorithm == hsl_sloan)
+		return 1;
+	
+	return 0;
+}
+
 int inline is_serial_algorithm(reorder_algorithm algorithm)
 {
-	if (algorithm == serial_rcm || algorithm == serial_sloan ||
-	    algorithm == hsl_rcm    || algorithm == hsl_spectral)
+	if (algorithm == serial_rcm || 
+	    algorithm == serial_sloan ||
+	    is_hsl_algorithm(algorithm))
 		return 1;
 	
 	return 0;
@@ -105,15 +116,6 @@ int inline is_parallel_algorithm(reorder_algorithm algorithm)
 {
 	if (algorithm == unordered_rcm || algorithm == leveled_rcm ||
 	    algorithm == bucket_rcm    || algorithm == parallel_sloan)
-		return 1;
-	
-	return 0;
-}
-
-int inline is_hsl_algorithm(reorder_algorithm algorithm)
-{
-	if (algorithm == hsl_rcm || algorithm == hsl_spectral || 
-	    algorithm == hsl_sloan)
 		return 1;
 	
 	return 0;
@@ -376,8 +378,8 @@ double normalize_double_results(const double* results)
 
 void run_all_tests()
 {
-	int count_matrix, count_alg, exec, 
-	    count_nthreads, num_matrices, num_nthreads, num_algorithms;
+	int count_matrix, count_alg, exec, num_threads,
+	    count_nthreads, num_matrices, size_set_nthreads, num_algorithms;
 	FILE* out_file;
 	test result;
 	double time_reorderings[TEST_EXEC_TIMES];
@@ -403,15 +405,15 @@ void run_all_tests()
 // 		"../Big-Matrices/G3_circuit.mtx"
 		
 		"../Matrices/rail_5177.mtx",
-// 		"../Matrices/bcspwr01.mtx",
-// 		"../Matrices/bcspwr02.mtx",
+		"../Matrices/bcspwr01.mtx",
+		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx"
 	};
 	
 	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
 	
-	reorder_algorithm algorithm[] = { parallel_sloan };
+	reorder_algorithm algorithm[] = { hsl_rcm, hsl_sloan, parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
@@ -421,9 +423,9 @@ void run_all_tests()
 	if ((out_file = fopen("run_all_tests_normalized_output.txt", "w")) == NULL) 
 		exit(1);
 	
-	num_matrices   = sizeof(matrices)/sizeof(matrices[0]);
-	num_nthreads   = sizeof(nthreads)/sizeof(nthreads[0]);
-	num_algorithms = sizeof(algorithm)/sizeof(algorithm[0]);
+	num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
+	size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
+	num_algorithms    = sizeof(algorithm)/sizeof(algorithm[0]);
 
 	for (count_matrix = 0; count_matrix < num_matrices; ++count_matrix)
 	{
@@ -437,9 +439,10 @@ void run_all_tests()
 			fprintf(out_file, "-----------------------------------------------------------------------\n");
 			fflush(out_file);
 			
-			if (is_serial_algorithm(algorithm[count_alg])) num_nthreads = 1;
+			num_threads = is_serial_algorithm(algorithm[count_alg]) ? 1 :
+				size_set_nthreads;
 			
-			for (count_nthreads = 0; count_nthreads < num_nthreads; ++count_nthreads)
+			for (count_nthreads = 0; count_nthreads < num_threads; ++count_nthreads)
 			{
 				result.algorithm        = algorithm[count_alg];
 				result.path_matrix_file = matrices[count_matrix];

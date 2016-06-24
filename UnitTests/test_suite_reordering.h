@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <float.h>
 
-#define TEST_EXEC_TIMES 1
+#define TEST_EXEC_TIMES 5
 
 
 typedef enum {
