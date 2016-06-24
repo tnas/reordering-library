@@ -10,7 +10,7 @@ int main (int argc, char* argv[]){
 	char* matrix_name;
 	EXECUTION exec_type;
 	test defs;
-
+	
 	while ((opt = getopt(argc, argv, "m:p:b:t:a")) != -1)
 	{
 		switch (opt)
