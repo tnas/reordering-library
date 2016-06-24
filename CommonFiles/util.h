@@ -2,6 +2,8 @@
 #include <time.h>
 #include <sys/time.h>
 #include <stdio.h>
+#include <omp.h>
+#include <math.h>
 #include "heads.h"
 
 #define iseven(n) ((n)%(2)==(0)?(1):(0))
