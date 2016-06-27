@@ -37,6 +37,12 @@ int main (int argc, char* argv[]){
 		}
 	}
 	
+	/*
+	 * Disabling dynamic adjustment of the number 
+	 * of threads available for the execution
+	 */
+	omp_set_dynamic(DYNAMIC_OFF);
+	
 	if (exec_type == ALL_TESTS)
 	{
 		run_all_tests();

@@ -468,6 +468,8 @@ void Bucket_RCM(MAT* mat, int** perm, int root)
 	
 	#pragma omp parallel
 	{
+		printf("omp dynamic: %d\n", omp_get_dynamic());fflush(stdout);
+		printf("num_threads : %d\n", omp_get_num_threads());fflush(stdout);
 		int node, n_par, n_ch, degree, pos_child_gen, pos_parent_gen, gen_pos;
 		int* neighbors;
 		

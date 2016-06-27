@@ -5,6 +5,8 @@
 
 #define THREAD_ON 1
 #define THREAD_OFF 0
+#define DYNAMIC_OFF 0
+#define DYNAMIC_ON 1
 #define UNDEF_THREAD -1
 
 #define INFINITY_LEVEL 2147483647
