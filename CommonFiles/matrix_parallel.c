@@ -33,7 +33,7 @@ long int MATRIX_PARALLEL_bandwidth (MAT* A)
 		
 		max_band = 0;
 		
-		#pragma omp for
+		#pragma omp for schedule(static)
 		for (row = 0; row < size; ++row)
 		{
 			band = row - A->JA[A->IA[row]];
@@ -65,7 +65,7 @@ long int MATRIX_PARALLEL_wavefront (MAT* A)
 		
 		max_wfront = 0; 
 		
-		#pragma omp for
+		#pragma omp for schedule(static)
 		for (row = 0; row < size; ++row)
 		{
 			wfront = 0;

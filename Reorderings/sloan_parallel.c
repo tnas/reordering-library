@@ -106,29 +106,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 			// Chosing maximum priority
 			#pragma omp single
 			{ 	
-// 				for (node = 0; node < num_nodes; ++node) 
-// 				{		
-// 					if (status[node] == NUMBERED)
-// 					{
-// 						printf("Node %d => priority %d - N\n", node, priority[node][SLOAN_CURR_PRIOR]);fflush(stdout);
-// 					}
-// 					else 
-// 					{
-// 						printf("Node %d => priority %d\n", node, priority[node][SLOAN_CURR_PRIOR]);fflush(stdout);
-// 					}
-// 				}
-// 				
-// 				printf("----------------------------------\n");fflush(stdout);
-// 				
-// 				for (prior_bag = num_prior_bags - 1; prior_bag >= 0; --prior_bag)
-// 				{
-// 					if (size_bags[prior_bag] > 0)
-// 					{
-// 						printf("Priority bag: %d => size %d\n", prior_bag, size_bags[prior_bag]);fflush(stdout);
-// 					}
-// 				}
-				
-				
 				for (prior_bag = num_prior_bags - 1; prior_bag >= 0; --prior_bag)
 				{
 					if (size_bags[prior_bag] > 0)
@@ -139,8 +116,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 				}
 			}
 			
-// 			printf("Max priority: %d\n", max_priority);fflush(stdout);
-			
 			// Processing the Logic Bag
 			#pragma omp for schedule(static, chunk_size)
 			for (n_node = 0; n_node < num_nodes; ++n_node)
@@ -149,7 +124,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 				{
 					if (priority[n_node][SLOAN_CURR_PRIOR] == max_priority)
 					{
-// 						printf("Getting node %d from priority bag %d\n", n_node, max_priority);fflush(stdout);
 						vertex        = n_node;
 						neighbors     = GRAPH_adjacent(adjacency, vertex);
 						vertex_degree = degree[vertex];
@@ -176,46 +150,11 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 									
 									update_far = ON;
 								}
-								
-								
-// 								switch (status[neighbor])
-// 								{
-// 									case ACTIVE :
-// 										
-// 										#pragma omp atomic
-// 										priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-// 										
-// 										break;
-// 										
-// 									case INACTIVE :
-// 										
-// 										// Setting status to PREACTIVE
-// 										#pragma omp atomic
-// 										++status[neighbor];
-// 									
-// 									case PREACTIVE :
-// 										
-// 										// Setting status to ACTIVE
-// 										#pragma omp atomic
-// 										++status[neighbor];
-// 										
-// 										#pragma omp atomic
-// 										priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-// 										
-// 										update_far = ON;
-// 										
-// 										break;
-// 								}
-								
 							}
 							else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
 							{
 								#pragma omp atomic
 								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-								
-// 								// Setting status to ACTIVE
-// 								#pragma omp atomic
-// 								++status[neighbor];
 								
 								#pragma omp critical
 								status[neighbor] = ACTIVE;
@@ -239,10 +178,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 									
 									if (status[far_neighbor] == INACTIVE)
 									{
-										// Setting status to PREACTIVE
-// 										#pragma omp atomic
-// 										++status[far_neighbor];
-										
 										#pragma omp critical
 										status[far_neighbor] = PREACTIVE;
 										
@@ -263,7 +198,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 						#pragma omp critical
 						{
 							size_bags[priority[vertex][SLOAN_CURR_PRIOR]]--;
-// 							printf("Setting node %d at position %d => Size Bag %d  = %d\n", vertex, next_id, priority[vertex][SLOAN_CURR_PRIOR], size_bags[priority[vertex][SLOAN_CURR_PRIOR]]);fflush(stdout);
 							(*permutation)[next_id++] = vertex;
 							status[vertex] = NUMBERED;
 							
@@ -278,8 +212,6 @@ void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_
 				if ((status[node] != NUMBERED) && 
 					(priority[node][SLOAN_CURR_PRIOR] != priority[node][SLOAN_NEW_PRIOR]))
 				{
-// 					printf("Removing node %d from priority bag %d to %d\n", node, priority[node][SLOAN_CURR_PRIOR], priority[node][SLOAN_NEW_PRIOR]);fflush(stdout);
-					
 					#pragma omp atomic
 					size_bags[priority[node][SLOAN_CURR_PRIOR]]--;
 						

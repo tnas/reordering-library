@@ -385,7 +385,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 			// *********************
 			while (children != NULL)
 			{
-				child = -1;
+				child = UNDEF_NODE;
 				
 				#pragma omp critical
 				{
@@ -396,7 +396,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 					}
 				}
 				
-				if (child != -1)
+				if (child != UNDEF_NODE)
 				{
 					#pragma omp critical
 					{
@@ -468,8 +468,6 @@ void Bucket_RCM(MAT* mat, int** perm, int root)
 	
 	#pragma omp parallel
 	{
-		printf("omp dynamic: %d\n", omp_get_dynamic());fflush(stdout);
-		printf("num_threads : %d\n", omp_get_num_threads());fflush(stdout);
 		int node, n_par, n_ch, degree, pos_child_gen, pos_parent_gen, gen_pos;
 		int* neighbors;
 		

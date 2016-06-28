@@ -155,12 +155,22 @@ test test_reorder_algorithm(test defs)
 	defs.original_band = MATRIX_bandwidth(matrix);
 	
 	// Setting threads for parallel algorithms
-	if (is_parallel_algorithm(defs.algorithm)) omp_set_num_threads(defs.num_threads);
-	
-	// Getting pseudo peripheral nodes
-	time = get_time();
-	peripheral_nodes = get_node_peripheral_hsl(defs.path_matrix_file);
-	defs.time_peripheral = (get_time() - time)/100.0;
+	if (is_parallel_algorithm(defs.algorithm)) 
+	{
+		omp_set_num_threads(defs.num_threads);
+		
+		// Getting pseudo peripheral nodes
+		time = omp_get_wtime();
+		peripheral_nodes = get_node_peripheral_hsl(defs.path_matrix_file);
+		defs.time_peripheral = (omp_get_wtime() - time)/100.0;
+	}
+	else
+	{
+		// Getting pseudo peripheral nodes
+		time = get_time();
+		peripheral_nodes = get_node_peripheral_hsl(defs.path_matrix_file);
+		defs.time_peripheral = (get_time() - time)/100.0;
+	}
 	
 	defs.root       = peripheral_nodes[START];
 	defs.start_node = peripheral_nodes[START];
@@ -214,33 +224,33 @@ test test_reorder_algorithm(test defs)
 		case unordered_rcm : // t = 5
 			defs.algorithm_name = "Unordered RCM";
 			defs.algorithm      = unordered_rcm;
-			time = get_time(); 
+			time = omp_get_wtime();
 			Unordered_RCM(matrix, &permutation, defs.root, defs.percent_chunk);
-			defs.time_reordering = (get_time() - time)/100.0;
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		case leveled_rcm : // t = 6
 			defs.algorithm_name = "Leveled RCM";
 			defs.algorithm      = leveled_rcm;
-			time = get_time(); 
+			time = omp_get_wtime();
 			Leveled_RCM(matrix, &permutation, defs.root);
-			defs.time_reordering = (get_time() - time)/100.0;
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		case bucket_rcm : // t = 7
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
-			time = get_time(); 
+			time = omp_get_wtime(); 
 			Bucket_RCM(matrix, &permutation, defs.root);
-			defs.time_reordering = (get_time() - time)/100.0;
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		case parallel_sloan : // t = 8
 			defs.algorithm_name = "Parallel Sloan";
 			defs.algorithm      = parallel_sloan;
-			time = get_time();
+			time = omp_get_wtime();
 			Parallel_Sloan(matrix, &permutation, defs.start_node, defs.end_node);
-			defs.time_reordering = (get_time() - time)/100.0;
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		default :
@@ -260,10 +270,20 @@ test test_reorder_algorithm(test defs)
 		}
 		else
 		{
-			time = get_time();
-			MATRIX_PARALLEL_permutation(matrix, permutation);
-			defs.wavefront = MATRIX_PARALLEL_wavefront(matrix);
-			defs.time_permutation = (get_time() - time)/100.0;
+			if (is_parallel_algorithm(defs.algorithm))
+			{
+				time = omp_get_wtime();
+				MATRIX_PARALLEL_permutation(matrix, permutation);
+				defs.wavefront = MATRIX_PARALLEL_wavefront(matrix);
+				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+			}
+			else
+			{
+				time = get_time();
+				MATRIX_PARALLEL_permutation(matrix, permutation);
+				defs.wavefront = MATRIX_PARALLEL_wavefront(matrix);
+				defs.time_permutation = (get_time() - time)/100.0;
+			}
 			
 			printf("%s: Wavefront [ %ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
 				defs.algorithm_name, defs.wavefront, 
@@ -281,10 +301,20 @@ test test_reorder_algorithm(test defs)
 		}
 		else 
 		{
-			time = get_time();
-			MATRIX_PARALLEL_permutation(matrix, permutation);
-			defs.reorder_band = MATRIX_PARALLEL_bandwidth(matrix);
-			defs.time_permutation = (get_time() - time)/100.0;
+			if (is_parallel_algorithm(defs.algorithm))
+			{
+				time = omp_get_wtime();
+				MATRIX_PARALLEL_permutation(matrix, permutation);
+				defs.reorder_band = MATRIX_PARALLEL_wavefront(matrix);
+				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+			}
+			else
+			{
+				time = get_time();
+				MATRIX_PARALLEL_permutation(matrix, permutation);
+				defs.reorder_band = MATRIX_PARALLEL_wavefront(matrix);
+				defs.time_permutation = (get_time() - time)/100.0;
+			}
 		
 			printf("%s: Bandwidth (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
 				defs.algorithm_name, defs.original_band, defs.reorder_band, 

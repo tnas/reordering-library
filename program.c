@@ -37,11 +37,14 @@ int main (int argc, char* argv[]){
 		}
 	}
 	
-	/*
-	 * Disabling dynamic adjustment of the number 
-	 * of threads available for the execution
-	 */
+	// Disabling dynamic adjustment of the number of threads
 	omp_set_dynamic(DYNAMIC_OFF);
+	
+	// Hinting idle threads to spin rather than sleep
+	setenv("OMP_WAIT_POLICY", "PASSIVE", OVERWRITE_VARIABLE);
+	
+	// Prevent threads migrating between cores
+	setenv("OMP_PROC_BIND", "TRUE", OVERWRITE_VARIABLE);
 	
 	if (exec_type == ALL_TESTS)
 	{
