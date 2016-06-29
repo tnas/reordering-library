@@ -18,15 +18,17 @@
 #include <ctype.h>
 #include "./UnitTests/test_suite.h"
 #include "./UnitTests/test_suite_reordering.h"
-// #include "./UnitTests/test_suite_matrix.h"
+#include "./UnitTests/test_suite_prefixsum.h"
+#include "./UnitTests/test_suite_matrix.h"
 
 #define DYNAMIC_OFF 0
 #define OVERWRITE_VARIABLE 1
 
-/*
+/* *****************************************************
  * Program Parameters:
+ * 
  * -m <path of matrix .mtx file>
- * -t <algorithm>:
+ * -a <algorithm>:
  * 	0: Serial RCM
  * 	1: Serial Sloan
  * 	2: HSL RCM
@@ -38,14 +40,21 @@
  * 	8: Parallel Sloan
  * -p <number of threads>
  * -b <percent of chunk for Unordered RCM>
+ * -t <test suite>:
+ * 	0: reordering algorithms 
+ * 	1: prefix sum 
+ * 	2: wavefront calculus
+ * *****************************************************
  */
 int main (int argc, char* argv[]){
   
 	int opt, num_threads, algorithm, test_suite;
 	float bfs_chunk_size;
 	char* matrix_name;
-	EXECUTION exec_type;
+	test_scope scope;
 	test defs;
+	
+	scope = TEST_CASE;
 	
 	while ((opt = getopt(argc, argv, "m:p:b:t:a:")) != -1)
 	{
@@ -53,9 +62,9 @@ int main (int argc, char* argv[]){
 		{
 			case 'm' :
 				matrix_name = optarg;
-				exec_type = ONE_INSTANCE;
+				scope = TEST_CASE;
 				break;
-			case 't' :
+			case 'a' :
 				algorithm = atoi(optarg);
 				break;		
 				
@@ -67,9 +76,9 @@ int main (int argc, char* argv[]){
 				bfs_chunk_size = atof(optarg);
 				break;
 				
-			case 'a' :
+			case 't' :
 				test_suite = atoi(optarg);
-				exec_type = TEST_SUITE;
+				scope = TEST_SUITE;
 				break;
 		}
 	}
@@ -83,19 +92,24 @@ int main (int argc, char* argv[]){
 	// Prevent threads migrating between cores
 	setenv("OMP_PROC_BIND", "TRUE", OVERWRITE_VARIABLE);
 	
-	if (exec_type == TEST_SUITE)
+	if (scope == TEST_SUITE)
 	{
 		switch (test_suite) 
 		{
 			case REORDERING :
-				run_all_tests();
+				run_all_reordering_tests();
+				break;
+			
+			case PREFIX_SUM:
+				test_prefix_sum();
 				break;
 				
 			case MATRIX :
+				test_parallel_wavefront();
 				break;
 		}
 	}
-	else 
+	else if (scope == TEST_CASE)
 	{
 		defs.path_matrix_file = matrix_name;
 		defs.algorithm        = algorithm;
@@ -103,6 +117,11 @@ int main (int argc, char* argv[]){
 		defs.num_threads      = num_threads;
 		
 		test_reorder_algorithm(defs);
+	}
+	else
+	{
+		printf("*** [Error] Test not identified ***\n");
+		exit(1);	
 	}
 	
 	return 0;

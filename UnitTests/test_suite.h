@@ -24,5 +24,5 @@ typedef enum {
 
 typedef enum { 
 	TEST_SUITE, 
-	ONE_INSTANCE 
-} EXECUTION;
+	TEST_CASE 
+} test_scope;

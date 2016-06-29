@@ -20,6 +20,6 @@
 #ifndef __TEST_SUITE_MATRIX_H__
 #define __TEST_SUITE_MATRIX_H__
 
-
+void test_parallel_wavefront();
 
 #endif /* __TEST_SUITE_MATRIX_H__ */

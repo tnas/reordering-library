@@ -17,6 +17,7 @@
 
 #include "test_suite_prefixsum.h"
 
+
 void test_prefix_sum()
 {
 	int* sums;

@@ -31,29 +31,41 @@ void load_matrix(const char* path_matrix_file, MAT** matrix)
 
 
 
-void test_parallel_wavefront_inline_1()
+void test_parallel_wavefront()
 {
 	MAT* matrix;
-	char* matrix_name = "../Big-Matrices/inline_1.mtx";
-	long int expected_wavefront = 130603;
+	int num_matrices, size_set_threads, mat, th;
 	long int calculated_wavefront;
 	
-	load_matrix(matrix_name, &matrix);
-	calculated_wavefront = MATRIX_PARALLEL_wavefront(matrix);
+	int nthreads[] = { 1, 2, 4, 6, 8 };
 	
-	assert(calculated_wavefront == expected_wavefront);
+	char* matrices[] = {
+		"../Big-Matrices/inline_1.mtx",
+		"../Big-Matrices/audikw_1.mtx",
+		"../Big-Matrices/dielFilterV3real.mtx",
+		"../Big-Matrices/G3_circuit.mtx"
+	};
+	
+	long int expected_wavefront[] = {
+		130603, 477149, 598949, 85516
+	};
+	
+	num_matrices     = sizeof(matrices)/sizeof(matrices[0]);
+	size_set_threads = sizeof(nthreads)/sizeof(nthreads[0]);
+	
+	for (mat = 0; mat < num_matrices; ++mat)
+	{
+		load_matrix(matrices[mat], &matrix);
+		
+		for (th = 0; th < size_set_threads; ++th)
+		{
+			omp_set_num_threads(nthreads[th]);
+			
+			calculated_wavefront = MATRIX_PARALLEL_wavefront(matrix);
+			
+			assert(calculated_wavefront == expected_wavefront[mat]);
+		}
+		
+		MATRIX_clean(matrix);
+	}
 }
-
-
-void test_parallel_wavefront_audikw_1()
-{
-}
-
-void test_parallel_wavefront_dielFilterV3real()
-{
-}
-
-void test_parallel_wavefront_G3_circuit()
-{
-}
-
