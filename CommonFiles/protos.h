@@ -15,18 +15,18 @@ typedef enum LABEL { UNREACHED, LABELED } LABEL;
 /*----------------------------------------------------------------------------
  * ALGEBRA LINEAR FUNCTIONS PROTOTYPE 
  *--------------------------------------------------------------------------*/
-extern int      daxpy                    (int n, double  a, double *x, double *y);
-extern int      dcopy                    (int n, double *x, double *y);
-extern double   ddot                     (int n, double *x, double *y);
-extern int      dscal                    (int n, double  a, double *x, double *y);
-extern int      ddiff                    (int n, double *a, double *x, double *y);
-extern int      izero                    (int n, int *v);
-extern int      iszero                   (double x);
+// extern int      daxpy                    (int n, double  a, double *x, double *y);
+// extern int      dcopy                    (int n, double *x, double *y);
+// extern double   ddot                     (int n, double *x, double *y);
+// extern int      dscal                    (int n, double  a, double *x, double *y);
+// extern int      ddiff                    (int n, double *a, double *x, double *y);
+// extern int      izero                    (int n, int *v);
+// extern int      iszero                   (double x);
 
 /*----------------------------------------------------------------------------
  * COMPARE FUNCTIONS FOR QSORT 
  *--------------------------------------------------------------------------*/
-extern int      COMPARE_array            (const void * a, const void * b);
+// extern int      COMPARE_array            (const void * a, const void * b);
 extern int      COMPARE_eig              (const void * a, const void * b);
 extern int      COMPARE_degr_ASC         (const void * a, const void * b);
 extern int      COMPARE_dist_degr_DES    (const void * a, const void * b);
@@ -35,20 +35,20 @@ extern int      COMPARE_dist_degr_ASC    (const void * a, const void * b);
 /*----------------------------------------------------------------------------
  * MATRIX HEADER FUNCTIONS PROTOTYPE
  *--------------------------------------------------------------------------*/
-extern void     MATRIX_readCSR           (MAT* A, FILE* f);
-extern double   MATRIX_aij               (MAT* A, int i, int j);
-extern void     MATRIX_printCSR          (MAT* A);
-extern void     MATRIX_printFULL         (MAT* A);
-extern long int MATRIX_envelope          (MAT* A);
-extern long int MATRIX_bandwidth         (MAT* A);
-extern void     MATRIX_clean             (MAT* A);
-extern void     MATRIX_matvec            (MAT* A, double* x, double* b);
-extern void     MATRIX_forward           (MAT* L, double* b, double* y);
-extern void     MATRIX_backward          (MAT* U, double* y, double* x);
-extern void     MATRIX_permutation       (MAT* A, int* p);
-extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int bandwidth);
-extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
-extern long int MATRIX_wavefront	 (MAT* A);
+// extern void     MATRIX_readCSR           (MAT* A, FILE* f);
+// extern double   MATRIX_aij               (MAT* A, int i, int j);
+// extern void     MATRIX_printCSR          (MAT* A);
+// extern void     MATRIX_printFULL         (MAT* A);
+// extern long int MATRIX_envelope          (MAT* A);
+// extern long int MATRIX_bandwidth         (MAT* A);
+// extern void     MATRIX_clean             (MAT* A);
+// extern void     MATRIX_matvec            (MAT* A, double* x, double* b);
+// extern void     MATRIX_forward           (MAT* L, double* b, double* y);
+// extern void     MATRIX_backward          (MAT* U, double* y, double* x);
+// extern void     MATRIX_permutation       (MAT* A, int* p);
+// extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int bandwidth);
+// extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
+// extern long int MATRIX_wavefront	 (MAT* A);
 
 /*----------------------------------------------------------------------------
  * GRAPH FUNCTIONS PROTOTYPE IN CSR FORMAT

@@ -1,5 +1,5 @@
 #include <omp.h>
-#include "protos.h"
+#include "heads.h"
 #include "util.h"
 #include "matrix_parallel.h"
 
@@ -23,13 +23,19 @@
 #define DYNAMIC_OFF 0
 #define OVERWRITE_VARIABLE 1
 
-typedef enum REORDERING_ALGORITHM { SERIAL_RCM, UNORDERED_RCM, LEVELED_RCM } 
-	REORDERING_ALGORITHM;
+typedef enum { 
+	SERIAL_RCM, 
+	UNORDERED_RCM, 
+	LEVELED_RCM 
+} REORDERING_ALGORITHM;
 
-typedef enum SLOAN_STATE { INACTIVE, PREACTIVE, ACTIVE, NUMBERED }
-	SLOAN_STATE;
 
-typedef enum UPDATE { OFF, ON } UPDATE;
+typedef enum { 
+	INACTIVE, PREACTIVE, ACTIVE, NUMBERED 
+	
+} SLOAN_STATE;
+
+typedef enum { OFF, ON } UPDATE;
 	
 
 typedef struct

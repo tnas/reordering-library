@@ -5,7 +5,6 @@
 
 #define TEST_EXEC_TIMES 5
 
-
 typedef enum {
 	serial_rcm,
 	serial_sloan,
@@ -37,7 +36,6 @@ typedef struct {
 } test;
 
 
-typedef enum { ALL_TESTS, ONE_INSTANCE } EXECUTION;
 typedef enum { START, END } PERIPHERAL_NODES;
 
 

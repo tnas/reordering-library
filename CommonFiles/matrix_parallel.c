@@ -15,7 +15,6 @@
  * 
  */
 
-#include "protos_parallel.h"
 #include "matrix_parallel.h"
 
 

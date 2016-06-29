@@ -14,15 +14,23 @@
  * limitations under the License.
  * 
  */
+#include <omp.h>
+#include <math.h>
+#include "util.h"
 
-#include "matrix.h"
-#include "util_parallel.h"
+#define iseven(n) ((n)%(2)==(0)?(1):(0))
+#define isdivisor(d, n) ((n)%(d)==(0)?(1):(0))
 
-#ifndef __MATRIX_PARALLEL_H__
-#define __MATRIX_PARALLEL_H__
+typedef struct 
+{
+	int initial_prefix_sum;
+	int curr_prefix_sum;
+	int curr_total_sum;
+	int last_prefix_sum;
+	int last_total_sum;
+} status_prefix_sum;
 
-long int MATRIX_PARALLEL_bandwidth   (MAT* A);
-long int MATRIX_PARALLEL_wavefront   (MAT* A);
-void     MATRIX_PARALLEL_permutation (MAT* A, int* p);
 
-#endif /* __MATRIX_PARALLEL_H__ */
+void  prefix_sum(const int* counts, int** sums, const int max_level);
+
+

@@ -15,14 +15,14 @@
  * 
  */
 
-#include "matrix.h"
-#include "util_parallel.h"
+typedef enum {
+	REORDERING, 
+	PREFIX_SUM,
+	MATRIX
+} test_suite;
 
-#ifndef __MATRIX_PARALLEL_H__
-#define __MATRIX_PARALLEL_H__
 
-long int MATRIX_PARALLEL_bandwidth   (MAT* A);
-long int MATRIX_PARALLEL_wavefront   (MAT* A);
-void     MATRIX_PARALLEL_permutation (MAT* A, int* p);
-
-#endif /* __MATRIX_PARALLEL_H__ */
+typedef enum { 
+	TEST_SUITE, 
+	ONE_INSTANCE 
+} EXECUTION;

@@ -14,15 +14,12 @@
  * limitations under the License.
  * 
  */
+#include <assert.h>
+#include "../CommonFiles/matrix_parallel.h"
 
-#include "matrix.h"
-#include "util_parallel.h"
+#ifndef __TEST_SUITE_MATRIX_H__
+#define __TEST_SUITE_MATRIX_H__
 
-#ifndef __MATRIX_PARALLEL_H__
-#define __MATRIX_PARALLEL_H__
 
-long int MATRIX_PARALLEL_bandwidth   (MAT* A);
-long int MATRIX_PARALLEL_wavefront   (MAT* A);
-void     MATRIX_PARALLEL_permutation (MAT* A, int* p);
 
-#endif /* __MATRIX_PARALLEL_H__ */
+#endif /* __TEST_SUITE_MATRIX_H__ */

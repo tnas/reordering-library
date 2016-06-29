@@ -8,9 +8,10 @@ add_executable(reordering-library program.c
 	./CommonFiles/util.c 
 	./CommonFiles/blas.c 
 	./CommonFiles/matrix.c 
-	./CommonFiles/matrix_parallel.c
 	./CommonFiles/linked_list.c 
 	./CommonFiles/graph.c 
+	./CommonFiles/util_parallel.c
+	./CommonFiles/matrix_parallel.c
 	./CommonFiles/graph_parallel.c 
 	./Reorderings/spectral.c 
 	./Reorderings/rcm.c 
@@ -19,7 +20,8 @@ add_executable(reordering-library program.c
 	./Reorderings/sloan_parallel.c
 	./Reorderings/rcm_galois.cpp
 	./UnitTests/test_suite_reordering.c
-	./UnitTests/test_suite_prefixsum.c)
+	./UnitTests/test_suite_prefixsum.c
+	./UnitTests/test_suite_matrix.c)
 
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/libhsl_mc73.a)

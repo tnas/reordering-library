@@ -16,7 +16,9 @@
  */
 #include <unistd.h>
 #include <ctype.h>
+#include "./UnitTests/test_suite.h"
 #include "./UnitTests/test_suite_reordering.h"
+// #include "./UnitTests/test_suite_matrix.h"
 
 /*
  * Program Parameters:
@@ -36,13 +38,13 @@
  */
 int main (int argc, char* argv[]){
   
-	int opt, num_threads, algorithm;
+	int opt, num_threads, algorithm, test_suite;
 	float bfs_chunk_size;
 	char* matrix_name;
 	EXECUTION exec_type;
 	test defs;
 	
-	while ((opt = getopt(argc, argv, "m:p:b:t:a")) != -1)
+	while ((opt = getopt(argc, argv, "m:p:b:t:a:")) != -1)
 	{
 		switch (opt)
 		{
@@ -63,7 +65,8 @@ int main (int argc, char* argv[]){
 				break;
 				
 			case 'a' :
-				exec_type = ALL_TESTS;
+				test_suite = atoi(optarg);
+				exec_type = TEST_SUITE;
 				break;
 		}
 	}
@@ -77,9 +80,17 @@ int main (int argc, char* argv[]){
 	// Prevent threads migrating between cores
 	setenv("OMP_PROC_BIND", "TRUE", OVERWRITE_VARIABLE);
 	
-	if (exec_type == ALL_TESTS)
+	if (exec_type == TEST_SUITE)
 	{
-		run_all_tests();
+		switch (test_suite) 
+		{
+			case REORDERING :
+				run_all_tests();
+				break;
+				
+			case MATRIX :
+				break;
+		}
 	}
 	else 
 	{
