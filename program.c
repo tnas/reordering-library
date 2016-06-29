@@ -20,6 +20,9 @@
 #include "./UnitTests/test_suite_reordering.h"
 // #include "./UnitTests/test_suite_matrix.h"
 
+#define DYNAMIC_OFF 0
+#define OVERWRITE_VARIABLE 1
+
 /*
  * Program Parameters:
  * -m <path of matrix .mtx file>

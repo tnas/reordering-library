@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef __MATRIX_H__
+#define __MATRIX_H__
+
 typedef struct
 {
 	double*     AA;
@@ -37,5 +40,8 @@ extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
 extern long int MATRIX_wavefront	 (MAT* A);
 
 extern int      COMPARE_array            (const void * a, const void * b);
+extern int      COMPARE_eig              (const void * a, const void * b);
 extern 	void 	write_output_after	 (const MAT *A);
 extern 	void 	write_output_before	 (const MAT *A);
+
+#endif

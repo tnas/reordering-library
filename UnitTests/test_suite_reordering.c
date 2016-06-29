@@ -1,7 +1,5 @@
 #include "test_suite_reordering.h"
 
-void mc60hd_(int* n, int* nsup, int* lirn, int* irn, int* icptr, int* vars, int* mask, int* ls, int* xls, int* list, int* info);
-
 
 int get_node_peripheral(const char* path_matrix_file) {
 	

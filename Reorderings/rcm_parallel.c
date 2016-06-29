@@ -1,7 +1,4 @@
-/*----------------------------------------------------------------------------
- * UNORDERED RCM REORDERING SOLVER
- *--------------------------------------------------------------------------*/
-#include "../CommonFiles/protos_parallel.h"
+#include "rcm_parallel.h"
 
 
 int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)

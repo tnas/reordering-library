@@ -1,13 +1,8 @@
-/*----------------------------------------------------------------------------
- * RCM REORDERING SOLVER
- *--------------------------------------------------------------------------*/
-#include "../CommonFiles/protos.h"
+#include "spectral.h"
 
 /*----------------------------------------------------------------------------
  * SPECTRAL reordering
  *--------------------------------------------------------------------------*/
-void mc73_fiedler(int* n, int* lirn, int* irn, int* ip, int* list, double* fvector, int* info, double* a);
-
 void REORDERING_HSL_SPECTRAL (MAT* A, int** Fp)
 {
 	int i;
@@ -109,11 +104,4 @@ void REORDERING_HSL_SPECTRAL_WGT (MAT* A, int** Fp)
 	free(fvector);
 	
 	(*Fp) = p;
-}
-
-int COMPARE_eig (const void * a, const void * b)
-{
-	if (((ARRAY*)a)->arr1 > ((ARRAY*)b)->arr1) return  1;
-	if (((ARRAY*)a)->arr1 < ((ARRAY*)b)->arr1) return -1;
-	return 0;
 }

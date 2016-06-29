@@ -1,7 +1,21 @@
-/*----------------------------------------------------------------------------
- * PARALLEL GRAPH FUNCTIONS
- *--------------------------------------------------------------------------*/
-#include "protos_parallel.h"
+/*
+ * Copyright 2016 Thiago Nascimento <nascimenthiago@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include "graph_parallel.h"
 
 
 void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const float percent_chunk)
@@ -116,207 +130,4 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const
 	// 	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
 	// 	exit(0);
 	//   }
-}
-
-
-
-
-/*----------------------------------------------------------------------------
- * Find the depth of an LEVEL STRUCTURE
- * (i.e. the total number of levels - same as find the maximum of an array)
- *--------------------------------------------------------------------------*/
-int GRAPH_LS_depth_PARALLEL(int* LS, int n)
-{
-	if (LS == NULL || n <= 0)
-	{
-		printf ("error: Array is empty. Exiting.. [GRAPH_LS_depth]\n");
-		exit(0);
-	}
-
-	int level, depth = 0;
-	
-	#pragma omp parallel for private(level) reduction(max: depth)
-	for (level = 0; level < n; ++level)
-		if (LS[level] > depth) depth = LS[level];
-
-	return depth + 1;
-}
-
-
-/*----------------------------------------------------------------------------
- * Find the width of an LEVEL STRUCTURE
- * (i.e. maximum number of nodes which belong to a single level)
- *--------------------------------------------------------------------------*/
-int GRAPH_LS_width_PARALLEL(int* LS, int n)
-{
-	int i, width, size_L;
-	int* c;
-	
-	if (LS == NULL || n <= 0)
-	{
-		printf ("error: Array is empty. Exiting.. [GRAPH_LS_width]\n");
-		exit(0);
-	}
-	
-	width  = 0;	
-	size_L = GRAPH_LS_depth_PARALLEL(LS,n);
-	c      = calloc (size_L,sizeof(int));
-	
-	#pragma omp parallel
-	{
-		#pragma omp for private(i)
-		for (i = 0; i < n; ++i)
-			c[LS[i]]++;
-		
-		#pragma omp for private(i) reduction(max: width)
-		for (i = 0; i < size_L; ++i)
-			if (width < c[i])
-				width = c[i];
-			
-		#pragma omp single
-		free(c);
-	}
-	
-	return width;
-}
-
-
-
-/*----------------------------------------------------------------------------
- * Return the Last level shrinked from a LEVEL STRUCTURE
- *--------------------------------------------------------------------------*/
-LIST* GRAPH_LS_last_level_PARALLEL(MAT* A, int* LS, int n)
-{
-	int i, k1, k2, last;
-	GRAPH *G;
-	LIST  *L;
-	
-	#pragma omp parallel
-	{
-		#pragma omp sections
-		{
-			#pragma omp section
-			last = GRAPH_LS_depth(LS, n) - 1;
-			
-			#pragma omp section
-			G = (GRAPH*) malloc (n*sizeof(GRAPH));
-			
-			#pragma omp section
-			L = NULL;
-		}
-		
-		#pragma omp for private(i) 
-		for (i = 0; i < n; ++i)
-		{
-			G[i].label    = i;
-			G[i].distance = LS[i];
-			G[i].degree   = GRAPH_degree (A,i);			
-		}
-	}
-	
-	qsort (G, n, sizeof(GRAPH), COMPARE_dist_degr_DES);
-
-	k1 = k2 = 0;
-	
-	for (i = 0; i < n; ++i)
-	{
-		k1 = G[i].degree; 
-		if (G[i].distance != last) 
-			break;
-		if (k1 != k2)
-		{ 
-			L  = LIST_insert_IF_NOT_EXIST (L, G[i].label);
-			k2 = k1; 
-		}
-	}
-	
-	free(G);
-	
-	return L;
-}
-
-
-
-/*----------------------------------------------------------------------------
- * Find the pseudo-peripheral nodes in the graph (i.e. matrix) A 
- *--------------------------------------------------------------------------*/
-int* GRAPH_LS_peripheral_PARALLEL (MAT* A, int *node_s, int* node_e)
-{
-	int n, dgr, vertex, min_vertex, e, x, min_dgr, width, new_width;
-	int*  LS1;
-	int*  LS2;
-	LIST* level_list;
-	
-	n = width = A->n;
-	
-	#pragma omp parallel 
-	{
-		#pragma omp single nowait
-		LS1 =  (int*) calloc (n, sizeof (int));
-		
-		#pragma omp single nowait
-		LS2 =  (int*) calloc (n, sizeof (int));
-		
-		#pragma omp single nowait
-		level_list = NULL;
-		
-		#pragma omp single
-		{
-			min_dgr    = n;
-			min_vertex = INFINITY_LEVEL;
-		}
-		
-		/* Choose a vertex min_vertex with minimum degree */
-		#pragma omp for private(vertex, dgr) reduction(min: min_dgr, min_vertex)
-		for (vertex = 0; vertex < n; ++vertex)
-		{
-			dgr = GRAPH_degree(A, vertex);
-			
-			if (min_dgr > dgr)
-			{
-				min_dgr    = dgr;
-				min_vertex = vertex;
-			}
-		}
-	}
-	
-	/* Construct the Level Strucure of s */
-	GRAPH_bfs (A, min_vertex, LS1);
-// 	GRAPH_parallel_fixedpoint_bfs(A, min_vertex, &LS1);
-	level_list = GRAPH_LS_last_level_PARALLEL(A, LS1, n);
-	
-	while (level_list != NULL)
-	{
-		x          = LIST_first(level_list);
-		level_list = LIST_remove(level_list, x);
-		
-		GRAPH_bfs(A, x, LS2);
-// 		GRAPH_parallel_fixedpoint_bfs(A, x, &LS2);
-		new_width = GRAPH_LS_width_PARALLEL(LS2, n);
-
-		if (new_width < width)
-		{
-			if (GRAPH_LS_depth_PARALLEL(LS2, n) > GRAPH_LS_depth_PARALLEL(LS1, n))
-			{
-				min_vertex = x; 
-				GRAPH_bfs(A, min_vertex, LS1);
-// 				GRAPH_parallel_fixedpoint_bfs(A, min_vertex, &LS1);
-				level_list = GRAPH_LS_last_level_PARALLEL(A, LS1, n);
-				width = n;
-			}
-			else
-			{
-				e = x; 
-				width = new_width;
-			}
-			
-		}
-	}
-	
-	free(LS2);
-	
-	*node_s = min_vertex;
-	*node_e = e;
-	
-	return LS1;	
 }

@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#include "../CommonFiles/protos_parallel.h"
 #include <assert.h>
+#include "../CommonFiles/util_parallel.h"
 
 #ifndef TEST_SUITE_PREFIXSUM_H
 #define TEST_SUITE_PREFIXSUM_H

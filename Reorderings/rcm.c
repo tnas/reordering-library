@@ -1,7 +1,4 @@
-/*----------------------------------------------------------------------------
- * RCM REORDERING SOLVER
- *--------------------------------------------------------------------------*/
-#include "../CommonFiles/protos.h"
+#include "rcm.h"
 
 /*----------------------------------------------------------------------------
  * RCM reordering from the LEVEL STRUCTURE in PSEUDO-PERIPHERAL algorithm

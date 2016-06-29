@@ -6,7 +6,6 @@ project(reordering-library C Fortran)
 
 add_executable(reordering-library program.c 
 	./CommonFiles/util.c 
-	./CommonFiles/blas.c 
 	./CommonFiles/matrix.c 
 	./CommonFiles/linked_list.c 
 	./CommonFiles/graph.c 

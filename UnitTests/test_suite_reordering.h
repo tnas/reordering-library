@@ -1,7 +1,15 @@
-#include "../CommonFiles/protos_parallel.h"
 #include <assert.h>
 #include <limits.h>
 #include <float.h>
+#include "../CommonFiles/matrix_parallel.h"
+#include "../Reorderings/hsl.h"
+#include "../Reorderings/rcm.h"
+#include "../Reorderings/sloan.h"
+#include "../Reorderings/spectral.h"
+#include "../Reorderings/rcm_parallel.h"
+#include "../Reorderings/sloan_parallel.h"
+
+
 
 #define TEST_EXEC_TIMES 5
 

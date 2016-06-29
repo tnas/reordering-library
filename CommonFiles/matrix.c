@@ -17,6 +17,13 @@ int COMPARE_array (const void * a, const void * b)
 }
 
 
+int COMPARE_eig (const void * a, const void * b)
+{
+	if (((ARRAY*)a)->arr1 > ((ARRAY*)b)->arr1) return  1;
+	if (((ARRAY*)a)->arr1 < ((ARRAY*)b)->arr1) return -1;
+	return 0;
+}
+
 /*---------------------------------------------*/
 /*---WRITING OUTPUT----------------------------*/
 /*---------------------------------------------*/
