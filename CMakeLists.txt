@@ -28,7 +28,7 @@ target_link_libraries(reordering-library m gfortran blas)
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fopenmp -o3")
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
 
 set_property(TARGET reordering-library PROPERTY LINKER_LANGUAGE C)

@@ -124,7 +124,8 @@ int inline is_parallel_algorithm(reorder_algorithm algorithm)
 
 int inline is_sloan_algorithm(reorder_algorithm algorithm)
 {
-	if (algorithm == hsl_sloan || algorithm == parallel_sloan)
+	if (algorithm == hsl_sloan || algorithm == parallel_sloan ||
+	    algorithm == serial_sloan)
 		return 1;
 	
 	return 0;
@@ -280,7 +281,7 @@ test test_reorder_algorithm(test defs)
 			else
 			{
 				time = get_time();
-				MATRIX_PARALLEL_permutation(matrix, permutation);
+				MATRIX_permutation(matrix, permutation);
 				defs.wavefront = MATRIX_PARALLEL_wavefront(matrix);
 				defs.time_permutation = (get_time() - time)/100.0;
 			}
@@ -291,8 +292,8 @@ test test_reorder_algorithm(test defs)
 			fflush(stdout);
 		}
 	}
-	else
-	{
+	else // RCM Algorithms
+	{ 
 		if (is_hsl_algorithm(defs.algorithm))
 		{
 			printf("%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", defs.algorithm_name, 
@@ -305,14 +306,14 @@ test test_reorder_algorithm(test defs)
 			{
 				time = omp_get_wtime();
 				MATRIX_PARALLEL_permutation(matrix, permutation);
-				defs.reorder_band = MATRIX_PARALLEL_wavefront(matrix);
+				defs.reorder_band = MATRIX_PARALLEL_bandwidth(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
 			}
 			else
 			{
 				time = get_time();
-				MATRIX_PARALLEL_permutation(matrix, permutation);
-				defs.reorder_band = MATRIX_PARALLEL_wavefront(matrix);
+				MATRIX_permutation(matrix, permutation);
+				defs.reorder_band = MATRIX_bandwidth(matrix);
 				defs.time_permutation = (get_time() - time)/100.0;
 			}
 		
@@ -425,14 +426,14 @@ void run_all_tests()
 	float bfs_chunk_percent = .5;
 	
 	char* matrices[] = {
-// 		"../Big-Matrices/dw8192.mtx",
-// 		"../Big-Matrices/rail_79841.mtx",
-// 		"../Big-Matrices/Dubcova3.mtx",
-// 		"../Big-Matrices/inline_1.mtx",
-// 		"../Big-Matrices/audikw_1.mtx",
-// 		"../Big-Matrices/dielFilterV3real.mtx",
-// 		"../Big-Matrices/atmosmodj.mtx",
-// 		"../Big-Matrices/G3_circuit.mtx"
+		"../Big-Matrices/dw8192.mtx",
+		"../Big-Matrices/rail_79841.mtx",
+		"../Big-Matrices/Dubcova3.mtx",
+		"../Big-Matrices/inline_1.mtx",
+		"../Big-Matrices/audikw_1.mtx",
+		"../Big-Matrices/dielFilterV3real.mtx",
+		"../Big-Matrices/atmosmodj.mtx",
+		"../Big-Matrices/G3_circuit.mtx"
 		
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/bcspwr01.mtx",
@@ -441,9 +442,9 @@ void run_all_tests()
 // 		"../Matrices/Dubcova2.mtx"
 	};
 	
-	int nthreads[] = { 4, 8, 16, 32, 64, 128 };
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	
-	reorder_algorithm algorithm[] = { bucket_rcm };
+	reorder_algorithm algorithm[] = { hsl_rcm, serial_rcm, unordered_rcm };
 	
 	/* *****************
 	 * Tests execution

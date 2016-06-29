@@ -457,9 +457,8 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 
 void Bucket_RCM(MAT* mat, int** perm, int root) 
 { 
-
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads,
-		children_offset_gen, generation_size, gen_pos_reference, num_children;
+		children_offset_gen, generation_size, gen_pos_reference;
 	GRAPH* graph;
 	genealogy* generation;
 	
@@ -468,7 +467,7 @@ void Bucket_RCM(MAT* mat, int** perm, int root)
 	
 	#pragma omp parallel
 	{
-		int node, n_par, n_ch, degree, pos_child_gen, pos_parent_gen, gen_pos;
+		int node, n_par, n_ch, degree, pos_child_gen, pos_parent_gen, gen_pos, num_children;
 		int* neighbors;
 		
 		#pragma omp single nowait

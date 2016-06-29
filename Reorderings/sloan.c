@@ -119,7 +119,7 @@ long int REORDERING_SLOAN_HSL (MAT* A)
 	int *icptr   = A->IA;
 	int lirn     = A->nz;
 	int jcntl[2] = { SLOAN, AUTOMATIC_PERIPHERAL };
-	double weight[2] = { SLOAN_W2, SLOAN_W1 };
+	double weight[2] = { SLOAN_W1, SLOAN_W2 };
 	int info[4];
 	double rinfo[4];
 	int* vars;

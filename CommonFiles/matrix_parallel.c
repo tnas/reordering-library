@@ -128,12 +128,6 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 			B->JA = malloc(nz * sizeof(int));
 			
 			#pragma omp section
-			{
-				B->IA = malloc((n+1) * sizeof(int));
-				B->IA[0] = 0;
-			}
-			
-			#pragma omp section
 			B->D = malloc(n * sizeof(double));
 			
 			#pragma omp section
@@ -179,7 +173,7 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 		#pragma omp single
 		qsort(a, nz, sizeof(ARRAY), COMPARE_array);
 		
-		#pragma omp for schedule(static, chunk_size) 
+		#pragma omp for schedule(static, chunk_size) nowait
 		for (i = 0; i < n; ++i)
 		{
 			A->AA[i]   = a[i].arr1;
@@ -206,7 +200,19 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 			free(counts);
 			
 			#pragma omp section
-			MATRIX_clean(B);
+			free(B->AA);
+			
+			#pragma omp section
+			free(B->JA);
+			
+			#pragma omp section
+			free(B->IA);
+			
+			#pragma omp section
+			free(B->D);
 		}
+		
+		#pragma omp single
+		free(B);
 	}
 }
