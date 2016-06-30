@@ -56,11 +56,12 @@ long int MATRIX_PARALLEL_bandwidth (MAT* A)
 long int MATRIX_PARALLEL_wavefront (MAT* A)
 {
 	int size = A->n;
+	int nnz  = A->nz;
 	unsigned long int wavefront = 0;
 	
 	#pragma omp parallel
 	{
-		int row, ja, wfront, max_wfront;
+		int row, slice_row, ja, wfront, max_wfront;
 		
 		max_wfront = 0; 
 		
@@ -70,11 +71,33 @@ long int MATRIX_PARALLEL_wavefront (MAT* A)
 			wfront = 0;
 			
 			// Computing row-th wavefront 
-			for (ja = A->IA[row]; ja < size; ++ja)
-				if (A->JA[ja] <= row) ++wfront;
+			for (slice_row = row; slice_row < size-1; ++slice_row) 
+			{
+				for (ja = A->IA[slice_row]; ja < A->IA[slice_row+1]; ++ja)
+				{
+					if (A->JA[ja] <= row) 
+					{
+						++wfront;
+						ja = A->IA[slice_row+1];
+					}
+				}
+			}
+			
+			for (ja = A->IA[slice_row]; ja < nnz; ++ja)
+			{
+				if (A->JA[ja] <= row) 
+				{
+					++wfront;
+					ja = nnz;
+				}
+			}
+				
+// 			printf("Wavefront of row %d: %d\n", row, wfront);fflush(stdout);
 			
 			if (wfront > max_wfront) max_wfront = wfront;
 		}
+		
+// 		printf("Max wavefront from thread %d: %d\n", omp_get_thread_num(), max_wfront);fflush(stdout);
 		
 		if (max_wfront > wavefront)
 		{

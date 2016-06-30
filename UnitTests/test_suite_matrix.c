@@ -24,8 +24,8 @@ void load_matrix(const char* path_matrix_file, MAT** matrix)
 	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
 		exit(1);
 	
-	matrix = (MAT**) malloc (sizeof(MAT*));
-	MATRIX_readCSR (*matrix, matrix_file);
+	*matrix = (MAT*) malloc(sizeof(MAT));
+	MATRIX_readCSR(*matrix, matrix_file);
 	fclose(matrix_file);
 }
 
@@ -37,9 +37,11 @@ void test_parallel_wavefront()
 	int num_matrices, size_set_threads, mat, th;
 	long int calculated_wavefront;
 	
-	int nthreads[] = { 1, 2, 4, 6, 8 };
+// 	int nthreads[] = { 1, 2, 4, 6, 8 };
+	int nthreads[] = { 1 };
 	
 	char* matrices[] = {
+		"../Matrices/hsl.mtx",
 		"../Big-Matrices/inline_1.mtx",
 		"../Big-Matrices/audikw_1.mtx",
 		"../Big-Matrices/dielFilterV3real.mtx",
@@ -47,7 +49,7 @@ void test_parallel_wavefront()
 	};
 	
 	long int expected_wavefront[] = {
-		130603, 477149, 598949, 85516
+		5, 130603, 477149, 598949, 85516
 	};
 	
 	num_matrices     = sizeof(matrices)/sizeof(matrices[0]);
@@ -63,7 +65,11 @@ void test_parallel_wavefront()
 			
 			calculated_wavefront = MATRIX_PARALLEL_wavefront(matrix);
 			
+			printf("Calculated wavefront for matrix %s: %ld\n", 
+			       matrices[mat], calculated_wavefront);fflush(stdout);
 			assert(calculated_wavefront == expected_wavefront[mat]);
+			printf("Test of wavefront of matrix %s and %d threads ----- OK\n", 
+			       matrices[mat], nthreads[th]);fflush(stdout);
 		}
 		
 		MATRIX_clean(matrix);
