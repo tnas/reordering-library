@@ -161,10 +161,10 @@ long int MATRIX_PARALLEL_bandwidth (MAT* A)
 			if (band > max_band) max_band = band;
 		}
 		
-		if (max_band > bandwidth)
+		#pragma omp critical
 		{
-			#pragma omp critical
-			bandwidth = max_band;
+			if (max_band > bandwidth)
+				bandwidth = max_band;
 		}
 	}
 	
