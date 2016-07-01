@@ -37,15 +37,15 @@ void test_parallel_wavefront()
 	int num_matrices, size_set_threads, mat, th;
 	long int calculated_wavefront;
 	
-// 	int nthreads[] = { 1, 2, 4, 6, 8 };
-	int nthreads[] = { 1 };
+	int nthreads[] = { 1, 2, 4, 6, 8 };
+// 	int nthreads[] = { 1 };
 	
 	char* matrices[] = {
 		"../Matrices/hsl.mtx",
-		"../Big-Matrices/inline_1.mtx",
-		"../Big-Matrices/audikw_1.mtx",
-		"../Big-Matrices/dielFilterV3real.mtx",
-		"../Big-Matrices/G3_circuit.mtx"
+// 		"../Big-Matrices/inline_1.mtx",
+// 		"../Big-Matrices/audikw_1.mtx",
+// 		"../Big-Matrices/dielFilterV3real.mtx",
+// 		"../Big-Matrices/G3_circuit.mtx"
 	};
 	
 	long int expected_wavefront[] = {

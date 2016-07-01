@@ -53,60 +53,108 @@ long int MATRIX_PARALLEL_bandwidth (MAT* A)
 /*---------------------------------------------------------------------------
  * Compute matrix maximum wavefront
  *--------------------------------------------------------------------------*/
-long int MATRIX_PARALLEL_wavefront (MAT* A)
+long int MATRIX_PARALLEL_wavefront(MAT* A)
 {
-	int size = A->n;
-	int nnz  = A->nz;
-	unsigned long int wavefront = 0;
+	int size, nnz;
+	unsigned long int max_wavefront;
+	int* wf_per_row;
+	int* ext_IA;
+	
+	size = A->n;
+	nnz  = A->nz;
+	max_wavefront = 0;
+	ext_IA = calloc(size+1, sizeof(int));
 	
 	#pragma omp parallel
 	{
-		int row, slice_row, ja, wfront, max_wfront;
+		int row, ja, cand_col, virtual_row;
+		int* computed_colu_per_row;
+	
+// 		printf("num_threads: %d\n", omp_get_num_threads());fflush(stdout);
+		#pragma omp sections
+		{
+			#pragma omp section
+			wf_per_row = calloc(size, sizeof(int));
+			
+			#pragma omp section
+			memcpy(ext_IA, A->IA, size*sizeof(int));
+			
+			#pragma omp section
+			ext_IA[size] = nnz;
+		}
 		
-		max_wfront = 0; 
+// 		#pragma omp single
+// 		{
+// 			int i;
+// 			printf("A->IA: ");
+// 			for (i = 0; i < size; ++i)
+// 				printf("%d ", A->IA[i]);fflush(stdout);
+// 			printf("\n");fflush(stdout);
+// 			
+// 			printf("extIA: ");
+// 			for (i = 0; i < size; ++i)
+// 				printf("%d ", ext_IA[i]);fflush(stdout);
+// 			printf("\n");fflush(stdout);
+// 		}
+		
+		computed_colu_per_row = calloc(size, sizeof(int));
 		
 		#pragma omp for schedule(static)
 		for (row = 0; row < size; ++row)
 		{
-			wfront = 0;
+// 			printf("executing line %d: ja = [%d, %d]\n", row, ext_IA[row], ext_IA[row+1]);fflush(stdout);
 			
-			// Computing row-th wavefront 
-			for (slice_row = row; slice_row < size-1; ++slice_row) 
+			memset(computed_colu_per_row, 0, size * sizeof(int));
+			
+			for (ja = ext_IA[row]; ja < ext_IA[row+1]; ++ja)
 			{
-				for (ja = A->IA[slice_row]; ja < A->IA[slice_row+1]; ++ja)
+				cand_col = A->JA[ja];
+				
+// 				printf("processing cand_col %d\n", cand_col);fflush(stdout);
+				
+				for (virtual_row = 0; virtual_row <= row; ++virtual_row)
 				{
-					if (A->JA[ja] <= row) 
+					if (cand_col <= virtual_row && computed_colu_per_row[virtual_row] == 0) 
 					{
-						++wfront;
-						ja = A->IA[slice_row+1];
+						#pragma omp atomic
+						++wf_per_row[virtual_row];
+						
+						computed_colu_per_row[virtual_row] = 1;
 					}
 				}
 			}
 			
-			for (ja = A->IA[slice_row]; ja < nnz; ++ja)
-			{
-				if (A->JA[ja] <= row) 
-				{
-					++wfront;
-					ja = nnz;
-				}
-			}
-				
-// 			printf("Wavefront of row %d: %d\n", row, wfront);fflush(stdout);
-			
-			if (wfront > max_wfront) max_wfront = wfront;
+// 			int i;
+// 			printf("wf per row %d: ", row);
+// 			for (i = 0; i < size; ++i)
+// 				printf("%d ", wf_per_row[i]);fflush(stdout);
+// 			printf("\n");fflush(stdout);
 		}
 		
-// 		printf("Max wavefront from thread %d: %d\n", omp_get_thread_num(), max_wfront);fflush(stdout);
+		free(computed_colu_per_row);
 		
-		if (max_wfront > wavefront)
+		#pragma omp single nowait
+		free(ext_IA);
+		
+		#pragma omp single
 		{
-			#pragma omp critical
-			wavefront = max_wfront;
+			for (row = 0; row < size; ++row)
+			{
+	// 			printf("wf line %d: %d\n", row, wf_per_row[row]);fflush(stdout);
+				if (wf_per_row[row] > max_wavefront)
+				{
+					#pragma omp critical
+					max_wavefront = wf_per_row[row];
+				}
+				
+			}
 		}
+		
+		#pragma omp single nowait
+		free(wf_per_row);
 	}
 	
-	return wavefront;
+	return max_wavefront;
 }
 
 
