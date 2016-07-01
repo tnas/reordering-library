@@ -46,7 +46,7 @@
  * 	2: wavefront calculus
  * *****************************************************
  */
-int main (int argc, char* argv[]){
+int main (int argc, char* argv[]) {
   
 	int opt, num_threads, algorithm, test_suite;
 	float bfs_chunk_size;
@@ -105,7 +105,7 @@ int main (int argc, char* argv[]){
 				break;
 				
 			case MATRIX :
-				test_parallel_wavefront();
+				test_parallel_rms_wavefront();
 				break;
 		}
 	}

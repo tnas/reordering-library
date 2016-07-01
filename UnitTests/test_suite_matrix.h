@@ -20,6 +20,8 @@
 #ifndef __TEST_SUITE_MATRIX_H__
 #define __TEST_SUITE_MATRIX_H__
 
-void test_parallel_wavefront();
+void run_all_test_matrix();
+void test_parallel_max_wavefront();
+void test_parallel_rms_wavefront();
 
 #endif /* __TEST_SUITE_MATRIX_H__ */
