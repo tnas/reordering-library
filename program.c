@@ -105,7 +105,7 @@ int main (int argc, char* argv[]) {
 				break;
 				
 			case MATRIX :
-				test_parallel_rms_wavefront();
+				run_all_test_matrix();
 				break;
 		}
 	}
