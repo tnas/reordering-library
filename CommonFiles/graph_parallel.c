@@ -98,13 +98,10 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const
 						
 						cache_work_set = LIST_insert_IF_NOT_EXIST(cache_work_set, adj_node);
 					}
-					
 				}
-				
 				
 				free(neighboors);
 			}
-			
 			
 			if (cache_work_set != NULL)
 			{
@@ -124,10 +121,76 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const
 	}
 	
 	omp_destroy_lock(&lock);
-	
-	//   if (work_set != NULL) 
-	//   {
-	// 	printf ("Error: Work set has nodes not processed. Exiting.. [GRAPH_parallel_fixedpoint]\n");
-	// 	exit(0);
-	//   }
 }
+
+
+/**
+ * Build a METAGRAPH from an adjacency matrix using multithreads. 
+ * 
+ * @since 12-07-2016
+ */
+METAGRAPH* GRAPH_parallel_build(MAT* mat)
+{
+	METAGRAPH* meta_graph;
+	int size_graph, min_degree;
+	
+	size_graph = mat->n;
+	min_degree = INFINITY_LEVEL;
+	
+	meta_graph        = malloc(sizeof(METAGRAPH));
+	meta_graph->size  = size_graph;
+	meta_graph->graph = malloc(size_graph * sizeof(GRAPH));
+	
+	#pragma omp parallel 
+	{
+		int node, local_node_min_degree, local_min_degree;
+	
+		local_node_min_degree = 0;
+		local_min_degree      = INFINITY_LEVEL;
+		
+		#pragma omp for schedule(static) 
+		for (node = 0; node < size_graph; ++node)
+		{
+			meta_graph->graph[node].distance   = INFINITY_LEVEL;
+			meta_graph->graph[node].parent     = -1;
+			meta_graph->graph[node].chnum      = 0;
+			meta_graph->graph[node].label      = node;
+			meta_graph->graph[node].degree     = GRAPH_degree(mat, node);
+			meta_graph->graph[node].neighboors = GRAPH_adjacent(mat, node);
+			
+			if (meta_graph->graph[node].degree < local_min_degree)
+				local_node_min_degree = node;
+		}
+		
+		if (local_min_degree < min_degree)
+		{
+			#pragma omp critical
+			{
+				if (local_min_degree < min_degree)
+				{
+					min_degree = local_min_degree;
+					meta_graph->vertex_min_degree = local_node_min_degree;
+				}
+			}
+		}
+	}
+	
+	return meta_graph;
+}
+
+
+graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph)
+{
+	graph_diameter* diameter;
+	
+	diameter = malloc(sizeof(graph_diameter));
+	
+	// Create two breadth first search engines
+	
+	// Initialize start and end vertices of pseudo-diameter
+	diameter->start = meta_graph->vertex_min_degree;
+	diameter->end   = NON_VERTEX;
+	
+	return diameter;
+}
+

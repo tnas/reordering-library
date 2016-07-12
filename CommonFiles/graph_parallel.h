@@ -21,6 +21,7 @@
 #define __GRAPH_PARALLEL_H__
 
 #define INFINITY_LEVEL 2147483647
+#define NON_VERTEX -1
 
 
 typedef struct
@@ -29,7 +30,21 @@ typedef struct
 	GRAPH* children;
 } genealogy;
 
+typedef struct
+{
+	int start;
+	int end;
+} graph_diameter;
 
-extern void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const float percent_chunk);
+
+typedef struct
+{
+	GRAPH* graph;
+	int vertex_min_degree;
+	int size;
+} METAGRAPH; 
+
+void       GRAPH_parallel_fixedpoint_bfs (MAT* adjacency, int root, int** levels, const float percent_chunk);
+METAGRAPH* GRAPH_parallel_build		 (MAT* mat);
 
 #endif

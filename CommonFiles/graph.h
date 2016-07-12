@@ -28,6 +28,7 @@ typedef struct
 {
 	int label;
 	int degree;
+	int* neighboors;
 	int distance;
 	int parent;
 	int status;
