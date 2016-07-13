@@ -16,9 +16,13 @@
  */
 #include <omp.h>
 #include "graph.h"
+#include "util_parallel.h"
 
 #ifndef __GRAPH_PARALLEL_H__
 #define __GRAPH_PARALLEL_H__
+
+#define BFS_WORK_CHUNK 1024
+#define BFS_PERCENT_CHUNK 0.5
 
 #define INFINITY_LEVEL 2147483647
 #define NON_VERTEX -1
@@ -43,6 +47,13 @@ typedef struct
 	int vertex_min_degree;
 	int size;
 } METAGRAPH; 
+
+typedef struct 
+{
+	int height;
+	int width;
+	int** vertices_at_level;
+} BFS;
 
 void       GRAPH_parallel_fixedpoint_bfs (MAT* adjacency, int root, int** levels, const float percent_chunk);
 METAGRAPH* GRAPH_parallel_build		 (MAT* mat);

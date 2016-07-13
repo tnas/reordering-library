@@ -15,9 +15,6 @@
  * 
  */
 
-#define BFS_WORK_CHUNK 1024
-#define BFS_PERCENT_CHUNK 0.5
-
 #define THREAD_ON 1
 #define THREAD_OFF 0
 #define UNDEF_THREAD -1

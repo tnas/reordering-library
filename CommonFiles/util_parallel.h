@@ -34,6 +34,7 @@ typedef struct
 } status_prefix_sum;
 
 
-void  prefix_sum(const int* counts, int** sums, const int max_level);
+void  prefix_sum           (const int* counts, int** sums, const int max_level);
+int   count_nodes_by_level (const int* levels, const int n_nodes, int** counts);
 
 #endif
