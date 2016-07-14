@@ -53,6 +53,7 @@ typedef struct
 	int height;
 	int width;
 	int** vertices_at_level;
+	int* num_nodes_at_level;
 } BFS;
 
 void       GRAPH_parallel_fixedpoint_bfs (MAT* adjacency, int root, int** levels, const float percent_chunk);

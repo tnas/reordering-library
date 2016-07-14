@@ -295,18 +295,30 @@ BFS* GRAPH_parallel_execute_BFS(METAGRAPH mgraph, int root)
 	
 	max_level   = count_nodes_by_level(levels, n_nodes, &counts);
 	bfs->height = --max_level;
+	bfs = malloc(sizeof(BFS));
+	bfs->width = 0;
 	
 	#pragma omp parallel
 	{
-		#pragma omp single
+		#pragma omp sections
 		{
-			bfs = malloc(sizeof(BFS));
-			bfs->vertices_at_level = malloc(max_level * sizeof(int*));
+			#pragma omp section
+			bfs->vertices_at_level  = malloc(max_level * sizeof(int*));
+			
+			#pragma omp section
+			bfs->num_nodes_at_level = calloc(max_level, sizeof(int));
 		}
 		
 		#pragma omp for schedule(static) private(level)
 		for (level = 0; level < max_level; ++level)
-			bfs->vertices_at_level[level] = calloc(counts[level], sizeof(int));
+		{
+			bfs->vertices_at_level[level]  = calloc(counts[level], sizeof(int));
+			bfs->num_nodes_at_level[level] = counts[level];
+			
+			#pragma omp critical
+			if (counts[level] > bfs->width) 
+				bfs->width = counts[level];
+		}
 		
 		#pragma omp for schedule(static) private(node, level) 
 		for (node = 0; node < n_nodes; ++node)
@@ -319,44 +331,59 @@ BFS* GRAPH_parallel_execute_BFS(METAGRAPH mgraph, int root)
 				--counts[level];
 			}
 		}
-		
-		#pragma omp single nowait
-		
-		
-		#pragma omp single nowait
-		free(levels);
-		
-		#pragma omp single nowait
-		free(counts);
+
+		#pragma omp sections
+		{
+			#pragma omp section
+			free(levels);
+			
+			#pragma omp section
+			free(counts);
+		}
 	}
 	
 	return bfs;
 }
 
 
-void GRAPH_parallel_shrinking_strategy_half_sorting()
+void GRAPH_shrinking_strategy_vertex_by_degree()
 {
 }
 
-void GRAPH_parallel_shrinking_strategy_vertex_by_degree()
+void GRAPH_shrinking_strategy_five_non_adjacent()
 {
 }
 
-void GRAPH_parallel_shrinking_strategy_five_non_adjacent()
+
+/**
+ * Shrinking strategy in which nodes are sorted by degree and half
+ * of them are chosen.
+ * 
+ * @since 14-07-2016
+ */
+void GRAPH_shrinking_strategy_half_sorted(int** nodes, int* length)
 {
+	int* half_nodes;
+	
+	qsort(*nodes, *length, sizeof(int), COMPARE_int_ASC);
+	*length /= 2;
+	half_nodes = calloc(*length, sizeof(int));
+	memcpy(half_nodes, *nodes, (*length) * sizeof(int));
+	free(*nodes);
+	*nodes = half_nodes;
 }
+
 
 graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 {
+	// Create two breadth first search engines
 	BFS* forwardBFS;
 	BFS* reverseBFS;
 	graph_diameter* diameter;
-	int local_diameter;
+	int local_diameter, size_cand_set, min_width, cand, candidate, swap;
 	int* candidate_set;
 	
 	diameter = malloc(sizeof(graph_diameter));
-	
-	// Create two breadth first search engines
 	
 	// Initialize start and end vertices of pseudo-diameter
 	diameter->start = meta_graph.vertex_min_degree;
@@ -370,11 +397,49 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 		// get candidate set of end nodes
 		local_diameter = forwardBFS->height;
 		candidate_set  = forwardBFS->vertices_at_level[local_diameter];
+		size_cand_set  = forwardBFS->num_nodes_at_level[local_diameter];
 		
 		// shrink candidate set to a manageable number
+		GRAPH_shrinking_strategy_half_sorted(&candidate_set, &size_cand_set);
 		
+		min_width = INT_MAX;
+		
+		for (cand = 0; cand < size_cand_set; ++cand)
+		{
+			candidate = candidate_set[cand];
+			
+			// do BFS from each candidate
+			reverseBFS = GRAPH_parallel_execute_BFS(meta_graph, candidate);
+			
+			if (reverseBFS->width < min_width)
+			{
+				if (reverseBFS->height > local_diameter)
+				{
+					// reverseBFS is better than the forwardBFS
+					// reset algorithm with candidate as new start
+					diameter->start = candidate;
+					diameter->end   = NON_VERTEX;
+					cand = size_cand_set; // break
+				}
+				else
+				{
+					// reverseBFS is narrower than any others
+					// make this new end node
+					min_width = reverseBFS->width;
+					diameter->end = candidate;
+				}
+			}
+		}
 		
 	} while (diameter->end == NON_VERTEX);
+	
+	// swap start & end if the reverseBFS is narrower than forwardBFS
+	if (forwardBFS->width > reverseBFS->width)
+	{
+		swap = diameter->start;
+		diameter->start = diameter->end;
+		diameter->end   = swap;
+	}
 	
 	return diameter;
 }
