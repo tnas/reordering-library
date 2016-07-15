@@ -15,6 +15,7 @@
  * 
  */
 #include <assert.h>
+#include "test_suite.h"
 #include "../CommonFiles/matrix_parallel.h"
 
 #ifndef __TEST_SUITE_MATRIX_H__

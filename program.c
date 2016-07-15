@@ -44,6 +44,7 @@
  * 	0: reordering algorithms 
  * 	1: prefix sum 
  * 	2: wavefront calculus
+ * 	3: graph parallel
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -96,6 +97,12 @@ int main (int argc, char* argv[]) {
 	{
 		switch (test_suite) 
 		{
+			case ALL : 
+				run_all_reordering_tests();
+				test_prefix_sum();
+				run_all_test_matrix();
+				break;
+				
 			case REORDERING :
 				run_all_reordering_tests();
 				break;
@@ -106,6 +113,9 @@ int main (int argc, char* argv[]) {
 				
 			case MATRIX :
 				run_all_test_matrix();
+				break;
+			
+			case GRAPH_PARALLEL :
 				break;
 		}
 	}

@@ -17,21 +17,6 @@
 
 #include "test_suite_matrix.h"
 
-
-void load_matrix(const char* path_matrix_file, MAT** matrix)
-{
-	FILE* matrix_file;
-	
-	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
-		exit(1);
-	
-	*matrix = (MAT*) malloc(sizeof(MAT));
-	MATRIX_readCSR(*matrix, matrix_file);
-	fclose(matrix_file);
-}
-
-
-
 void test_parallel_max_wavefront()
 {
 	MAT* matrix;

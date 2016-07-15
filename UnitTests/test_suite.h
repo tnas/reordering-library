@@ -15,10 +15,18 @@
  * 
  */
 
+/* inclusion guard */
+#ifndef __TEST_SUITE_H__
+#define __TEST_SUITE_H__
+
+#include "../CommonFiles/matrix.h"
+
 typedef enum {
+	ALL,
 	REORDERING, 
 	PREFIX_SUM,
-	MATRIX
+	MATRIX,
+	GRAPH_PARALLEL
 } test_suite;
 
 
@@ -26,3 +34,8 @@ typedef enum {
 	TEST_SUITE, 
 	TEST_CASE 
 } test_scope;
+
+
+void load_matrix(const char* path_matrix_file, MAT** matrix);
+
+#endif /* __TEST_SUITE_H__ */
