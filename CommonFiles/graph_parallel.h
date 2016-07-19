@@ -52,11 +52,15 @@ typedef struct
 {
 	int height;
 	int width;
-	int** vertices_at_level;
+	GRAPH** vertices_at_level;
 	int* num_nodes_at_level;
 } BFS;
 
-void       GRAPH_parallel_fixedpoint_bfs (MAT* adjacency, int root, int** levels, const float percent_chunk);
-METAGRAPH* GRAPH_parallel_build		 (MAT* mat);
+void        GRAPH_parallel_fixedpoint_bfs 	 (MAT* adjacency, int root, int** levels, const float percent_chunk);
+METAGRAPH*  GRAPH_parallel_build		 (MAT* mat);
+void inline GRAPH_parallel_destroy	 	 (METAGRAPH* mgraph);
+void inline GRAPH_shrinking_strategy_half_sorted (GRAPH** nodes, int* length);
+BFS* 	    GRAPH_parallel_execute_BFS		 (METAGRAPH mgraph, int root);
+void inline GRAPH_parallel_destroy_BFS		 (BFS* bfs);
 
 #endif

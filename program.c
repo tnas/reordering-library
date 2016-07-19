@@ -20,6 +20,7 @@
 #include "./UnitTests/test_suite_reordering.h"
 #include "./UnitTests/test_suite_prefixsum.h"
 #include "./UnitTests/test_suite_matrix.h"
+#include "./UnitTests/test_graph_parallel.h"
 
 #define DYNAMIC_OFF 0
 #define OVERWRITE_VARIABLE 1
@@ -41,10 +42,11 @@
  * -p <number of threads>
  * -b <percent of chunk for Unordered RCM>
  * -t <test suite>:
- * 	0: reordering algorithms 
- * 	1: prefix sum 
- * 	2: wavefront calculus
- * 	3: graph parallel
+ * 	0: all tests
+ * 	1: reordering algorithms 
+ * 	2: prefix sum 
+ * 	3: wavefront calculus
+ * 	4: graph parallel
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -101,6 +103,7 @@ int main (int argc, char* argv[]) {
 				run_all_reordering_tests();
 				test_prefix_sum();
 				run_all_test_matrix();
+				run_all_test_GRAPH_parallel();
 				break;
 				
 			case REORDERING :
@@ -116,6 +119,7 @@ int main (int argc, char* argv[]) {
 				break;
 			
 			case GRAPH_PARALLEL :
+				run_all_test_GRAPH_parallel();
 				break;
 		}
 	}

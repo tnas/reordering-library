@@ -17,7 +17,9 @@
 
 #include "graph_parallel.h"
 
-
+/**
+ * It executes a Breadth-First-Search using the fixed point concept.
+ */
 void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const float percent_chunk)
 {
 	int node, n_nodes, has_unreached_nodes, size_workset;
@@ -124,6 +126,11 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const
 }
 
 
+/**
+ * It executes a Breadth-First-Search using the fixed point concept. However, 
+ * it uses a optimized data structure METAGRAPH, in order to increase the
+ * performance of operations like take degree and neighboors of nodes.
+ */
 void GRAPH_parallel_fixedpoint_BFS(METAGRAPH mgraph, int root, int** levels, const float percent_chunk)
 {
 	int node, n_nodes, has_unreached_nodes, size_workset;
@@ -257,7 +264,7 @@ METAGRAPH* GRAPH_parallel_build(MAT* mat)
 		for (node = 0; node < size_graph; ++node)
 		{
 			meta_graph->graph[node].distance   = INFINITY_LEVEL;
-			meta_graph->graph[node].parent     = -1;
+			meta_graph->graph[node].parent     = NON_VERTEX;
 			meta_graph->graph[node].chnum      = 0;
 			meta_graph->graph[node].label      = node;
 			meta_graph->graph[node].degree     = GRAPH_degree(mat, node);
@@ -283,53 +290,124 @@ METAGRAPH* GRAPH_parallel_build(MAT* mat)
 	return meta_graph;
 }
 
+/**
+ * Clean the memory used by METAGRAPH structure.
+ * 
+ * @since 19-07-2016
+ */
+void inline GRAPH_parallel_destroy(METAGRAPH* mgraph)
+{
+	int node, size_graph;
+	
+	size_graph = mgraph->size;
+	
+	#pragma omp parallel for schedule(static) private(node)
+	for (node = 0; node < size_graph; ++node)
+		free(mgraph->graph[node].neighboors);
+	
+	free(mgraph->graph);
+	free(mgraph);
+}
 
+
+/**
+ * Clean the memory used by BFS structure.
+ * 
+ * @since 19-07-2016
+ */
+void inline GRAPH_parallel_destroy_BFS(BFS* bfs)
+{
+	int level, max_level;
+	
+	max_level = bfs->height;
+	
+	#pragma omp parallel for schedule(static) private(level)
+	for (level = 0; level < max_level; ++level)
+	
+	free(bfs->vertices_at_level);
+	free(bfs->num_nodes_at_level);
+	
+	free(bfs);
+}
+
+
+/**
+ * Build a BFS data structure from a METAGRAPH parameter. For
+ * this, the function execute a Breadht-First-Search throught
+ * the GRAPH_parallel_fixedpoint_BFS procedure. A root node
+ * must to be provided.
+ * 
+ */
 BFS* GRAPH_parallel_execute_BFS(METAGRAPH mgraph, int root)
 {
-	int n_nodes, max_level, level, node;
+	int n_nodes, max_level;
 	BFS* bfs;
 	int* levels;
 	int* counts;
 	
+	n_nodes = mgraph.size;
+	bfs     = malloc(sizeof(BFS));
+	levels  = calloc(n_nodes, sizeof(int));
+	
 	GRAPH_parallel_fixedpoint_BFS(mgraph, root, &levels, BFS_PERCENT_CHUNK);
 	
 	max_level   = count_nodes_by_level(levels, n_nodes, &counts);
-	bfs->height = --max_level;
-	bfs = malloc(sizeof(BFS));
-	bfs->width = 0;
+	// decrementing two levels added to max_level by count_nodes_by_level
+	bfs->height = max_level - 2;
+	bfs->width  = 0;
 	
 	#pragma omp parallel
 	{
+		GRAPH graph_node;
+		int level, count_level, node;
+		
 		#pragma omp sections
 		{
 			#pragma omp section
-			bfs->vertices_at_level  = malloc(max_level * sizeof(int*));
+			bfs->vertices_at_level  = malloc((bfs->height + 1) * sizeof(GRAPH*));
 			
 			#pragma omp section
-			bfs->num_nodes_at_level = calloc(max_level, sizeof(int));
+			bfs->num_nodes_at_level = calloc((bfs->height + 1), sizeof(int));
 		}
 		
-		#pragma omp for schedule(static) private(level)
-		for (level = 0; level < max_level; ++level)
+		// Allocating memory for BFS structure
+		#pragma omp for schedule(static)
+		for (count_level = 1; count_level < max_level; ++count_level)
 		{
-			bfs->vertices_at_level[level]  = calloc(counts[level], sizeof(int));
-			bfs->num_nodes_at_level[level] = counts[level];
+			level = count_level - 1;
+			
+			bfs->vertices_at_level[level]  = calloc(counts[count_level], sizeof(GRAPH));
+			bfs->num_nodes_at_level[level] = counts[count_level];
+			
+			printf("level %d with %d nodes\n", count_level, counts[count_level]);fflush(stdout);
 			
 			#pragma omp critical
-			if (counts[level] > bfs->width) 
-				bfs->width = counts[level];
+			if (counts[count_level] > bfs->width) 
+				bfs->width = counts[count_level];
 		}
 		
-		#pragma omp for schedule(static) private(node, level) 
+		// Filling BFS structure with respective datas
+		#pragma omp for schedule(static) 
 		for (node = 0; node < n_nodes; ++node)
 		{
-			level = levels[node];
+			level       = levels[node];
+			count_level = level + 1;
+			
+			printf("adding node %d at level %d\n", node, level);fflush(stdout);
+			printf("updating counts[%d] from %d to %d\n", count_level, counts[count_level], counts[count_level]-1);fflush(stdout);
 			
 			#pragma omp critical
 			{
-				bfs->vertices_at_level[level][counts[level]] = node;
-				--counts[level];
+				graph_node.label  = node;
+				graph_node.degree = mgraph.graph[node].degree; 
+				bfs->vertices_at_level[level][counts[count_level]] = graph_node;
+				--counts[count_level];
 			}
+			
+			for (count_level = 1; count_level < max_level; ++count_level)
+				printf("counts[%d] = %d ", count_level, counts[count_level]);fflush(stdout);
+			
+			printf("\n----------------------------------------\n");fflush(stdout);
 		}
 
 		#pragma omp sections
@@ -361,19 +439,23 @@ void GRAPH_shrinking_strategy_five_non_adjacent()
  * 
  * @since 14-07-2016
  */
-void GRAPH_shrinking_strategy_half_sorted(int** nodes, int* length)
+void inline GRAPH_shrinking_strategy_half_sorted(GRAPH** nodes, int* length)
 {
-	int* half_nodes;
+	GRAPH* half_nodes;
 	
-	qsort(*nodes, *length, sizeof(int), COMPARE_int_ASC);
+	qsort(*nodes, *length, sizeof(int), COMPARE_degr_ASC);
 	*length /= 2;
-	half_nodes = calloc(*length, sizeof(int));
-	memcpy(half_nodes, *nodes, (*length) * sizeof(int));
+	half_nodes = calloc(*length, sizeof(GRAPH));
+	memcpy(half_nodes, *nodes, (*length) * sizeof(GRAPH));
 	free(*nodes);
 	*nodes = half_nodes;
 }
 
 
+/**
+ * It calculates the pseudo diameter of a graph represented by the
+ * METAGRAPH data structure. 
+ */
 graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 {
 	// Create two breadth first search engines
@@ -381,7 +463,7 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 	BFS* reverseBFS;
 	graph_diameter* diameter;
 	int local_diameter, size_cand_set, min_width, cand, candidate, swap;
-	int* candidate_set;
+	GRAPH* candidate_set;
 	
 	diameter = malloc(sizeof(graph_diameter));
 	
@@ -406,7 +488,7 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 		
 		for (cand = 0; cand < size_cand_set; ++cand)
 		{
-			candidate = candidate_set[cand];
+			candidate = candidate_set[cand].label;
 			
 			// do BFS from each candidate
 			reverseBFS = GRAPH_parallel_execute_BFS(meta_graph, candidate);
