@@ -18,6 +18,7 @@
 #include <limits.h>
 #include <float.h>
 #include "../CommonFiles/matrix_parallel.h"
+#include "../CommonFiles/graph_hsl.h"
 #include "../Reorderings/hsl.h"
 #include "../Reorderings/rcm.h"
 #include "../Reorderings/sloan.h"
@@ -63,7 +64,5 @@ typedef struct {
 typedef enum { START, END } PERIPHERAL_NODES;
 
 
-int  get_node_peripheral     (const char* path_matrix_file);
-int* get_node_peripheral_hsl (const char* path_matrix_file);
 test test_reorder_algorithm  (test defs);
 void run_all_reordering_tests();

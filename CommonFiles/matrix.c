@@ -92,6 +92,7 @@ void write_output_before(const MAT *A)
 	fclose(g);
 }
 
+
 /*----------------------------------------------------------------------------
  * Read matrix from file in MM format to a CSR structure
  *--------------------------------------------------------------------------*/
@@ -195,6 +196,22 @@ void MATRIX_readCSR (MAT* A, FILE* f)
 					A->D[i] = A->AA[j];
 		}
 	}
+}
+
+
+/*----------------------------------------------------------------------------
+ * Build a matrix MAT from a file 
+ *--------------------------------------------------------------------------*/
+void MATRIX_read_from_path(const char* path_matrix_file, MAT** matrix)
+{
+	FILE* matrix_file;
+	
+	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
+		exit(1);
+	
+	*matrix = (MAT*) malloc(sizeof(MAT));
+	MATRIX_readCSR(*matrix, matrix_file);
+	fclose(matrix_file);
 }
 
 

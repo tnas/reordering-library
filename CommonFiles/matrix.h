@@ -42,6 +42,7 @@ typedef struct
  * MATRIX HEADER FUNCTIONS PROTOTYPE
  *--------------------------------------------------------------------------*/
 extern void     MATRIX_readCSR           (MAT* A, FILE* f);
+extern void 	MATRIX_read_from_path	 (const char* path_matrix_file, MAT** matrix);
 extern double   MATRIX_aij               (MAT* A, int i, int j);
 extern void     MATRIX_printCSR          (MAT* A);
 extern void     MATRIX_printFULL         (MAT* A);

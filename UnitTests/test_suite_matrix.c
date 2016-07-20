@@ -38,7 +38,7 @@ void test_parallel_max_wavefront()
 	
 	for (mat = 0; mat < num_matrices; ++mat)
 	{
-		load_matrix(matrices[mat], &matrix);
+		MATRIX_read_from_path(matrices[mat], &matrix);
 		
 		for (th = 0; th < size_set_threads; ++th)
 		{
@@ -82,7 +82,7 @@ void test_parallel_rms_wavefront()
 	
 	for (mat = 0; mat < num_matrices; ++mat)
 	{
-		load_matrix(matrices[mat], &matrix);
+		MATRIX_read_from_path(matrices[mat], &matrix);
 		
 		for (th = 0; th < size_set_threads; ++th)
 		{

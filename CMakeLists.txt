@@ -12,13 +12,14 @@ add_executable(reordering-library program.c
 	./CommonFiles/util_parallel.c
 	./CommonFiles/matrix_parallel.c
 	./CommonFiles/graph_parallel.c 
+	./CommonFiles/graph_hsl.c
 	./Reorderings/spectral.c 
 	./Reorderings/rcm.c 
+	./Reorderings/rcm_hsl.c
 	./Reorderings/rcm_parallel.c 
+	./Reorderings/rcm_galois.cpp
 	./Reorderings/sloan.c
 	./Reorderings/sloan_parallel.c
-	./Reorderings/rcm_galois.cpp
-	./UnitTests/test_suite.c
 	./UnitTests/test_suite_reordering.c
 	./UnitTests/test_suite_prefixsum.c
 	./UnitTests/test_suite_matrix.c

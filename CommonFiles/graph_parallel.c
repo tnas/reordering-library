@@ -404,7 +404,10 @@ inline GRAPH* GRAPH_shrinking_strategy_half_sorted(GRAPH* nodes, int* length)
 
 /**
  * It calculates the pseudo diameter of a graph represented by the
- * METAGRAPH data structure. 
+ * METAGRAPH data structure. This algorithm was proposed by 
+ * Gary karl Kumfert in his Phd Thesis - An Object-Oriented Algorithmic
+ * Laboratory for Ordering Sparse Matrices (2000).
+ * 
  */
 graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 {

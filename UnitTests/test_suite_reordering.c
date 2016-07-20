@@ -17,94 +17,6 @@
 
 #include "test_suite_reordering.h"
 
-int get_node_peripheral(const char* path_matrix_file) {
-	
-	int root, e;
-	int* level_structure;
-	MAT* matrix;
-	FILE* matrix_file;
-	
-	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
-		exit(1);
-	
-	matrix = (MAT*) malloc (sizeof(MAT));
-	MATRIX_readCSR (matrix, matrix_file);
-	fclose(matrix_file);
-	
-	level_structure = GRAPH_LS_peripheral(matrix, &root, &e);
-	
-	MATRIX_clean(matrix);
-	free(level_structure);
-	
-	return root;
-}
-
-
-int* get_node_peripheral_hsl(const char* path_matrix_file) {
-	
-	MAT* matrix;
-	FILE* matrix_file;
-	int* peripheral_nodes;
-	
-	peripheral_nodes = calloc(2, sizeof(int));
-	
-	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
-		exit(1);
-	
-	matrix = (MAT*) malloc (sizeof(MAT));
-	MATRIX_readCSR (matrix, matrix_file);
-	fclose(matrix_file);
-
-	int i;
-	int n        = matrix->n; 
-	int nsup     = n;
-	int *irn     = matrix->JA;
-	int *icptr   = matrix->IA;
-	int lirn     = matrix->nz;
-	int *vars;
-	int *mask;
-	int *ls;
-	int *xls;
-	int *list;
-	int info[6];
-	
-	vars = calloc(n, sizeof(int));
-	mask = calloc(n, sizeof(int));
-	ls   = calloc(n, sizeof(int));
-	xls  = calloc(n, sizeof(int));
-	list = calloc(n, sizeof(int));
-	
-	for (i = 0; i < n; i++) 
-	{
-		++irn[i];
-		++icptr[i];
-		vars[i] = mask[i] = 1;
-	}
-	
-	for (i = n; i < lirn; i++) ++irn[i];
-	
-	mc60hd_(&n, &nsup, &lirn, irn, icptr, vars, mask, ls, xls, list, info);
-	
-	for (i = 0; i < n; i++) 
-	{
-		++irn[i];
-		++icptr[i];
-	}
-	
-	for (i = n; i < lirn; i++) ++irn[i];
-	
-	peripheral_nodes[0] = info[0] - 1;
-	peripheral_nodes[1] = info[1] - 1;
-	
-	MATRIX_clean(matrix);
-	free(vars);
-	free(mask);
-	free(ls);
-	free(xls);
-	free(list);
-	
-	return peripheral_nodes;
-}
 
 int inline is_hsl_algorithm(reorder_algorithm algorithm)
 {
@@ -156,15 +68,9 @@ test test_reorder_algorithm(test defs)
 	int* permutation;
 	double time;
 	MAT* matrix;
-	FILE* matrix_file;
 	int* peripheral_nodes;
-	
-	if ((matrix_file = fopen(defs.path_matrix_file, "r")) == NULL) 
-		exit(1);
-	
-	matrix = (MAT*) malloc (sizeof(MAT));
-	MATRIX_readCSR (matrix, matrix_file);
-	fclose(matrix_file);
+
+	MATRIX_read_from_path(defs.path_matrix_file, &matrix);
 	write_output_before(matrix);
 	defs.original_band = MATRIX_bandwidth(matrix);
 	
@@ -173,7 +79,7 @@ test test_reorder_algorithm(test defs)
 		
 	// Getting pseudo peripheral nodes
 	time = omp_get_wtime();
-	peripheral_nodes = get_node_peripheral_hsl(defs.path_matrix_file);
+	peripheral_nodes = get_pseudo_diameter_hsl(matrix);
 	defs.time_peripheral = (omp_get_wtime() - time)/100.0;
 	
 	defs.root       = peripheral_nodes[START];

@@ -36,6 +36,4 @@ typedef enum {
 } test_scope;
 
 
-void load_matrix(const char* path_matrix_file, MAT** matrix);
-
 #endif /* __TEST_SUITE_H__ */
