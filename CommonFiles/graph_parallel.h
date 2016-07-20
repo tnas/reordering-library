@@ -56,11 +56,12 @@ typedef struct
 	int* num_nodes_at_level;
 } BFS;
 
-void        GRAPH_parallel_fixedpoint_bfs 	 (MAT* adjacency, int root, int** levels, const float percent_chunk);
-METAGRAPH*  GRAPH_parallel_build		 (MAT* mat);
-void inline GRAPH_parallel_destroy	 	 (METAGRAPH* mgraph);
-void inline GRAPH_shrinking_strategy_half_sorted (GRAPH** nodes, int* length);
-BFS* 	    GRAPH_parallel_execute_BFS		 (METAGRAPH mgraph, int root);
-void inline GRAPH_parallel_destroy_BFS		 (BFS* bfs);
+void        	  GRAPH_parallel_fixedpoint_bfs        (MAT* adjacency, int root, int** levels, const float percent_chunk);
+inline METAGRAPH* GRAPH_parallel_build_METAGRAPH       (MAT* mat);
+void inline 	  GRAPH_parallel_destroy_METAGRAPH     (METAGRAPH* mgraph);
+inline GRAPH*  	  GRAPH_shrinking_strategy_half_sorted (GRAPH* nodes, int* length);
+inline BFS*    	  GRAPH_parallel_build_BFS	       (METAGRAPH mgraph, int root);
+void inline 	  GRAPH_parallel_destroy_BFS	       (BFS* bfs);
+graph_diameter*   GRAPH_parallel_pseudodiameter	       (const METAGRAPH meta_graph);
 
 #endif
