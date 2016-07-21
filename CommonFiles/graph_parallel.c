@@ -393,8 +393,8 @@ void GRAPH_shrinking_strategy_five_non_adjacent()
 inline GRAPH* GRAPH_shrinking_strategy_half_sorted(GRAPH* nodes, int* length)
 {
 	GRAPH* half_nodes;
-	
-	qsort(nodes, *length, sizeof(int), COMPARE_degr_ASC);
+	// TODO: To implement the case when the length == 0
+	qsort(nodes, *length, sizeof(GRAPH), COMPARE_degr_ASC);
 	*length /= 2;
 	half_nodes = calloc(*length, sizeof(GRAPH));
 	memcpy(half_nodes, nodes, (*length) * sizeof(GRAPH));
