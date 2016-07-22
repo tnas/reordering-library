@@ -375,12 +375,84 @@ inline BFS* GRAPH_parallel_build_BFS(METAGRAPH mgraph, int root)
 }
 
 
-void GRAPH_shrinking_strategy_vertex_by_degree()
+/**
+ * Shrinking strategy in which a single node of each degree is chosen.
+ * 
+ * @since 22-07-2016
+ */
+inline GRAPH* GRAPH_shrinking_strategy_vertex_by_degree(GRAPH* nodes, int* length)
 {
+	int node, shrink_length, last_degree;
+	GRAPH* shrinked_nodes;
+	
+	if (*length == 1) return nodes;
+	
+	qsort(nodes, *length, sizeof(GRAPH), COMPARE_degr_ASC);
+	shrinked_nodes = calloc(*length, sizeof(GRAPH));
+	
+	shrink_length  = 0;
+	last_degree = -1;
+	
+	for (node = 0; node < *length; ++node)
+	{
+		if (nodes[node].degree != last_degree)
+		{
+			last_degree = nodes[node].degree;
+			shrinked_nodes[shrink_length++] = nodes[node];
+		}
+	}
+	
+	*length = shrink_length;
+	
+	return shrinked_nodes;
 }
 
-void GRAPH_shrinking_strategy_five_non_adjacent()
+
+/**
+ * Shrinking strategy in which the candidate set is sorted by node degree
+ * and the first five nodes are chosen. Each selected vertex must not be adjacent 
+ * to any previously chosen nodes.
+ * 
+ * @since 22-07-2016
+ */
+inline GRAPH* GRAPH_shrinking_strategy_five_non_adjacent(GRAPH* nodes, int* length)
 {
+	int node, num_chosen, length_shrink_nodes, chosen, neigh, chose_node;
+	GRAPH* shrinked_nodes;
+	
+	length_shrink_nodes = 5; // According to Kumfert
+	
+	if (*length < length_shrink_nodes) return nodes;
+	
+	num_chosen     = 0;
+	shrinked_nodes = calloc(length_shrink_nodes, sizeof(GRAPH));
+	
+	qsort(nodes, *length, sizeof(GRAPH), COMPARE_degr_ASC);
+	
+	for (node = 0; node < *length; ++node)
+	{
+		if (num_chosen == length_shrink_nodes) break;
+		
+		chose_node = 1;
+		
+		for (chosen = 0; chosen < num_chosen && chose_node == 0; ++chosen)
+		{
+			for (neigh = 0; neigh < shrinked_nodes[chosen].degree; ++neigh)
+			{
+				if (shrinked_nodes[chosen].neighboors[neigh] == nodes[node].label) 
+				{
+					chose_node = 0;
+					break;
+				}
+			}
+		}
+		
+		if (chose_node) shrinked_nodes[num_chosen++] = nodes[node];
+	}
+	
+	*length = num_chosen;
+	
+	return shrinked_nodes;
 }
 
 
@@ -393,7 +465,9 @@ void GRAPH_shrinking_strategy_five_non_adjacent()
 inline GRAPH* GRAPH_shrinking_strategy_half_sorted(GRAPH* nodes, int* length)
 {
 	GRAPH* half_nodes;
-	// TODO: To implement the case when the length == 0
+	
+	if (*length == 1) return nodes;
+		
 	qsort(nodes, *length, sizeof(GRAPH), COMPARE_degr_ASC);
 	*length /= 2;
 	half_nodes = calloc(*length, sizeof(GRAPH));
@@ -435,7 +509,9 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 		size_cand_set  = forwardBFS->num_nodes_at_level[local_diameter];
 		
 		// shrink candidate set to a manageable number
-		candidate_set = GRAPH_shrinking_strategy_half_sorted(candidate_set, &size_cand_set);
+// 		candidate_set = GRAPH_shrinking_strategy_half_sorted(candidate_set, &size_cand_set);
+// 		candidate_set = GRAPH_shrinking_strategy_vertex_by_degree(candidate_set, &size_cand_set);
+		candidate_set = GRAPH_shrinking_strategy_five_non_adjacent(candidate_set, &size_cand_set);
 		
 		min_width = INT_MAX;
 		

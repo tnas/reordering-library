@@ -120,7 +120,7 @@ int main (int argc, char* argv[]) {
 			
 			case GRAPH_PARALLEL :
 				run_all_test_GRAPH_parallel();
-				run_all_comparison_GRAPH_parallel();
+// 				run_all_comparison_GRAPH_parallel();
 				break;
 		}
 	}

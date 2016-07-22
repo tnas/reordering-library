@@ -148,6 +148,119 @@ void test_GRAPH_shrinking_strategy_half_sorted_can24()
 }
 
 
+void test_GRAPH_shrinking_strategy_vertex_by_degree()
+{
+	int length = 5;
+	GRAPH* nodes;
+	GRAPH* shrinked_nodes;
+	
+	nodes = calloc(length, sizeof(GRAPH));
+	
+	nodes[0].label = 0;
+	nodes[0].degree = 5;
+	
+	nodes[1].label = 1;
+	nodes[1].degree = 3;
+	
+	nodes[2].label = 2;
+	nodes[2].degree = 5;
+	
+	nodes[3].label = 3;
+	nodes[3].degree = 2;
+	
+	nodes[4].label = 4;
+	nodes[4].degree = 3;
+	
+	shrinked_nodes = GRAPH_shrinking_strategy_vertex_by_degree(nodes, &length);
+	
+	assert(length == 3);
+	
+	assert(shrinked_nodes[0].label = 3);
+	assert(shrinked_nodes[0].degree = 2);
+	
+	assert(shrinked_nodes[1].label = 1);
+	assert(shrinked_nodes[1].degree = 3);
+	
+	assert(shrinked_nodes[2].label = 2);
+	assert(shrinked_nodes[2].degree = 5);
+	
+	free(nodes);
+	free(shrinked_nodes);
+	
+	printf("test_GRAPH_shrinking_strategy_vertex_by_degree -- SUCCESS\n");fflush(stdout);
+}
+
+
+void test_GRAPH_shrinking_strategy_five_non_adjacent()
+{
+	int length = 7;
+	GRAPH* nodes;
+	GRAPH* shrinked_nodes;
+	
+	nodes = calloc(length, sizeof(GRAPH));
+	
+	nodes[0].label = 0;
+	nodes[0].degree = 5;
+	int neighs0[] = {51, 52, 53, 54, 55};
+	nodes[0].neighboors = neighs0;
+	
+	nodes[1].label = 1;
+	nodes[1].degree = 4;
+	int neighs1[] = {41, 42, 43, 44};
+	nodes[1].neighboors = neighs1;
+	
+	// Should be discarded - adjacent with label 3
+	nodes[2].label = 2;
+	nodes[2].degree = 3;
+	int neighs2[] = {31, 22, 32}; 
+	nodes[2].neighboors = neighs2;
+	// -------------------------------
+	
+	nodes[3].label = 3;
+	nodes[3].degree = 2;
+	int neighs3[] = {21, 22};
+	nodes[3].neighboors = neighs3;
+	
+	nodes[4].label = 4;
+	nodes[4].degree = 1;
+	int neighs4[] = {11};
+	nodes[4].neighboors = neighs4;
+	
+	nodes[5].label = 5;
+	nodes[5].degree = 6;
+	int neighs5[] = {61, 62, 63, 64, 65, 66};
+	nodes[5].neighboors = neighs5;
+	
+	nodes[6].label = 6;
+	nodes[6].degree = 7;
+	int neighs6[] = {71, 72, 73, 74, 75, 76, 77};
+	nodes[6].neighboors = neighs6;
+	
+	shrinked_nodes = GRAPH_shrinking_strategy_five_non_adjacent(nodes, &length);
+	
+	assert(length == 5);
+	
+	assert(shrinked_nodes[0].label = 4);
+	assert(shrinked_nodes[0].degree = 1);
+	
+	assert(shrinked_nodes[1].label = 3);
+	assert(shrinked_nodes[1].degree = 2);
+	
+	assert(shrinked_nodes[2].label = 1);
+	assert(shrinked_nodes[2].degree = 4);
+	
+	assert(shrinked_nodes[3].label = 5);
+	assert(shrinked_nodes[3].degree = 6);
+	
+	assert(shrinked_nodes[4].label = 6);
+	assert(shrinked_nodes[4].degree = 7);
+	
+	free(nodes);
+	free(shrinked_nodes);
+	
+	printf("test_GRAPH_shrinking_strategy_five_non_adjacent -- SUCCESS\n");fflush(stdout);
+}
+
 
 void test_GRAPH_parallel_build_BFS()
 {
@@ -202,20 +315,24 @@ void run_all_test_GRAPH_parallel()
 {
 	printf("[UNIT TESTS]\n");fflush(stdout);
 	
-	omp_set_num_threads(1);
-	printf("Tests with a single thread\n");fflush(stdout);
-	test_GRAPH_parallel_build_METAGRAPH();
-	test_GRAPH_shrinking_strategy_half_sorted();
-	test_GRAPH_shrinking_strategy_half_sorted_can24();
-	test_GRAPH_parallel_build_BFS();
+// 	omp_set_num_threads(1);
+// 	printf("Tests with a single thread\n");fflush(stdout);
+// 	test_GRAPH_parallel_build_METAGRAPH();
+// 	test_GRAPH_shrinking_strategy_half_sorted();
+// 	test_GRAPH_shrinking_strategy_half_sorted_can24();
+// 	test_GRAPH_shrinking_strategy_vertex_by_degree();
+// 	test_GRAPH_shrinking_strategy_five_non_adjacent();
+// 	test_GRAPH_parallel_build_BFS();
 	test_GRAPH_parallel_pseudodiameter_sample();
 	
-	printf("Tests with %d threads\n", NUM_THREADS);fflush(stdout);
-	omp_set_num_threads(NUM_THREADS);
-	test_GRAPH_parallel_build_METAGRAPH();
-	test_GRAPH_shrinking_strategy_half_sorted();
-	test_GRAPH_shrinking_strategy_half_sorted_can24();
-	test_GRAPH_parallel_build_BFS();
+// 	printf("Tests with %d threads\n", NUM_THREADS);fflush(stdout);
+// 	omp_set_num_threads(NUM_THREADS);
+// 	test_GRAPH_parallel_build_METAGRAPH();
+// 	test_GRAPH_shrinking_strategy_half_sorted();
+// 	test_GRAPH_shrinking_strategy_half_sorted_can24();
+// 	test_GRAPH_shrinking_strategy_vertex_by_degree();
+// 	test_GRAPH_shrinking_strategy_five_non_adjacent();
+// 	test_GRAPH_parallel_build_BFS();
 }
 
 
@@ -225,12 +342,13 @@ void compare_hsl_pseudodiameter()
 	graph_diameter* diameter;
 	MAT* matrix;
 	int* peripherals;
-	double start_time, end_time;
+	double start_time_hsl, end_time_hsl, start_time_parallel, end_time_parallel;
 	int mat;
 	
 	char* matrix_path[] = {
-// 		"../Matrices/can24.mtx",
-		"../Matrices/rail_5177.mtx"
+		"../Matrices/can24.mtx",
+		"../Matrices/rail_5177.mtx",
+		"../Matrices/FEM_3D_thermal1.mtx"
 	};
 	
 	int num_matrices = sizeof(matrix_path)/sizeof(matrix_path[0]);
@@ -239,26 +357,22 @@ void compare_hsl_pseudodiameter()
 	{
 		// Executing HSL pseudo-diameter
 		MATRIX_read_from_path(matrix_path[mat], &matrix);
-		
-		start_time = omp_get_wtime();
+		start_time_hsl = omp_get_wtime();
 		peripherals = get_pseudo_diameter_hsl(matrix);
-		end_time = omp_get_wtime();
-		
+		end_time_hsl = omp_get_wtime();
 		MATRIX_clean(matrix);
-		printf("[%s] Time HSL Pseudo-diameter (%d, %d): %.5f\n", 
-			matrix_path[mat], peripherals[0], peripherals[1], (end_time - start_time)/100);
 		
 		// Executing Parallel pseudo-diameter
 		MATRIX_read_from_path(matrix_path[mat], &matrix);
 		mgraph   = GRAPH_parallel_build_METAGRAPH(matrix);
-		
-		start_time = omp_get_wtime();
+		start_time_parallel = omp_get_wtime();
 		diameter = GRAPH_parallel_pseudodiameter(*mgraph);
-		end_time = omp_get_wtime();
-		
+		end_time_parallel = omp_get_wtime();
 		MATRIX_clean(matrix);
-		printf("[%s] Time Parallel Pseudo-diameter (%d, %d): %.5f\n", 
-			matrix_path[mat], diameter->start, diameter->end, (end_time - start_time)/100);
+		
+		printf("[%s] Pseudo-diameter HSL (%d, %d): %.5f -- Parallel (%d, %d): %.5f\n", 
+			matrix_path[mat], diameter->start, diameter->end, (end_time_hsl - start_time_hsl)/100,
+			peripherals[0], peripherals[1], (end_time_parallel - start_time_parallel)/100);
 	}
 }
 
@@ -274,5 +388,4 @@ void run_all_comparison_GRAPH_parallel()
 	omp_set_num_threads(NUM_THREADS);
 	printf("Tests with %d threads\n", NUM_THREADS);fflush(stdout);
 	compare_hsl_pseudodiameter();
-	
 }
