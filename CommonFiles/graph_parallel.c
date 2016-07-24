@@ -385,7 +385,13 @@ inline GRAPH* GRAPH_shrinking_strategy_vertex_by_degree(GRAPH* nodes, int* lengt
 	int node, shrink_length, last_degree;
 	GRAPH* shrinked_nodes;
 	
-	if (*length == 1) return nodes;
+	if (*length == 1)
+	{
+		shrinked_nodes = calloc(*length, sizeof(GRAPH));
+		memcpy(shrinked_nodes, nodes, (*length) * sizeof(GRAPH));
+		
+		return shrinked_nodes;
+	}
 	
 	qsort(nodes, *length, sizeof(GRAPH), COMPARE_degr_ASC);
 	shrinked_nodes = calloc(*length, sizeof(GRAPH));
@@ -422,7 +428,13 @@ inline GRAPH* GRAPH_shrinking_strategy_five_non_adjacent(GRAPH* nodes, int* leng
 	
 	length_shrink_nodes = 5; // According to Kumfert
 	
-	if (*length < length_shrink_nodes) return nodes;
+	if (*length < length_shrink_nodes) 
+	{
+		shrinked_nodes = calloc(*length, sizeof(GRAPH));
+		memcpy(shrinked_nodes, nodes, (*length) * sizeof(GRAPH));
+		
+		return shrinked_nodes;
+	}
 	
 	num_chosen     = 0;
 	shrinked_nodes = calloc(length_shrink_nodes, sizeof(GRAPH));
@@ -464,17 +476,29 @@ inline GRAPH* GRAPH_shrinking_strategy_five_non_adjacent(GRAPH* nodes, int* leng
  */
 inline GRAPH* GRAPH_shrinking_strategy_half_sorted(GRAPH* nodes, int* length)
 {
-	GRAPH* half_nodes;
+	GRAPH* shrinked_nodes;
 	
-	if (*length == 1) return nodes;
+	if (*length == 1)
+	{
+		shrinked_nodes = calloc(*length, sizeof(GRAPH));
+		memcpy(shrinked_nodes, nodes, (*length) * sizeof(GRAPH));
+		
+		return shrinked_nodes;
+	}
 		
 	qsort(nodes, *length, sizeof(GRAPH), COMPARE_degr_ASC);
 	*length /= 2;
-	half_nodes = calloc(*length, sizeof(GRAPH));
-	memcpy(half_nodes, nodes, (*length) * sizeof(GRAPH));
+	shrinked_nodes = calloc(*length, sizeof(GRAPH));
+	memcpy(shrinked_nodes, nodes, (*length) * sizeof(GRAPH));
 	
-	return half_nodes;
+	return shrinked_nodes;
 }
+
+static GRAPH* (*strategy[3])(GRAPH* nodes, int* length) = {
+	GRAPH_shrinking_strategy_half_sorted,
+	GRAPH_shrinking_strategy_vertex_by_degree,
+	GRAPH_shrinking_strategy_five_non_adjacent
+};
 
 /**
  * It calculates the pseudo diameter of a graph represented by the
@@ -483,7 +507,7 @@ inline GRAPH* GRAPH_shrinking_strategy_half_sorted(GRAPH* nodes, int* length)
  * Laboratory for Ordering Sparse Matrices (2000).
  * 
  */
-graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
+graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph, Shrinking_Strategy shrink_type)
 {
 	// Create two breadth first search engines
 	BFS* forwardBFS;
@@ -511,7 +535,8 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph)
 		// shrink candidate set to a manageable number
 // 		candidate_set = GRAPH_shrinking_strategy_half_sorted(candidate_set, &size_cand_set);
 // 		candidate_set = GRAPH_shrinking_strategy_vertex_by_degree(candidate_set, &size_cand_set);
-		candidate_set = GRAPH_shrinking_strategy_five_non_adjacent(candidate_set, &size_cand_set);
+		candidate_set = (*strategy)(candidate_set, &size_cand_set);
+		candidate_set = strategy[shrink_type](candidate_set, &size_cand_set);
 		
 		min_width = INT_MAX;
 		

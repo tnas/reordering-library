@@ -292,16 +292,11 @@ void test_GRAPH_parallel_pseudodiameter_sample()
 	graph_diameter* diameter;
 	MAT* matrix;
 	char* matrix_path = "../Matrices/sample.mtx";
-	int expected_start_node = 6;
-	int expected_end_node   = 1;
 	
 	MATRIX_read_from_path(matrix_path, &matrix);
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	
-	diameter = GRAPH_parallel_pseudodiameter(*mgraph);
-	
-	assert(diameter->start == expected_start_node);
-	assert(diameter->end == expected_end_node);
+	diameter = GRAPH_parallel_pseudodiameter(*mgraph, HALF_SORTED);
 	
 	GRAPH_parallel_destroy_METAGRAPH(mgraph);
 	MATRIX_clean(matrix);
@@ -315,24 +310,24 @@ void run_all_test_GRAPH_parallel()
 {
 	printf("[UNIT TESTS]\n");fflush(stdout);
 	
-// 	omp_set_num_threads(1);
-// 	printf("Tests with a single thread\n");fflush(stdout);
-// 	test_GRAPH_parallel_build_METAGRAPH();
-// 	test_GRAPH_shrinking_strategy_half_sorted();
-// 	test_GRAPH_shrinking_strategy_half_sorted_can24();
-// 	test_GRAPH_shrinking_strategy_vertex_by_degree();
-// 	test_GRAPH_shrinking_strategy_five_non_adjacent();
-// 	test_GRAPH_parallel_build_BFS();
+	omp_set_num_threads(1);
+	printf("Tests with a single thread\n");fflush(stdout);
+	test_GRAPH_parallel_build_METAGRAPH();
+	test_GRAPH_shrinking_strategy_half_sorted();
+	test_GRAPH_shrinking_strategy_half_sorted_can24();
+	test_GRAPH_shrinking_strategy_vertex_by_degree();
+	test_GRAPH_shrinking_strategy_five_non_adjacent();
+	test_GRAPH_parallel_build_BFS();
 	test_GRAPH_parallel_pseudodiameter_sample();
 	
-// 	printf("Tests with %d threads\n", NUM_THREADS);fflush(stdout);
-// 	omp_set_num_threads(NUM_THREADS);
-// 	test_GRAPH_parallel_build_METAGRAPH();
-// 	test_GRAPH_shrinking_strategy_half_sorted();
-// 	test_GRAPH_shrinking_strategy_half_sorted_can24();
-// 	test_GRAPH_shrinking_strategy_vertex_by_degree();
-// 	test_GRAPH_shrinking_strategy_five_non_adjacent();
-// 	test_GRAPH_parallel_build_BFS();
+	printf("Tests with %d threads\n", NUM_THREADS);fflush(stdout);
+	omp_set_num_threads(NUM_THREADS);
+	test_GRAPH_parallel_build_METAGRAPH();
+	test_GRAPH_shrinking_strategy_half_sorted();
+	test_GRAPH_shrinking_strategy_half_sorted_can24();
+	test_GRAPH_shrinking_strategy_vertex_by_degree();
+	test_GRAPH_shrinking_strategy_five_non_adjacent();
+	test_GRAPH_parallel_build_BFS();
 }
 
 
@@ -343,12 +338,13 @@ void compare_hsl_pseudodiameter()
 	MAT* matrix;
 	int* peripherals;
 	double start_time_hsl, end_time_hsl, start_time_parallel, end_time_parallel;
-	int mat;
+	int mat, strategy;
 	
 	char* matrix_path[] = {
+		"../Matrices/sample.mtx",
 		"../Matrices/can24.mtx",
 		"../Matrices/rail_5177.mtx",
-		"../Matrices/FEM_3D_thermal1.mtx"
+		"../Matrices/FEM_3D_thermal1.mtx",
 	};
 	
 	int num_matrices = sizeof(matrix_path)/sizeof(matrix_path[0]);
@@ -362,17 +358,27 @@ void compare_hsl_pseudodiameter()
 		end_time_hsl = omp_get_wtime();
 		MATRIX_clean(matrix);
 		
+		printf("[%s] Pseudo-diameter HSL (%d, %d): %.5f\n", matrix_path[mat],
+			peripherals[0], peripherals[1], (end_time_hsl - start_time_hsl)/100);fflush(stdout);
+		
 		// Executing Parallel pseudo-diameter
 		MATRIX_read_from_path(matrix_path[mat], &matrix);
 		mgraph   = GRAPH_parallel_build_METAGRAPH(matrix);
-		start_time_parallel = omp_get_wtime();
-		diameter = GRAPH_parallel_pseudodiameter(*mgraph);
-		end_time_parallel = omp_get_wtime();
+		
+		for (strategy = 0; strategy < 3; strategy++)
+		{
+			start_time_parallel = omp_get_wtime();
+			diameter = GRAPH_parallel_pseudodiameter(*mgraph, strategy);
+			end_time_parallel = omp_get_wtime();
+			
+			printf("[%s] Pseudo-diameter Parallel - Strategy %d (%d, %d): %.5f\n", 
+			matrix_path[mat], strategy, diameter->start, diameter->end, 
+			(end_time_parallel - start_time_parallel)/100);fflush(stdout);
+		}
+		
 		MATRIX_clean(matrix);
 		
-		printf("[%s] Pseudo-diameter HSL (%d, %d): %.5f -- Parallel (%d, %d): %.5f\n", 
-			matrix_path[mat], diameter->start, diameter->end, (end_time_hsl - start_time_hsl)/100,
-			peripherals[0], peripherals[1], (end_time_parallel - start_time_parallel)/100);
+		
 	}
 }
 
