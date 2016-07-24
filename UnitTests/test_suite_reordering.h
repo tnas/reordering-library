@@ -24,6 +24,7 @@
 #include "../Reorderings/sloan.h"
 #include "../Reorderings/spectral.h"
 #include "../Reorderings/rcm_parallel.h"
+#include "../Reorderings/rcm_hsl.h"
 #include "../Reorderings/sloan_parallel.h"
 
 

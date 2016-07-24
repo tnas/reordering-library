@@ -46,8 +46,6 @@ void test_GRAPH_parallel_build_METAGRAPH()
 	
 	GRAPH_parallel_destroy_METAGRAPH(mgraph);
 	
-	MATRIX_clean(matrix);
-	
 	printf("test_GRAPH_parallel_build_METAGRAPH -- SUCCESS\n");fflush(stdout);
 }
 
@@ -274,13 +272,12 @@ void test_GRAPH_parallel_build_BFS()
 	MATRIX_read_from_path(matrix_path, &matrix);
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	
-	bfs = GRAPH_parallel_build_BFS(*mgraph, root);
+	bfs = GRAPH_parallel_build_BFS(mgraph, root);
 	
 	assert(bfs->height == expected_height);
 	
 	GRAPH_parallel_destroy_BFS(bfs);
 	GRAPH_parallel_destroy_METAGRAPH(mgraph);
-	MATRIX_clean(matrix);
 	
 	printf("test_GRAPH_parallel_build_BFS -- SUCCESS\n");fflush(stdout);
 }
@@ -296,10 +293,9 @@ void test_GRAPH_parallel_pseudodiameter_sample()
 	MATRIX_read_from_path(matrix_path, &matrix);
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	
-	diameter = GRAPH_parallel_pseudodiameter(*mgraph, HALF_SORTED);
+	diameter = GRAPH_parallel_pseudodiameter(mgraph, HALF_SORTED);
 	
 	GRAPH_parallel_destroy_METAGRAPH(mgraph);
-	MATRIX_clean(matrix);
 	free(diameter);
 	
 	printf("test_GRAPH_parallel_pseudodiameter_sample -- SUCCESS\n");fflush(stdout);
@@ -368,7 +364,7 @@ void compare_hsl_pseudodiameter()
 		for (strategy = 0; strategy < 3; strategy++)
 		{
 			start_time_parallel = omp_get_wtime();
-			diameter = GRAPH_parallel_pseudodiameter(*mgraph, strategy);
+			diameter = GRAPH_parallel_pseudodiameter(mgraph, strategy);
 			end_time_parallel = omp_get_wtime();
 			
 			printf("[%s] Pseudo-diameter Parallel - Strategy %d (%d, %d): %.5f\n", 

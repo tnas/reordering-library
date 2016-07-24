@@ -69,8 +69,11 @@ test test_reorder_algorithm(test defs)
 	double time;
 	MAT* matrix;
 	int* peripheral_nodes;
+	graph_diameter* diameter;
+	METAGRAPH* mgraph;
 
 	MATRIX_read_from_path(defs.path_matrix_file, &matrix);
+	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	write_output_before(matrix);
 	defs.original_band = MATRIX_bandwidth(matrix);
 	
@@ -78,13 +81,26 @@ test test_reorder_algorithm(test defs)
 	if (is_parallel_algorithm(defs.algorithm)) omp_set_num_threads(defs.num_threads);
 		
 	// Getting pseudo peripheral nodes
-	time = omp_get_wtime();
-	peripheral_nodes = get_pseudo_diameter_hsl(matrix);
-	defs.time_peripheral = (omp_get_wtime() - time)/100.0;
-	
-	defs.root       = peripheral_nodes[START];
-	defs.start_node = peripheral_nodes[START];
-	defs.end_node   = peripheral_nodes[END];
+	if (is_hsl_algorithm(defs.algorithm))
+	{
+		time = omp_get_wtime();
+		peripheral_nodes = get_pseudo_diameter_hsl(matrix);
+		defs.time_peripheral = (omp_get_wtime() - time)/100.0;
+		
+		defs.root       = peripheral_nodes[START];
+		defs.start_node = peripheral_nodes[START];
+		defs.end_node   = peripheral_nodes[END];
+	}
+	else
+	{
+		time = omp_get_wtime();
+		diameter = GRAPH_parallel_pseudodiameter(mgraph, VERTEX_BY_DEGREE);
+		defs.time_peripheral = (omp_get_wtime() - time)/100.0;
+		
+		defs.root       = diameter->start;
+		defs.start_node = diameter->start;
+		defs.end_node   = diameter->end;
+	}
 	
 	switch (defs.algorithm)
 	{
@@ -108,7 +124,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm = hsl_rcm;
 			defs.algorithm_name = "HSL RCM";
 			time = omp_get_wtime();
-			defs.reorder_band = REORDERING_HSL_RCM(matrix);
+			defs.reorder_band = Reordering_RCM_HSL(matrix);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -132,7 +148,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Unordered RCM";
 			defs.algorithm      = unordered_rcm;
 			time = omp_get_wtime();
-			Unordered_RCM(matrix, &permutation, defs.root, defs.percent_chunk);
+// 			Unordered_RCM(matrix, &permutation, defs.root, defs.percent_chunk);
+			Unordered_RCM_METAGRAPH(mgraph, &permutation, defs.root, defs.percent_chunk);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -140,7 +157,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Leveled RCM";
 			defs.algorithm      = leveled_rcm;
 			time = omp_get_wtime();
-			Leveled_RCM(matrix, &permutation, defs.root);
+// 			Leveled_RCM(matrix, &permutation, defs.root);
+			Leveled_RCM_METAGRAPH(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -148,7 +166,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
 			time = omp_get_wtime(); 
-			Bucket_RCM(matrix, &permutation, defs.root);
+// 			Bucket_RCM(matrix, &permutation, defs.root);
+			Bucket_RCM_METAGRAPH(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -156,7 +175,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Parallel Sloan";
 			defs.algorithm      = parallel_sloan;
 			time = omp_get_wtime();
-			Parallel_Sloan(matrix, &permutation, defs.start_node, defs.end_node);
+// 			Parallel_Sloan(matrix, &permutation, defs.start_node, defs.end_node);
+			Parallel_Sloan_METAGRAPH(mgraph, &permutation, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -234,8 +254,9 @@ test test_reorder_algorithm(test defs)
 	}
 	
 	write_output_after(matrix);
-	MATRIX_clean(matrix);
+	GRAPH_parallel_destroy_METAGRAPH(mgraph);
 	free(peripheral_nodes);
+	free(diameter);
 	
 	return defs;
 }

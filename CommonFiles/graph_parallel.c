@@ -131,13 +131,13 @@ void GRAPH_parallel_fixedpoint_bfs(MAT* adjacency, int root, int** levels, const
  * it uses a optimized data structure METAGRAPH, in order to increase the
  * performance of operations like take degree and neighboors of nodes.
  */
-void GRAPH_parallel_fixedpoint_BFS(METAGRAPH mgraph, int root, int** levels, const float percent_chunk)
+void GRAPH_parallel_fixedpoint_BFS(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
 {
 	int node, n_nodes, has_unreached_nodes, size_workset;
 	LIST* work_set;
 	omp_lock_t lock;
 	
-	n_nodes = mgraph.size;
+	n_nodes = mgraph->size;
   
 	#pragma omp parallel for private (node)
 	for (node = 0; node < n_nodes; ++node) 
@@ -189,8 +189,8 @@ void GRAPH_parallel_fixedpoint_BFS(METAGRAPH mgraph, int root, int** levels, con
 				active_node      = LIST_first(active_chunk_ws);
 				active_chunk_ws  = LIST_remove(active_chunk_ws, active_node);
 				
-				neighboors  = mgraph.graph[active_node].neighboors;
-				node_degree = mgraph.graph[active_node].degree;
+				neighboors  = mgraph->graph[active_node].neighboors;
+				node_degree = mgraph->graph[active_node].degree;
 				
 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
 				{
@@ -250,6 +250,7 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 	meta_graph        = malloc(sizeof(METAGRAPH));
 	meta_graph->size  = size_graph;
 	meta_graph->graph = malloc(size_graph * sizeof(GRAPH));
+	meta_graph->mat   = mat;
 	
 	#pragma omp parallel 
 	{
@@ -263,6 +264,7 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 		{
 			meta_graph->graph[node].distance   = INFINITY_LEVEL;
 			meta_graph->graph[node].parent     = NON_VERTEX;
+			meta_graph->graph[node].status     = UNREACHED;
 			meta_graph->graph[node].chnum      = 0;
 			meta_graph->graph[node].label      = node;
 			meta_graph->graph[node].degree     = GRAPH_degree(mat, node);
@@ -299,14 +301,14 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
  * must to be provided.
  * 
  */
-inline BFS* GRAPH_parallel_build_BFS(METAGRAPH mgraph, int root)
+inline BFS* GRAPH_parallel_build_BFS(const METAGRAPH* mgraph, int root)
 {
 	int n_nodes, max_level;
 	BFS* bfs;
 	int* levels;
 	int* counts;
 	
-	n_nodes = mgraph.size;
+	n_nodes = mgraph->size;
 	bfs     = malloc(sizeof(BFS));
 	levels  = calloc(n_nodes, sizeof(int));
 	
@@ -355,7 +357,7 @@ inline BFS* GRAPH_parallel_build_BFS(METAGRAPH mgraph, int root)
 			#pragma omp critical
 			{
 				graph_node.label  = node;
-				graph_node.degree = mgraph.graph[node].degree; 
+				graph_node.degree = mgraph->graph[node].degree; 
 				bfs->vertices_at_level[level][counts[count_level]-1] = graph_node;
 				counts[count_level]--;
 			}
@@ -507,7 +509,7 @@ static GRAPH* (*strategy[3])(GRAPH* nodes, int* length) = {
  * Laboratory for Ordering Sparse Matrices (2000).
  * 
  */
-graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph, Shrinking_Strategy shrink_type)
+graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph, Shrinking_Strategy shrink_type)
 {
 	// Create two breadth first search engines
 	BFS* forwardBFS;
@@ -519,7 +521,7 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH meta_graph, Shrink
 	diameter = malloc(sizeof(graph_diameter));
 	
 	// Initialize start and end vertices of pseudo-diameter
-	diameter->start = meta_graph.vertex_min_degree;
+	diameter->start = meta_graph->vertex_min_degree;
 	diameter->end   = NON_VERTEX;
 	
 	do 
@@ -601,6 +603,7 @@ void inline GRAPH_parallel_destroy_METAGRAPH(METAGRAPH* mgraph)
 	for (node = 0; node < size_graph; ++node)
 		free(mgraph->graph[node].neighboors);
 	
+	MATRIX_clean(mgraph->mat);
 	free(mgraph->graph);
 	free(mgraph);
 }

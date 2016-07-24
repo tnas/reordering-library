@@ -28,3 +28,4 @@ typedef enum {
 } SLOAN_STATE;
 
 void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_node);
+void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
