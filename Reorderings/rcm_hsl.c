@@ -35,6 +35,10 @@ long int Reordering_RCM_HSL(MAT* A)
 	int* permsv;
 	int* svar;
 	
+	svar   = calloc(n, sizeof(int));
+	vars   = calloc(n, sizeof(int));
+	iw     = calloc(2*n + 2, sizeof(int));
+	
 	/* -------------------------------------------------------------------- */    
 	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
 	/* -------------------------------------------------------------------- */
@@ -47,25 +51,36 @@ long int Reordering_RCM_HSL(MAT* A)
 	
 	for (i = n; i < lirn; i++) ++irn[i];
 	
-	svar   = calloc(n, sizeof(int));
-	vars   = calloc(n, sizeof(int));
-	iw     = calloc(2*n + 2, sizeof(int));
-	
 	// To find supervariables and compress pattern
 	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
+	
+// 	printf("The number of supervariables is %d\n", nsup);fflush(stdout);
+// 	
+// 	for (i = 0; i < n; i++) 
+// 	{
+// 		printf("vars[%d]: %d ", i, vars[i]);fflush(stdout);
+// 	}
+// 	printf("\n");fflush(stdout);
+// 	
+// 	for (i = 0; i < n; i++) 
+// 	{
+// 		printf("svar[%d]: %d ", i, svar[i]);fflush(stdout);
+// 	}
+// 	printf("\n");fflush(stdout);
 	
 	free(iw);
 	pair_lenght = nsup/2;
 	permsv = calloc(nsup, sizeof(int));
 	iw     = calloc(3*nsup + 1, sizeof(int));
 	w      = calloc(nsup, sizeof(double));
-	pair   = (int**) calloc(pair_lenght, sizeof(int*));
+	pair   = calloc(pair_lenght, sizeof(int*));
 	
 	for (i = 0; i < pair_lenght; ++i)
-		pair[i] = (int*) calloc(2, sizeof(int));
+		pair[i] = calloc(2, sizeof(int));
 	
 	// To find supervariable permutation
 	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
+	
 	
 	free(iw);
 	iw = calloc(2*nsup + 1, sizeof(int));
@@ -84,11 +99,17 @@ long int Reordering_RCM_HSL(MAT* A)
 	
 	for (i = n; i < lirn; i++) --irn[i];
 	
+	
+	
 	free(vars);
 	free(iw);
 	free(w);
 	free(permsv);
 	free(svar);
+	
+	for (i = 0; i < pair_lenght; ++i)
+		free(pair[i]);
+	
 	free(pair);
 	
 	return rinfo[SEMI_BANDWIDTH];

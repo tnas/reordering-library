@@ -519,6 +519,7 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph, Shrin
 	GRAPH* candidate_set;
 	
 	diameter = malloc(sizeof(graph_diameter));
+	forwardBFS = reverseBFS = NULL;
 	
 	// Initialize start and end vertices of pseudo-diameter
 	diameter->start = meta_graph->vertex_min_degree;
@@ -526,6 +527,8 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph, Shrin
 	
 	do 
 	{
+		if (forwardBFS != NULL) GRAPH_parallel_destroy_BFS(forwardBFS);
+		
 		// do BFS starting at start node 'start'
 		forwardBFS = GRAPH_parallel_build_BFS(meta_graph, diameter->start);
 		
@@ -535,9 +538,6 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph, Shrin
 		size_cand_set  = forwardBFS->num_nodes_at_level[local_diameter];
 		
 		// shrink candidate set to a manageable number
-// 		candidate_set = GRAPH_shrinking_strategy_half_sorted(candidate_set, &size_cand_set);
-// 		candidate_set = GRAPH_shrinking_strategy_vertex_by_degree(candidate_set, &size_cand_set);
-		candidate_set = (*strategy)(candidate_set, &size_cand_set);
 		candidate_set = strategy[shrink_type](candidate_set, &size_cand_set);
 		
 		min_width = INT_MAX;
@@ -547,6 +547,7 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph, Shrin
 			candidate = candidate_set[cand].label;
 			
 			// do BFS from each candidate
+			if (reverseBFS != NULL) GRAPH_parallel_destroy_BFS(reverseBFS);
 			reverseBFS = GRAPH_parallel_build_BFS(meta_graph, candidate);
 			
 			if (reverseBFS->width < min_width)

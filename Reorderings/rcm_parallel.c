@@ -130,9 +130,8 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 	const int num_threads = omp_get_max_threads();
 	omp_lock_t locks[num_threads];
 	
-	#pragma omp parallel private (level, node, children, degree, count)
+	#pragma omp parallel private(level, node, children, degree, count)
 	{
-		
 		#pragma omp single nowait
 		{
 			read_offset  = calloc(max_dist, sizeof(int));
@@ -149,11 +148,11 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 		#pragma omp single nowait
 		(*perm)[0] =  source_node;
 		
-		#pragma omp for schedule(static) nowait
+		#pragma omp for schedule(static) 
 		for (count = 0; count < num_threads; ++count)
 			omp_init_lock(&locks[count]);
 		
-		#pragma omp parallel for num_threads(num_threads) schedule(static)
+		#pragma omp for schedule(static)
 		for (count = 0; count < mat->n; ++count)
 			colors[count] = UNREACHED;
 
@@ -165,7 +164,6 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 		
 		while (level < max_dist - 1)
 		{
-			
 			while (read_offset[level] != sums[level+1]) // There are nodes to read
 			{
 				#pragma omp flush (write_offset)
@@ -917,16 +915,16 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 		num_threads = omp_get_num_threads();
 		
 		#pragma omp single nowait
-		*perm  = calloc(graph_size, sizeof(int));
+		{
+			*perm  = calloc(graph_size, sizeof(int));
+			(*perm)[0] = root;
+		}
 		
 		#pragma omp single nowait
 		mgraph->graph[root].distance = 0;
 		
 		#pragma omp single nowait
 		mgraph->graph[root].status = LABELED;
-		
-		#pragma omp single nowait
-		(*perm)[0] = root;
 		
 		#pragma omp single nowait
 		perm_size++;

@@ -29,7 +29,7 @@
 
 
 
-#define TEST_EXEC_TIMES 5
+#define TEST_EXEC_TIMES 1
 
 typedef enum {
 	serial_rcm,

@@ -72,6 +72,8 @@ test test_reorder_algorithm(test defs)
 	graph_diameter* diameter;
 	METAGRAPH* mgraph;
 
+	diameter         = NULL;
+	peripheral_nodes = NULL;
 	MATRIX_read_from_path(defs.path_matrix_file, &matrix);
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	write_output_before(matrix);
@@ -255,8 +257,8 @@ test test_reorder_algorithm(test defs)
 	
 	write_output_after(matrix);
 	GRAPH_parallel_destroy_METAGRAPH(mgraph);
-	free(peripheral_nodes);
-	free(diameter);
+	if (peripheral_nodes != NULL) free(peripheral_nodes);
+	if (diameter != NULL) free(diameter);
 	
 	return defs;
 }
@@ -353,25 +355,29 @@ void run_all_reordering_tests()
 	float bfs_chunk_percent = .5;
 	
 	char* matrices[] = {
-		"../Big-Matrices/dw8192.mtx",
-		"../Big-Matrices/rail_79841.mtx",
-		"../Big-Matrices/Dubcova3.mtx",
-		"../Big-Matrices/inline_1.mtx",
-		"../Big-Matrices/audikw_1.mtx",
-		"../Big-Matrices/dielFilterV3real.mtx",
-		"../Big-Matrices/atmosmodj.mtx",
-		"../Big-Matrices/G3_circuit.mtx"
+// 		"../Big-Matrices/dw8192.mtx",
+// 		"../Big-Matrices/rail_79841.mtx",
+// 		"../Big-Matrices/Dubcova3.mtx",
+// 		"../Big-Matrices/inline_1.mtx",
+// 		"../Big-Matrices/audikw_1.mtx",
+// 		"../Big-Matrices/dielFilterV3real.mtx",
+// 		"../Big-Matrices/atmosmodj.mtx",
+// 		"../Big-Matrices/G3_circuit.mtx"
 		
-// 		"../Matrices/rail_5177.mtx",
+		"../Matrices/hsl.mtx",
+// 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/FEM_3D_thermal1.mtx",
-// 		"../Matrices/Dubcova2.mtx"
+// 		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/Dubcova2.mtx",
+// 		"../Matrices/FEM_3D_thermal1.mtx"
+		
 	};
 	
-	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithm[] = { hsl_rcm, serial_rcm, unordered_rcm };
+	reorder_algorithm algorithm[] = { unordered_rcm };
 	
 	/* *****************
 	 * Tests execution
