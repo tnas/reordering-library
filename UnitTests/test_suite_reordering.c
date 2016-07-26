@@ -365,19 +365,18 @@ void run_all_reordering_tests()
 // 		"../Big-Matrices/G3_circuit.mtx"
 		
 		"../Matrices/hsl.mtx",
-// 		"../Matrices/sample.mtx",
-// 		"../Matrices/bcspwr01.mtx",
-// 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx",
+		"../Matrices/sample.mtx",
+		"../Matrices/bcspwr01.mtx",
+		"../Matrices/bcspwr02.mtx",
+		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx"
-		
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	int nthreads[] = { 4 };
+	int nthreads[] = { 1 };
 	
-	reorder_algorithm algorithm[] = { unordered_rcm };
+	reorder_algorithm algorithm[] = { hsl_rcm };
 	
 	/* *****************
 	 * Tests execution

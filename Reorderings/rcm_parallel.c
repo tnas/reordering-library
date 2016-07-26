@@ -17,8 +17,10 @@
 
 #include "rcm_parallel.h"
 
-
-void place_old(MAT* mat, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
+/**
+ * @Deprecated
+ */
+void place_original(MAT* mat, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
 {
 	int level, node, degree, count;
 	int* read_offset;
@@ -120,12 +122,13 @@ void place_old(MAT* mat, const int source_node, const int* sums, const int max_d
 	}
 }
 
+
 void place(MAT* mat, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
 {
 	int level, node, degree, count;
 	int* read_offset;
 	int* write_offset;
-	int colors[mat->n];
+	int* colors;
 	GRAPH* children;
 	const int num_threads = omp_get_max_threads();
 	omp_lock_t locks[num_threads];
@@ -148,11 +151,14 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 		#pragma omp single nowait
 		(*perm)[0] =  source_node;
 		
-		#pragma omp for schedule(static) 
+		#pragma omp single nowait
 		for (count = 0; count < num_threads; ++count)
 			omp_init_lock(&locks[count]);
 		
-		#pragma omp for schedule(static)
+		#pragma omp single 
+		colors = calloc(mat->n, sizeof(int));
+		
+		#pragma omp for
 		for (count = 0; count < mat->n; ++count)
 			colors[count] = UNREACHED;
 
@@ -203,11 +209,16 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 			level += num_threads;
 		}
 		
+		#pragma omp barrier
+		
 		#pragma omp single nowait
 		free(read_offset);
 		
 		#pragma omp single nowait
 		free(write_offset);
+		
+		#pragma omp single nowait
+		free(colors);
 		
 		#pragma omp for schedule(static) 
 		for (count = 0; count < num_threads; ++count)
@@ -302,11 +313,6 @@ void Unordered_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root, cons
 	
 	#pragma omp parallel 
 	{
-		/* Reverse order */
-		#pragma omp for private (count_nodes)
-		for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-			(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
-		
 		#pragma omp single nowait
 		free(levels);
 		
@@ -315,6 +321,11 @@ void Unordered_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root, cons
 		
 		#pragma omp single nowait
 		free(sums);
+		
+		/* Reverse order */
+		#pragma omp for private (count_nodes) schedule(static) 
+		for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
+			(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
 		
 		#pragma omp single nowait
 		free(tperm);
