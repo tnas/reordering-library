@@ -19,6 +19,7 @@ add_executable(reordering-library program.c
 	./Reorderings/rcm_parallel.c 
 	./Reorderings/rcm_galois.cpp
 	./Reorderings/sloan.c
+	./Reorderings/sloan_hsl.c
 	./Reorderings/sloan_parallel.c
 	./UnitTests/test_suite_reordering.c
 	./UnitTests/test_suite_prefixsum.c

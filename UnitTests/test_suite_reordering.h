@@ -21,10 +21,11 @@
 #include "../CommonFiles/graph_hsl.h"
 #include "../Reorderings/hsl.h"
 #include "../Reorderings/rcm.h"
-#include "../Reorderings/sloan.h"
-#include "../Reorderings/spectral.h"
-#include "../Reorderings/rcm_parallel.h"
 #include "../Reorderings/rcm_hsl.h"
+#include "../Reorderings/rcm_parallel.h"
+#include "../Reorderings/spectral.h"
+#include "../Reorderings/sloan.h"
+#include "../Reorderings/sloan_hsl.h"
 #include "../Reorderings/sloan_parallel.h"
 
 

@@ -93,6 +93,8 @@ test test_reorder_algorithm(test defs)
 		defs.root       = peripheral_nodes[START];
 		defs.start_node = peripheral_nodes[START];
 		defs.end_node   = peripheral_nodes[END];
+		
+		printf("diameter (%d, %d)\n", defs.start_node, defs.end_node);fflush(stdout);
 	}
 	else
 	{
@@ -144,7 +146,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "HSL Sloan";
 			defs.algorithm      = hsl_sloan;
 			time = omp_get_wtime();
-			defs.wavefront = REORDERING_SLOAN_HSL(matrix);
+// 			defs.wavefront = REORDERING_SLOAN_HSL(matrix);
+			defs.wavefront = REORDERING_SLOAN_pseudodiameter_HSL(matrix, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -378,7 +381,7 @@ void run_all_reordering_tests()
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	
-	reorder_algorithm algorithm[] = { hsl_rcm };
+	reorder_algorithm algorithm[] = { hsl_sloan };
 	
 	/* *****************
 	 * Tests execution
