@@ -520,7 +520,7 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 								p_children[ch].degree = graph[(*perm)[index_children + ch]].degree;
 							}
 							
-							qsort(&((*perm)[index_children]), num_children, sizeof(int), COMPARE_degr_ASC);
+							qsort(&((*perm)[index_children]), num_children, sizeof(int), COMPARE_int_ASC);
 							
 							for (ch = 0; ch < num_children; ++ch)
 								(*perm)[index_children + ch] = p_children[ch].label;
@@ -556,7 +556,6 @@ void Leveled_RCM(MAT* mat, int** perm, int root)
 void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root) 
 {
 	int graph_size, perm_size, node, perm_offset, size_children, size_offset, node_offset;
-	GRAPH* graph;
 	int* counts;
 	int* psum;
 	int* parent_index;
@@ -569,16 +568,16 @@ void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root)
 	#pragma omp parallel
 	{
 		#pragma omp single nowait
-		*perm  = calloc(graph_size, sizeof(int));
+		{
+			*perm  = calloc(graph_size, sizeof(int));
+			(*perm)[0] = root;
+		}
 		
 		#pragma omp single nowait
-		graph[root].distance = 0;
+		mgraph->graph[root].distance = 0;
 		
 		#pragma omp single nowait
-		graph[root].parent = NON_VERTEX;
-		
-		#pragma omp single nowait
-		(*perm)[0] = root;
+		mgraph->graph[root].parent = NON_VERTEX;
 		
 		#pragma omp single nowait
 		perm_size++;
@@ -647,7 +646,7 @@ void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root)
 		
 		while (ch_pointer != NULL)
 		{
-			mgraph->graph[graph[ch_pointer->data].parent].chnum++;
+			mgraph->graph[mgraph->graph[ch_pointer->data].parent].chnum++;
 			ch_pointer = ch_pointer->next;
 		}
 		
@@ -658,7 +657,7 @@ void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root)
 		
 		for (node = 0; node < size_offset; ++node)
 		{
-			if (graph[(*perm)[node+perm_offset]].chnum > 0)
+			if (mgraph->graph[(*perm)[node+perm_offset]].chnum > 0)
 			{
 				++node_offset;
 				counts[node_offset] = mgraph->graph[(*perm)[node+perm_offset]].chnum;
@@ -719,10 +718,10 @@ void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root)
 							for (ch = 0; ch < num_children; ++ch)
 							{
 								p_children[ch].label  = (*perm)[index_children + ch];
-								p_children[ch].degree = graph[(*perm)[index_children + ch]].degree;
+								p_children[ch].degree = mgraph->graph[(*perm)[index_children + ch]].degree;
 							}
 							
-							qsort(&((*perm)[index_children]), num_children, sizeof(int), COMPARE_degr_ASC);
+							qsort(&((*perm)[index_children]), num_children, sizeof(int), COMPARE_int_ASC);
 							
 							for (ch = 0; ch < num_children; ++ch)
 								(*perm)[index_children + ch] = p_children[ch].label;

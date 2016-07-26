@@ -93,8 +93,6 @@ test test_reorder_algorithm(test defs)
 		defs.root       = peripheral_nodes[START];
 		defs.start_node = peripheral_nodes[START];
 		defs.end_node   = peripheral_nodes[END];
-		
-		printf("diameter (%d, %d)\n", defs.start_node, defs.end_node);fflush(stdout);
 	}
 	else
 	{
@@ -129,9 +127,9 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm = hsl_rcm;
 			defs.algorithm_name = "HSL RCM";
 			time = omp_get_wtime();
-// 			defs.reorder_band = Reordering_RCM_HSL(matrix);
 			defs.reorder_band = Reordering_RCM_pseudodiameter_HSL(matrix, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			defs.time_permutation = 0;
 			break;
 			
 		case hsl_spectral : // t = 3
@@ -140,22 +138,22 @@ test test_reorder_algorithm(test defs)
 			time = omp_get_wtime(); 
 			REORDERING_HSL_SPECTRAL(matrix, &permutation);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			defs.time_permutation = 0;
 			break;
 			
 		case hsl_sloan : // t = 4
 			defs.algorithm_name = "HSL Sloan";
 			defs.algorithm      = hsl_sloan;
 			time = omp_get_wtime();
-// 			defs.wavefront = REORDERING_SLOAN_HSL(matrix);
 			defs.wavefront = REORDERING_SLOAN_pseudodiameter_HSL(matrix, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			defs.time_permutation = 0;
 			break;
 			
 		case unordered_rcm : // t = 5
 			defs.algorithm_name = "Unordered RCM";
 			defs.algorithm      = unordered_rcm;
 			time = omp_get_wtime();
-// 			Unordered_RCM(matrix, &permutation, defs.root, defs.percent_chunk);
 			Unordered_RCM_METAGRAPH(mgraph, &permutation, defs.root, defs.percent_chunk);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
@@ -164,7 +162,6 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Leveled RCM";
 			defs.algorithm      = leveled_rcm;
 			time = omp_get_wtime();
-// 			Leveled_RCM(matrix, &permutation, defs.root);
 			Leveled_RCM_METAGRAPH(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
@@ -173,7 +170,6 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
 			time = omp_get_wtime(); 
-// 			Bucket_RCM(matrix, &permutation, defs.root);
 			Bucket_RCM_METAGRAPH(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
@@ -182,7 +178,6 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Parallel Sloan";
 			defs.algorithm      = parallel_sloan;
 			time = omp_get_wtime();
-// 			Parallel_Sloan(matrix, &permutation, defs.start_node, defs.end_node);
 			Parallel_Sloan_METAGRAPH(mgraph, &permutation, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
@@ -199,7 +194,8 @@ test test_reorder_algorithm(test defs)
 	{
 		if (is_hsl_algorithm(defs.algorithm))
 		{
-			printf("%s: Wavefront [ %ld ] Time [ %.6f ]\n", defs.algorithm_name, defs.wavefront, defs.time_reordering); 
+			printf("%s: Wavefront [ %ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", defs.algorithm_name, 
+			       defs.wavefront, defs.time_reordering, defs.time_reordering, get_total_time(defs)); 
 			fflush(stdout);
 		}
 		else
@@ -223,14 +219,16 @@ test test_reorder_algorithm(test defs)
 				defs.algorithm_name, defs.wavefront, 
 				defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
 			fflush(stdout);
+			
+			free(permutation);
 		}
 	}
 	else // RCM Algorithms
 	{ 
 		if (is_hsl_algorithm(defs.algorithm))
 		{
-			printf("%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", defs.algorithm_name, 
-			       defs.original_band, defs.reorder_band, defs.time_reordering); 
+			printf("%s: (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", defs.algorithm_name, 
+			       defs.original_band, defs.reorder_band, defs.time_peripheral, defs.time_reordering, get_total_time(defs)); 
 			fflush(stdout);
 		}
 		else 
@@ -374,14 +372,16 @@ void run_all_reordering_tests()
 		"../Matrices/sample.mtx",
 		"../Matrices/bcspwr01.mtx",
 		"../Matrices/bcspwr02.mtx",
-		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx"
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+// 	int nthreads[] = { 10 };
 	
-	reorder_algorithm algorithm[] = { hsl_sloan };
+	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm, hsl_sloan, parallel_sloan };
+// 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
@@ -437,8 +437,8 @@ void run_all_reordering_tests()
 				{
 					if (is_hsl_algorithm(result.algorithm))
 					{
-						fprintf(out_file, "%s: Wavefront [ %ld ] Time [ %.6f ]\n", 
-						       result.algorithm_name, result.wavefront, result.time_reordering); 
+						fprintf(out_file, "%s: Wavefront [ %ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", result.algorithm_name, 
+							result.wavefront, result.time_reordering, result.time_reordering, get_total_time(result)); 
 						fflush(out_file);
 					}
 					else
@@ -453,8 +453,8 @@ void run_all_reordering_tests()
 				{
 					if (is_hsl_algorithm(result.algorithm))
 					{
-						fprintf(out_file, "%s: (Before/After) [ %ld/%ld ] Time [ %.6f ]\n", result.algorithm_name, 
-						result.original_band, result.reorder_band, result.time_reordering); 
+						fprintf(out_file, "%s: (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", result.algorithm_name, 
+							result.original_band, result.reorder_band, result.time_peripheral, result.time_reordering, get_total_time(result)); 
 						fflush(out_file);
 					}
 					else 

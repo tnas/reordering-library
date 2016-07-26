@@ -237,9 +237,6 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 		free(distance);
 		
 		#pragma omp single nowait
-		free(priority);
-		
-		#pragma omp single nowait
 		free(status);
 		
 		#pragma omp single nowait
@@ -247,6 +244,13 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 		
 		#pragma omp single nowait
 		free(degree);
+		
+		#pragma omp for schedule(static, chunk_size)
+		for (node = 0; node < num_nodes; ++node)
+			free(priority[node]);
+		
+		#pragma omp single nowait
+		free(priority);
 	}
 }
 
