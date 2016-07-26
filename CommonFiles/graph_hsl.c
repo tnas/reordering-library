@@ -55,11 +55,11 @@ int* get_pseudo_diameter_hsl(const MAT* matrix)
 	
 	for (i = 0; i < n; i++) 
 	{
-		++irn[i];
-		++icptr[i];
+		--irn[i];
+		--icptr[i];
 	}
 	
-	for (i = n; i < lirn; i++) ++irn[i];
+	for (i = n; i < lirn; i++) --irn[i];
 	
 	peripheral_nodes[0] = info[0] - 1;
 	peripheral_nodes[1] = info[1] - 1;

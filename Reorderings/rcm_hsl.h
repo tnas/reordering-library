@@ -22,6 +22,7 @@
 #include "hsl.h"
 #include "../CommonFiles/matrix.h"
 
-long int Reordering_RCM_HSL(MAT* A);
+long int Reordering_RCM_HSL	           (MAT* A);
+long int Reordering_RCM_pseudodiameter_HSL (MAT* A, int start_node, int end_node);
 
 #endif /* __RCM_HSL_H__ */

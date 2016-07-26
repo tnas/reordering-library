@@ -76,6 +76,7 @@ test test_reorder_algorithm(test defs)
 	peripheral_nodes = NULL;
 	MATRIX_read_from_path(defs.path_matrix_file, &matrix);
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
+	
 	write_output_before(matrix);
 	defs.original_band = MATRIX_bandwidth(matrix);
 	
@@ -126,7 +127,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm = hsl_rcm;
 			defs.algorithm_name = "HSL RCM";
 			time = omp_get_wtime();
-			defs.reorder_band = Reordering_RCM_HSL(matrix);
+// 			defs.reorder_band = Reordering_RCM_HSL(matrix);
+			defs.reorder_band = Reordering_RCM_pseudodiameter_HSL(matrix, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -364,6 +366,7 @@ void run_all_reordering_tests()
 // 		"../Big-Matrices/atmosmodj.mtx",
 // 		"../Big-Matrices/G3_circuit.mtx"
 		
+		
 		"../Matrices/hsl.mtx",
 		"../Matrices/sample.mtx",
 		"../Matrices/bcspwr01.mtx",
@@ -373,8 +376,7 @@ void run_all_reordering_tests()
 // 		"../Matrices/FEM_3D_thermal1.mtx"
 	};
 	
-// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	int nthreads[] = { 1 };
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	
 	reorder_algorithm algorithm[] = { hsl_rcm };
 	

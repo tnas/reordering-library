@@ -29,7 +29,7 @@ long int Reordering_RCM_HSL(MAT* A)
 	int info[4];
 	double rinfo[4];
 	int* vars;
-	int** pair;
+	int* pair;
 	int* iw;
 	double* w;
 	int* permsv;
@@ -54,33 +54,16 @@ long int Reordering_RCM_HSL(MAT* A)
 	// To find supervariables and compress pattern
 	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
 	
-// 	printf("The number of supervariables is %d\n", nsup);fflush(stdout);
-// 	
-// 	for (i = 0; i < n; i++) 
-// 	{
-// 		printf("vars[%d]: %d ", i, vars[i]);fflush(stdout);
-// 	}
-// 	printf("\n");fflush(stdout);
-// 	
-// 	for (i = 0; i < n; i++) 
-// 	{
-// 		printf("svar[%d]: %d ", i, svar[i]);fflush(stdout);
-// 	}
-// 	printf("\n");fflush(stdout);
-	
 	free(iw);
 	pair_lenght = nsup/2;
+	
 	permsv = calloc(nsup, sizeof(int));
 	iw     = calloc(3*nsup + 1, sizeof(int));
 	w      = calloc(nsup, sizeof(double));
-	pair   = calloc(pair_lenght, sizeof(int*));
-	
-	for (i = 0; i < pair_lenght; ++i)
-		pair[i] = calloc(2, sizeof(int));
+	pair   = (int*) malloc(pair_lenght * 2 * sizeof(int));
 	
 	// To find supervariable permutation
-	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, pair, info, iw, w);
-	
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, (int**) pair, info, iw, w);
 	
 	free(iw);
 	iw = calloc(2*nsup + 1, sizeof(int));
@@ -99,17 +82,93 @@ long int Reordering_RCM_HSL(MAT* A)
 	
 	for (i = n; i < lirn; i++) --irn[i];
 	
+	free(vars);
+	free(iw);
+	free(w);
+	free(permsv);
+	free(svar);
+	free(pair);
 	
+	return rinfo[SEMI_BANDWIDTH];
+}
+
+
+
+long int Reordering_RCM_pseudodiameter_HSL(MAT* A, int start_node, int end_node)
+{
+	int i, nsup, pair_lenght;
+	int n        = A->n; 
+	int *irn     = A->JA;
+	int *icptr   = A->IA;
+	int lirn     = A->nz;
+	int jcntl[2] = { RCM, ESPECIFIED_PERIPHERAL };
+	double weight[2];
+	int info[4];
+	double rinfo[4];
+	int* vars;
+	int* pair;
+	int* iw;
+	double* w;
+	int* permsv;
+	int* svar;
+	
+	svar   = calloc(n, sizeof(int));
+	vars   = calloc(n, sizeof(int));
+	iw     = calloc(2*n + 2, sizeof(int));
+	
+	/* -------------------------------------------------------------------- */    
+	/* Convert matrix from 0-based C-notation to Fortran 1-based notation   */
+	/* -------------------------------------------------------------------- */
+	
+	for (i = 0; i < n; i++) 
+	{
+		++irn[i];
+		++icptr[i];
+	}
+	
+	for (i = n; i < lirn; i++) ++irn[i];
+	
+	// To find supervariables and compress pattern
+	mc60bd_(&n, &lirn, irn, icptr, &nsup, svar, vars, iw);
+	
+	free(iw);
+	pair_lenght = nsup/2;
+	permsv = calloc(nsup, sizeof(int));
+	iw     = calloc(3*nsup + 1, sizeof(int));
+	w      = calloc(nsup, sizeof(double));
+	pair   = (int*) malloc(pair_lenght * 2 * sizeof(int));
+	
+	for (i = 0; i < pair_lenght; ++i)
+	{
+		*(pair + i)     = end_node;
+		*(pair + i + 1) = start_node;
+	}
+	
+	// To find supervariable permutation
+	mc60cd_(&n, &nsup, &lirn, irn, icptr, vars, jcntl, permsv, weight, (int**) pair, info, iw, w);
+	
+	free(iw);
+	iw = calloc(2*nsup + 1, sizeof(int));
+	
+	// To compute the profile and wavefront for a supervariable permutation
+	mc60fd_(&n, &nsup, &lirn, irn, icptr, vars, permsv, iw, rinfo);
+	
+	/* -------------------------------------------------------------------- */    
+	/* Convert matrix back to 0-based C-notation.                           */
+	/* -------------------------------------------------------------------- */
+	for (i = 0; i < n; i++) 
+	{
+		--irn[i];
+		--icptr[i];
+	}
+	
+	for (i = n; i < lirn; i++) --irn[i];
 	
 	free(vars);
 	free(iw);
 	free(w);
 	free(permsv);
 	free(svar);
-	
-	for (i = 0; i < pair_lenght; ++i)
-		free(pair[i]);
-	
 	free(pair);
 	
 	return rinfo[SEMI_BANDWIDTH];
