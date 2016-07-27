@@ -203,7 +203,8 @@ test test_reorder_algorithm(test defs)
 			if (is_parallel_algorithm(defs.algorithm))
 			{
 				time = omp_get_wtime();
-				MATRIX_PARALLEL_permutation(matrix, permutation);
+// 				MATRIX_PARALLEL_permutation(matrix, permutation);
+				MATRIX_permutation(matrix, permutation);
 				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
 			}
@@ -380,8 +381,8 @@ void run_all_reordering_tests()
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 // 	int nthreads[] = { 10 };
 	
-	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm, hsl_sloan, parallel_sloan };
-// 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
+// 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm, hsl_sloan, parallel_sloan };
+	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
