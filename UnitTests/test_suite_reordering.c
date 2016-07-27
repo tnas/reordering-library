@@ -178,7 +178,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Parallel Sloan";
 			defs.algorithm      = parallel_sloan;
 			time = omp_get_wtime();
-			Parallel_Sloan_METAGRAPH(mgraph, &permutation, defs.start_node, defs.end_node);
+// 			Parallel_Sloan_METAGRAPH(mgraph, &permutation, defs.start_node, defs.end_node);
+			Parallel_Sloan(mgraph->mat, &permutation, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -203,8 +204,13 @@ test test_reorder_algorithm(test defs)
 			if (is_parallel_algorithm(defs.algorithm))
 			{
 				time = omp_get_wtime();
-// 				MATRIX_PARALLEL_permutation(matrix, permutation);
-				MATRIX_permutation(matrix, permutation);
+				printf("Generating matrix permutation\n");fflush(stdout);
+				int r;
+				printf("Permutation array: ");
+				for (r = 0; r < matrix->n; r++) printf("%d ", permutation[r]);fflush(stdout);
+				printf("\n");fflush(stdout);
+				MATRIX_PARALLEL_permutation(matrix, permutation);
+				printf("Matrix permutation done\n");fflush(stdout);
 				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
 			}
@@ -369,20 +375,20 @@ void run_all_reordering_tests()
 // 		"../Big-Matrices/G3_circuit.mtx"
 		
 		
-		"../Matrices/hsl.mtx",
+// 		"../Matrices/hsl.mtx",
 		"../Matrices/sample.mtx",
-		"../Matrices/bcspwr01.mtx",
-		"../Matrices/bcspwr02.mtx",
+// 		"../Matrices/bcspwr01.mtx",
+// 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx"
 	};
 	
-	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-// 	int nthreads[] = { 10 };
+// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	int nthreads[] = { 2 };
 	
 // 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm, hsl_sloan, parallel_sloan };
-	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
+	reorder_algorithm algorithm[] = { parallel_sloan };
 	
 	/* *****************
 	 * Tests execution

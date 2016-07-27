@@ -130,7 +130,7 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 				}
 			}
 			
-			// Processing the Logic Bag
+			// Processing Logic Bag
 			#pragma omp for schedule(static, chunk_size)
 			for (n_node = 0; n_node < num_nodes; ++n_node)
 			{
@@ -233,6 +233,8 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 			}
 		}
 		
+		#pragma omp barrier
+		
 		#pragma omp single nowait
 		free(distance);
 		
@@ -255,7 +257,7 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 }
 
 
-void Parallel_Sloan (MAT* adjacency, int** permutation, int start_node, int end_node)
+void Parallel_Sloan(MAT* adjacency, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, min_priority, max_priority, num_prior_bags, 
 	    num_threads, chunk_size;
