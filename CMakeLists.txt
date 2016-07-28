@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.6)
 
 project(reordering-library C Fortran)
 
@@ -29,7 +29,7 @@ add_executable(reordering-library program.c
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/libhsl_mc73.a)
 
-target_link_libraries(reordering-library m gfortran blas)
+target_link_libraries(reordering-library m blas gfortran)
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
 

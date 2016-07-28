@@ -20,15 +20,17 @@
 
 int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 {
-	int node, count_thread, max_level, level;
+	int node, count_thread, max_level, level, id_thread;
 	int** local_count;
 	int* local_max;
 	
 	max_level = 0;
 	const int num_threads = omp_get_max_threads();
 	
-	#pragma omp parallel private(node, count_thread, level) 
+	#pragma omp parallel private(node, count_thread, level, id_thread) 
 	{
+		id_thread = omp_get_thread_num();
+		
 		#pragma omp single nowait
 		local_max = calloc(num_threads, sizeof(int*));
 		
@@ -44,13 +46,18 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 		#pragma omp for nowait
 		for (node = 0; node < n_nodes; ++node)
 		{
-			++local_count[omp_get_thread_num()][levels[node]];
-			local_max[omp_get_thread_num()] = max(local_max[omp_get_thread_num()], levels[node]); 
+			++local_count[id_thread][levels[node]];
+			local_max[id_thread] = max(local_max[id_thread], levels[node]); 
 		}
 		
-		#pragma omp for reduction(max:max_level)
-		for (count_thread = 0; count_thread < num_threads; ++count_thread)
-			max_level = max(max_level, local_max[count_thread]);
+// 		#pragma omp for reduction(max:max_level)
+// 		for (count_thread = 0; count_thread < num_threads; ++count_thread)
+// 			max_level = max(max_level, local_max[count_thread]);
+
+		#pragma omp critical
+		max_level = max(max_level, local_max[id_thread]);
+		
+		#pragma omp barrier
 		
 		#pragma omp single	
 		max_level += 2;
