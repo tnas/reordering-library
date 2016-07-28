@@ -24,7 +24,7 @@
 void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, min_priority, max_priority, num_prior_bags, 
-	    num_threads, chunk_size;
+	    num_threads, chunk_size, count_threads_on;
 	int* distance;
 	int** priority;
 	int* status;
@@ -37,7 +37,7 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 	
 	#pragma omp parallel 
 	{
-		int node, vertex, vertex_degree, neighbor, ngb, prior_bag, n_node,
+		int node, vertex, vertex_degree, neighbor, ngb, prior_bag, 
 		    neighbor_degree, far_ngb, far_neighbor, update_far;
 		int* neighbors;
 		int* far_neighbors;
@@ -117,55 +117,50 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 		
 		while (next_id < num_nodes)
 		{
-			// Chosing maximum priority
-			#pragma omp single
-			{ 	
-				for (prior_bag = num_prior_bags - 1; prior_bag >= 0; --prior_bag)
-				{
-					if (size_bags[prior_bag] > 0)
+			#pragma omp sections
+			{
+				// Chosing maximum priority == Defining the Logical Bag
+				#pragma omp section
+				{ 	
+					for (prior_bag = num_prior_bags - 1; prior_bag >= 0; --prior_bag)
 					{
-						max_priority = prior_bag;
-						prior_bag = 0;
+						if (size_bags[prior_bag] > 0)
+						{
+							max_priority = prior_bag;
+							prior_bag = 0; // stop seaching
+						}
 					}
 				}
+				
+				#pragma omp section
+				count_threads_on = 0;
 			}
 			
-			// Processing Logic Bag
 			#pragma omp for schedule(static, chunk_size)
-			for (n_node = 0; n_node < num_nodes; ++n_node)
+			for (vertex = 0; vertex < num_nodes; ++vertex)
 			{
-				if (status[n_node] != NUMBERED)
+				// Processing Logical Bag
+				if ((status[vertex] != NUMBERED) && (priority[vertex][SLOAN_CURR_PRIOR] == max_priority))
 				{
-					if (priority[n_node][SLOAN_CURR_PRIOR] == max_priority)
+					neighbors     = mgraph->graph[vertex].neighboors;
+					vertex_degree = mgraph->graph[vertex].degree;
+					
+					#pragma omp atomic
+					count_threads_on++;
+					
+					for (ngb = 0; ngb < vertex_degree; ++ngb)
 					{
-						vertex        = n_node;
-						neighbors     = mgraph->graph[vertex].neighboors;
-						vertex_degree = mgraph->graph[vertex].degree;
+						update_far = OFF;
+						neighbor   = neighbors[ngb];
 						
-						for (ngb = 0; ngb < vertex_degree; ++ngb)
+						if (status[vertex] == PREACTIVE)
 						{
-							update_far = OFF;
-							neighbor   = neighbors[ngb];
-							
-							if (status[vertex] == PREACTIVE)
+							if (status[neighbor] == ACTIVE)
 							{
-								if (status[neighbor] == ACTIVE)
-								{
-									#pragma omp atomic
-									priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-								}
-								else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
-								{
-									#pragma omp atomic
-									priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-									
-									#pragma omp critical
-									status[neighbor] = ACTIVE;
-									
-									update_far = ON;
-								}
+								#pragma omp atomic
+								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
 							}
-							else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
+							else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
 							{
 								#pragma omp atomic
 								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
@@ -175,43 +170,57 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 								
 								update_far = ON;
 							}
-					
-							if (update_far)
+						}
+						else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
+						{
+							#pragma omp atomic
+							priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+							
+							#pragma omp critical
+							status[neighbor] = ACTIVE;
+							
+							update_far = ON;
+						}
+				
+						if (update_far)
+						{
+							/* ***********************
+							* Updating far neighbors
+							* ***********************
+							*/
+							
+							far_neighbors   = mgraph->graph[neighbor].neighboors;
+							neighbor_degree = mgraph->graph[neighbor].degree;
+							
+							for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
 							{
-								/* ***********************
-								* Updating far neighbors
-								* ***********************
-								*/
+								far_neighbor = far_neighbors[far_ngb];
 								
-								far_neighbors   = mgraph->graph[neighbor].neighboors;
-								neighbor_degree = mgraph->graph[neighbor].degree;
-								
-								for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
+								if (status[far_neighbor] == INACTIVE)
 								{
-									far_neighbor = far_neighbors[far_ngb];
-									
-									if (status[far_neighbor] == INACTIVE)
-									{
-										#pragma omp critical
-										status[far_neighbor] = PREACTIVE;
-										
-										#pragma omp atomic
-										priority[far_neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-									}
+									#pragma omp critical
+									status[far_neighbor] = PREACTIVE;
 									
 									#pragma omp atomic
-									priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+									priority[far_neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
 								}
+								
+								#pragma omp atomic
+								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
 							}
 						}
-						
-						#pragma omp critical
-						{
-							size_bags[priority[vertex][SLOAN_CURR_PRIOR]]--;
-							(*permutation)[next_id++] = vertex;
-							status[vertex] = NUMBERED;
-							
-						}
+					}
+					
+					#pragma omp atomic
+					--count_threads_on;
+					
+					while (count_threads_on > 0); // Barrier
+					
+					#pragma omp critical
+					{
+						size_bags[priority[vertex][SLOAN_CURR_PRIOR]]--;
+						(*permutation)[next_id++] = vertex;
+						status[vertex] = NUMBERED;
 					}
 				}
 			}
@@ -260,7 +269,7 @@ void Parallel_Sloan_METAGRAPH (const METAGRAPH* mgraph, int** permutation, int s
 void Parallel_Sloan(MAT* adjacency, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, min_priority, max_priority, num_prior_bags, 
-	    num_threads, chunk_size;
+	    num_threads, chunk_size, count_threads_on;
 	int* distance;
 	int** priority;
 	int* status;
@@ -353,17 +362,23 @@ void Parallel_Sloan(MAT* adjacency, int** permutation, int start_node, int end_n
 		
 		while (next_id < num_nodes)
 		{
-			// Chosing maximum priority
-			#pragma omp single
-			{ 	
-				for (prior_bag = num_prior_bags - 1; prior_bag >= 0; --prior_bag)
-				{
-					if (size_bags[prior_bag] > 0)
+			#pragma omp sections
+			{
+				// Chosing maximum priority == Defining the Logical Bag
+				#pragma omp section
+				{ 	
+					for (prior_bag = num_prior_bags - 1; prior_bag >= 0; --prior_bag)
 					{
-						max_priority = prior_bag;
-						prior_bag = 0;
+						if (size_bags[prior_bag] > 0)
+						{
+							max_priority = prior_bag;
+							prior_bag = 0; // stop seaching
+						}
 					}
 				}
+				
+				#pragma omp section
+				count_threads_on = 0;
 			}
 			
 			// Processing the Logic Bag
@@ -374,6 +389,9 @@ void Parallel_Sloan(MAT* adjacency, int** permutation, int start_node, int end_n
 				{
 					if (priority[n_node][SLOAN_CURR_PRIOR] == max_priority)
 					{
+						#pragma omp atomic
+						count_threads_on++;
+						
 						vertex        = n_node;
 						neighbors     = GRAPH_adjacent(adjacency, vertex);
 						vertex_degree = degree[vertex];
@@ -444,6 +462,11 @@ void Parallel_Sloan(MAT* adjacency, int** permutation, int start_node, int end_n
 						}
 						
 						free(neighbors);
+						
+						#pragma omp atomic
+						--count_threads_on;
+					
+						while (count_threads_on > 0);
 						
 						#pragma omp critical
 						{
