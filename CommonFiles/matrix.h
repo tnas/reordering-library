@@ -56,10 +56,10 @@ extern void     MATRIX_permutation       (MAT* A, int* p);
 extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int bandwidth);
 extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
 extern long int MATRIX_wavefront	 (MAT* A);
+extern void     MATRIX_write_gnuplot     (const MAT *A, const char* file_name);
 
 extern int      COMPARE_array            (const void * a, const void * b);
 extern int      COMPARE_eig              (const void * a, const void * b);
-extern 	void 	write_output_after	 (const MAT *A);
-extern 	void 	write_output_before	 (const MAT *A);
+
 
 #endif

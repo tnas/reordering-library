@@ -41,56 +41,55 @@ int COMPARE_eig (const void * a, const void * b)
 	return 0;
 }
 
-/*---------------------------------------------*/
-/*---WRITING OUTPUT----------------------------*/
-/*---------------------------------------------*/
-void write_output_after(const MAT *A)
+
+/*----------------------------------------------------------------------------
+ * Create the input file for the GNU Plot to generate the matrix
+ * sparse pattern. 
+ *--------------------------------------------------------------------------*/
+void MATRIX_write_gnuplot(const MAT* A, const char* file_name)
 {
 	int i,j;
+	char* mtx_extension = ".mtx";
+	char* plt_extension = ".plt";
+	char* png_extension = ".png";
+	FILE* mtx_file;
+	FILE* plt_file;
+	char mtx_name[1024];
+	char plt_name[1024];
+	char png_name[1024];
 	
-	FILE *f = fopen("output_after.mtx", "w");
-	fprintf(f,"%d %d %d\n", A->n, A->m, A->nz);
+	strcpy(mtx_name, file_name);
+	strcat(mtx_name, mtx_extension);
+	
+	mtx_file = fopen(mtx_name, "w");
+	fprintf(mtx_file,"%d %d %d\n", A->n, A->m, A->nz);
+	
 	for (i = 0; i < A->n; ++i)
 	{
 		for (j = A->IA[i]; j <= A->IA[i+1]-1; j++)
-			fprintf (f,"%d %d %le\n",A->JA[j],i,A->AA[j]); 
+			fprintf (mtx_file,"%d %d %le\n",A->JA[j],i,A->AA[j]); 
 	}
-	fclose(f);
-	FILE *g = fopen("plot_after.plt", "w");
-	fprintf(g,"#!/bin/sh\n");
-	fprintf(g,"set xrange [0:%d]\n", A->n);
-	fprintf(g,"set yrange [0:%d] reverse\n", A->n);
-	fprintf(g,"set size square\n");
-	fprintf(g,"set terminal png\n");
-	fprintf(g,"set output \"output_after.png\"\n");
-	fprintf(g,"plot \"output_after.mtx\" using 1:2 notitle with dots linecolor rgb \"#000000\"\n");
-	fclose(g);
-}
-
-
-
-void write_output_before(const MAT *A)
-{
-	int i,j;
 	
-	FILE *f = fopen("output_before.mtx", "w");
-	fprintf(f,"%d %d %d\n", A->n, A->m, A->nz);
-	for (i = 0; i < A->n; ++i)
-	{
-		for (j = A->IA[i]; j <= A->IA[i+1]-1; j++)
-			fprintf (f,"%d %d %le\n",A->JA[j],i,A->AA[j]); 
-	}
-	fclose(f);
-	FILE *g = fopen("plot_before.plt", "w");
-	fprintf(g,"#!/bin/sh\n");
-	fprintf(g,"set xrange [0:%d]\n", A->n);
-	fprintf(g,"set yrange [0:%d] reverse\n", A->n);
-	fprintf(g,"set size square\n");
-	fprintf(g,"set terminal png\n");
-	fprintf(g,"set output \"output_before.png\"\n");
-	fprintf(g,"plot \"output_before.mtx\" using 1:2 notitle with dots linecolor rgb \"#000000\"\n");
-	fclose(g);
+	fclose(mtx_file);
+	
+	
+	strcpy(plt_name, file_name);
+	strcat(plt_name, plt_extension);
+	
+	strcpy(png_name, file_name);
+	strcat(png_name, png_extension);
+	
+	plt_file = fopen(plt_name, "w");
+	fprintf(plt_file,"#!/bin/sh\n");
+	fprintf(plt_file,"set xrange [0:%d]\n", A->n);
+	fprintf(plt_file,"set yrange [0:%d] reverse\n", A->n);
+	fprintf(plt_file,"set size square\n");
+	fprintf(plt_file,"set terminal png\n");
+	fprintf(plt_file,"set output \"%s\"\n", png_name);
+	fprintf(plt_file,"plot \"%s\" using 1:2 notitle with dots linecolor rgb \"#000000\"\n", mtx_name);
+	fclose(plt_file);
 }
+
 
 
 /*----------------------------------------------------------------------------

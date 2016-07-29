@@ -74,10 +74,11 @@ test test_reorder_algorithm(test defs)
 
 	diameter         = NULL;
 	peripheral_nodes = NULL;
+	
 	MATRIX_read_from_path(defs.path_matrix_file, &matrix);
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	
-	write_output_before(matrix);
+	MATRIX_write_gnuplot(matrix, "original_matrix");
 	defs.original_band = MATRIX_bandwidth(matrix);
 	
 	// Setting threads for parallel algorithms
@@ -258,7 +259,7 @@ test test_reorder_algorithm(test defs)
 		
 	}
 	
-	write_output_after(matrix);
+	MATRIX_write_gnuplot(matrix, "reordered_matrix");
 	GRAPH_parallel_destroy_METAGRAPH(mgraph);
 	if (peripheral_nodes != NULL) free(peripheral_nodes);
 	if (diameter != NULL) free(diameter);
