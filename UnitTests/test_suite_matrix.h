@@ -14,11 +14,12 @@
  * limitations under the License.
  * 
  */
-#include <assert.h>
-#include "../CommonFiles/matrix_parallel.h"
 
 #ifndef __TEST_SUITE_MATRIX_H__
 #define __TEST_SUITE_MATRIX_H__
+
+#include <assert.h>
+#include "../CommonFiles/matrix_parallel.h"
 
 void run_all_test_matrix();
 void test_parallel_max_wavefront();

@@ -179,7 +179,6 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm      = parallel_sloan;
 			time = omp_get_wtime();
 			Parallel_Sloan_METAGRAPH(mgraph, &permutation, defs.start_node, defs.end_node);
-// 			Parallel_Sloan(mgraph->mat, &permutation, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -204,13 +203,7 @@ test test_reorder_algorithm(test defs)
 			if (is_parallel_algorithm(defs.algorithm))
 			{
 				time = omp_get_wtime();
-// 				printf("Generating matrix permutation\n");fflush(stdout);
-// 				int r;
-// 				printf("Permutation array: ");
-// 				for (r = 0; r < matrix->n; r++) printf("%d ", permutation[r]);fflush(stdout);
-// 				printf("\n");fflush(stdout);
 				MATRIX_PARALLEL_permutation(matrix, permutation);
-// 				printf("Matrix permutation done\n");fflush(stdout);
 				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
 			}
@@ -274,77 +267,6 @@ test test_reorder_algorithm(test defs)
 }
 
 
-long int normalize_int_results(const long int* results)
-{
-	int exec_min_val, exec_max_val, exec;
-	long int sum_val, max_val, min_val;
-	
-	max_val = sum_val = 0;
-	min_val = INT_MAX;
-	
-	if (TEST_EXEC_TIMES == 1) return results[0];
-	
-	// Finding out max/min value
-	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
-	{
-		if (results[exec] > max_val)
-		{
-			exec_max_val = exec;
-			max_val = results[exec];
-		}
-		else if (results[exec] < min_val)
-		{
-			exec_min_val = exec;
-			min_val = results[exec];
-		}
-	}
-	
-	// Discarding max and min results value
-	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
-	{
-		if (exec != exec_min_val && exec != exec_max_val)
-			sum_val += results[exec];
-	}
-	
-	return sum_val / (TEST_EXEC_TIMES - 2);
-}
-
-
-double normalize_double_results(const double* results)
-{
-	int exec_min_val, exec_max_val, exec;
-	double sum_val, max_val, min_val;
-	
-	max_val = sum_val = 0;
-	min_val = INT_MAX;
-	
-	if (TEST_EXEC_TIMES == 1) return results[0];
-	
-	// Finding out max/min value
-	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
-	{
-		if (results[exec] > max_val)
-		{
-			exec_max_val = exec;
-			max_val = results[exec];
-		}
-		else if (results[exec] < min_val)
-		{
-			exec_min_val = exec;
-			min_val = results[exec];
-		}
-	}
-	
-	// Discarding max and min results value
-	for (exec = 0; exec < TEST_EXEC_TIMES; ++exec)
-	{
-		if (exec != exec_min_val && exec != exec_max_val)
-			sum_val += results[exec];
-	}
-	
-	return sum_val / (TEST_EXEC_TIMES - 2);
-}
-
 
 void run_all_reordering_tests()
 {
@@ -352,6 +274,7 @@ void run_all_reordering_tests()
 	    count_nthreads, num_matrices, size_set_nthreads, num_algorithms;
 	FILE* out_file;
 	test result;
+	statistic norm_values;
 	double time_reorderings[TEST_EXEC_TIMES];
 	double time_peripherals[TEST_EXEC_TIMES];
 	double time_permutations[TEST_EXEC_TIMES];
@@ -445,11 +368,20 @@ void run_all_reordering_tests()
 					wavefronts[exec]        = result.wavefront;
 				}
 				
-				result.time_peripheral  = normalize_double_results(time_peripherals); 
-				result.time_reordering  = normalize_double_results(time_reorderings);
-				result.time_permutation = normalize_double_results(time_permutations);
-				result.reorder_band     = normalize_int_results(bandwidths);
-				result.wavefront        = normalize_int_results(wavefronts);
+				normalize_results(time_peripherals, TEST_EXEC_TIMES, &norm_values);
+				result.time_peripheral = norm_values.average_value; 
+				
+				normalize_results(time_reorderings, TEST_EXEC_TIMES, &norm_values);
+				result.time_reordering = norm_values.average_value; 
+				
+				normalize_results(time_permutations, TEST_EXEC_TIMES, &norm_values);
+				result.time_permutation = norm_values.average_value; 
+				
+				normalize_results((double*) bandwidths, TEST_EXEC_TIMES, &norm_values);
+				result.reorder_band = norm_values.average_value; 
+				
+				normalize_results((double*) wavefronts, TEST_EXEC_TIMES, &norm_values);
+				result.wavefront = norm_values.average_value; 
 				
 				if (is_sloan_algorithm(result.algorithm))
 				{

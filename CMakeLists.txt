@@ -4,7 +4,7 @@ project(reordering-library C Fortran)
 
 # set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-add_executable(reordering-library program.c 
+add_executable(reordering-library UnitTests/test_util.c program.c 
 	./CommonFiles/util.c 
 	./CommonFiles/matrix.c 
 	./CommonFiles/linked_list.c 

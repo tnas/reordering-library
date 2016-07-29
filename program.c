@@ -21,6 +21,7 @@
 #include "./UnitTests/test_suite_prefixsum.h"
 #include "./UnitTests/test_suite_matrix.h"
 #include "./UnitTests/test_graph_parallel.h"
+#include "./UnitTests/test_util.h"
 
 #define DYNAMIC_OFF 0
 #define OVERWRITE_VARIABLE 1
@@ -47,6 +48,7 @@
  * 	2: prefix sum 
  * 	3: wavefront calculus
  * 	4: graph parallel
+ * 	5: util functions
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -104,6 +106,7 @@ int main (int argc, char* argv[]) {
 				test_prefix_sum();
 				run_all_test_matrix();
 				run_all_test_GRAPH_parallel();
+				run_all_util_tests();
 				break;
 				
 			case REORDERING :
@@ -121,6 +124,10 @@ int main (int argc, char* argv[]) {
 			case GRAPH_PARALLEL :
 				run_all_test_GRAPH_parallel();
 				run_all_comparison_GRAPH_parallel();
+				break;
+			
+			case UTIL_FUNCIONS :
+				run_all_util_tests();
 				break;
 		}
 	}

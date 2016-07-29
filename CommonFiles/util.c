@@ -47,10 +47,87 @@ double get_time ()
 }
 
 
+/**
+ * This function calculates average value and standard deviation for an 
+ * array of length elements. The minimum and maximum values are
+ * excluded from the calculus.
+ * 
+ */
+void normalize_cutbound_results(const double* values, const int length, statistic* norm_values)
+{
+	int exec_min_val, exec_max_val, exec;
+	double sum_val, max_val, min_val, sum_pow_val;
+	
+	max_val = sum_val = sum_pow_val= 0;
+	min_val = INT_MAX;
+	
+	if (length == 1) 
+	{
+		norm_values->average_value = values[0];
+		norm_values->standard_deviation = 0;
+	}
+	
+	// Finding out max/min value
+	for (exec = 0; exec < length; ++exec)
+	{
+		if (values[exec] > max_val)
+		{
+			exec_max_val = exec;
+			max_val = values[exec];
+		}
+		
+		if (values[exec] < min_val)
+		{
+			exec_min_val = exec;
+			min_val = values[exec];
+		}
+	}
+	
+	// Discarding max and min results value
+	for (exec = 0; exec < length; ++exec)
+	{
+		if (exec != exec_min_val && exec != exec_max_val)
+			sum_val += values[exec];
+	}
+	
+	norm_values->average_value = sum_val / (length - 2);
+	
+	for (exec = 0; exec < length; ++exec)
+	{
+		if (exec != exec_min_val && exec != exec_max_val)
+			sum_pow_val += pow(values[exec] - norm_values->average_value, 2);
+	}
+	
+	norm_values->standard_deviation = sqrt(sum_pow_val / (length - 3));
+}
 
 
+/**
+ * This function calculates average value and standard deviation for an 
+ * array of length elements.
+ * 
+ * @since 29-07-2016
+ */
+void normalize_results(const double* values, const int length, statistic* norm_values)
+{
+	int exec;
+	double sum_val, sum_pow_val;
 
-
-
-
-
+	if (length == 1)
+	{
+		norm_values->average_value = values[0];
+		norm_values->standard_deviation = 0;
+	}
+	
+	sum_val = sum_pow_val = 0;
+	
+	for (exec = 0; exec < length; ++exec)
+		sum_val += values[exec];
+	
+	norm_values->average_value = sum_val / length;
+	
+	for (exec = 0; exec < length; ++exec)
+		sum_pow_val += pow(values[exec] - norm_values->average_value, 2);
+	
+	norm_values->standard_deviation = sqrt(sum_pow_val / (length - 1));
+}

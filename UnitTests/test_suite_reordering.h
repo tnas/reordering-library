@@ -19,6 +19,7 @@
 #include <float.h>
 #include "../CommonFiles/matrix_parallel.h"
 #include "../CommonFiles/graph_hsl.h"
+#include "../CommonFiles/util.h"
 #include "../Reorderings/hsl.h"
 #include "../Reorderings/rcm.h"
 #include "../Reorderings/rcm_hsl.h"
@@ -27,7 +28,6 @@
 #include "../Reorderings/sloan.h"
 #include "../Reorderings/sloan_hsl.h"
 #include "../Reorderings/sloan_parallel.h"
-
 
 
 #define TEST_EXEC_TIMES 1

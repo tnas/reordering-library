@@ -14,17 +14,31 @@
  * limitations under the License.
  * 
  */
+#ifndef __UTIL_H__
+#define __UTIL_H__
 
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
 #include <stdio.h>
 #include <limits.h>
+#include <math.h>
 
 #define min(a,b) (((a)>(b))?(b):(a))
 #define max(a,b) (((a)>(b))?(a):(b))
 
-extern  int COMPARE_int_ASC (const void * a, const void * b);
-extern 	int get_random_integer(int max);
-extern 	int pow_uint(int base, const int exp);
-extern 	double get_time();
+typedef struct 
+{
+	double average_value;
+	double standard_deviation;
+} statistic;
+
+
+int    COMPARE_int_ASC		  (const void * a, const void * b);
+int    get_random_integer	  (int max);
+int    pow_uint			  (int base, const int exp);
+double get_time			  ();
+void   normalize_results	  (const double* values, const int length, statistic* norm_values);
+void   normalize_cutbound_results (const double* results, const int length, statistic* norm_values);
+
+#endif
