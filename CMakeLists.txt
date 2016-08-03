@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 project(reordering-library C Fortran)
 
 # set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-add_executable(reordering-library UnitTests/test_util.c program.c 
+add_executable(reordering-library  program.c 
 	./CommonFiles/util.c 
 	./CommonFiles/matrix.c 
 	./CommonFiles/linked_list.c 
@@ -24,12 +24,13 @@ add_executable(reordering-library UnitTests/test_util.c program.c
 	./UnitTests/test_suite_reordering.c
 	./UnitTests/test_suite_prefixsum.c
 	./UnitTests/test_suite_matrix.c
-	./UnitTests/test_graph_parallel.c)
+	./UnitTests/test_graph_parallel.c
+	./UnitTests/test_util.c)
 
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/libhsl_mc73.a)
 
-target_link_libraries(reordering-library m blas gfortran)
+target_link_libraries(reordering-library m gfortran blas)
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
 

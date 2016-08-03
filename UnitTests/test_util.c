@@ -17,6 +17,23 @@
 
 #include "test_util.h"
 
+
+void test_normalize_results_0()
+{
+	statistic expected_results;
+	int length = 10;
+	double values[10] = {
+		3, 3, 3, 3, 3, 3, 3, 3, 3, 3
+	};
+	
+	normalize_results(values, length, &expected_results);
+	
+	assert(expected_results.average_value == 3);
+	assert(expected_results.standard_deviation == 0);
+}
+
+
+
 void test_normalize_results_1()
 {
 	statistic expected_results;
@@ -70,6 +87,7 @@ void test_normalize_cutbounds_results_1()
 
 void run_all_util_tests()
 {
+	   test_normalize_results_0();
 	   test_normalize_results_1();
 	   test_normalize_results_2();
 	   test_normalize_cutbounds_results_1();

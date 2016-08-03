@@ -30,7 +30,7 @@
 #include "../Reorderings/sloan_parallel.h"
 
 
-#define TEST_EXEC_TIMES 1
+#define TEST_EXEC_TIMES 10
 
 typedef enum {
 	serial_rcm,

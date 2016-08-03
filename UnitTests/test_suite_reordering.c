@@ -300,7 +300,7 @@ void run_all_reordering_tests()
 // 		"../Big-Matrices/delaunay_n24.mtx",
 // 		"../Big-Matrices/road_usa.mtx"
 		
-// 		"../Big-Matrices/dw8192.mtx",
+		"../Big-Matrices/dw8192.mtx",
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
 // 		"../Big-Matrices/inline_1.mtx",
@@ -310,11 +310,11 @@ void run_all_reordering_tests()
 // 		"../Big-Matrices/G3_circuit.mtx"
 		
 		
-		"../Matrices/hsl.mtx",
-		"../Matrices/sample.mtx",
-		"../Matrices/bcspwr01.mtx",
-		"../Matrices/bcspwr02.mtx",
-		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/hsl.mtx",
+// 		"../Matrices/sample.mtx",
+// 		"../Matrices/bcspwr01.mtx",
+// 		"../Matrices/bcspwr02.mtx",
+// 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx"
 	};
@@ -322,8 +322,8 @@ void run_all_reordering_tests()
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 // 	int nthreads[] = { 2 };
 	
-// 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
-	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
+	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
+// 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	
 	/* *****************
 	 * Tests execution
