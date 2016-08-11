@@ -34,11 +34,13 @@ typedef struct
 } statistic;
 
 
-int    COMPARE_int_ASC		  (const void * a, const void * b);
-int    get_random_integer	  (int max);
-int    pow_uint			  (int base, const int exp);
-double get_time			  ();
-void   normalize_results	  (const double* values, const int length, statistic* norm_values);
-void   normalize_cutbound_results (const double* results, const int length, statistic* norm_values);
+int    COMPARE_int_ASC		      (const void * a, const void * b);
+int    get_random_integer	      (int max);
+int    pow_uint			      (int base, const int exp);
+double get_time			      ();
+void   normalize_results	      (const double* values, const int length, statistic* norm_values);
+void   normalize_int_results          (const long int* values, const int length, statistic* norm_values);
+void   normalize_cutbound_results     (const double* results, const int length, statistic* norm_values);
+void   normalize_cutbound_int_results (const long int* values, const int length, statistic* norm_values);
 
 #endif

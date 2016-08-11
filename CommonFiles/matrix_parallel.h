@@ -25,5 +25,6 @@ long int MATRIX_PARALLEL_bandwidth   	(MAT* A);
 long int MATRIX_PARALLEL_max_wavefront  (MAT* A);
 long int MATRIX_PARALLEL_rms_wavefront  (MAT* A);
 void     MATRIX_PARALLEL_permutation    (MAT* A, int* p);
+void 	 MATRIX_PARALLEL_wavefront	(const MAT* A, int** wf_per_row);
 
 #endif /* __MATRIX_PARALLEL_H__ */

@@ -40,6 +40,7 @@ int pow_uint(int base, const int exp)
 	return val_pow;
 }
 
+
 double get_time ()
 {
 	struct timeval tv; gettimeofday(&tv, 0);
@@ -102,6 +103,20 @@ void normalize_cutbound_results(const double* values, const int length, statisti
 }
 
 
+
+void normalize_cutbound_int_results(const long int* values, const int length, statistic* norm_values)
+{
+	double d_values[length];
+	int val;
+	
+	for (val = 0; val < length; ++val)
+		d_values[val] = (double) values[val];
+	
+	normalize_cutbound_results(d_values, length, norm_values);
+}
+
+
+
 /**
  * This function calculates average value and standard deviation for an 
  * array of length elements.
@@ -130,4 +145,22 @@ void normalize_results(const double* values, const int length, statistic* norm_v
 		sum_pow_val += pow(values[exec] - norm_values->average_value, 2);
 	
 	norm_values->standard_deviation = sqrt(sum_pow_val / (length - 1));
+}
+
+
+/**
+ * This function calculates average value and standard deviation for an 
+ * array of length elements.
+ * 
+ * @since 11-08-2016
+ */
+void normalize_int_results(const long int* values, const int length, statistic* norm_values)
+{
+	double d_values[length];
+	int val;
+	
+	for (val = 0; val < length; ++val)
+		d_values[val] = (double) values[val];
+	
+	normalize_results(d_values, length, norm_values);
 }

@@ -320,7 +320,7 @@ void run_all_reordering_tests()
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-// 	int nthreads[] = { 2 };
+// 	int nthreads[] = { 1 };
 	
 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
 // 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
@@ -378,10 +378,10 @@ void run_all_reordering_tests()
 				normalize_results(time_permutations, TEST_EXEC_TIMES, &norm_values);
 				result.time_permutation = norm_values.average_value; 
 				
-				normalize_results((double*) bandwidths, TEST_EXEC_TIMES, &norm_values);
+				normalize_int_results(bandwidths, TEST_EXEC_TIMES, &norm_values);
 				result.reorder_band = norm_values.average_value; 
 				
-				normalize_results((double*) wavefronts, TEST_EXEC_TIMES, &norm_values);
+				normalize_int_results(wavefronts, TEST_EXEC_TIMES, &norm_values);
 				result.wavefront = norm_values.average_value; 
 				
 				if (is_sloan_algorithm(result.algorithm))

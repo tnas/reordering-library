@@ -22,12 +22,11 @@ void test_normalize_results_0()
 {
 	statistic expected_results;
 	int length = 10;
-	double values[10] = {
+	long int values[10] = {
 		3, 3, 3, 3, 3, 3, 3, 3, 3, 3
 	};
 	
-	normalize_results(values, length, &expected_results);
-	
+	normalize_int_results(values, length, &expected_results);
 	assert(expected_results.average_value == 3);
 	assert(expected_results.standard_deviation == 0);
 }

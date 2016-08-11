@@ -65,6 +65,10 @@ typedef struct {
 
 typedef enum { START, END } PERIPHERAL_NODES;
 
-
-test test_reorder_algorithm  (test defs);
-void run_all_reordering_tests();
+int    is_hsl_algorithm        (reorder_algorithm algorithm);
+int    is_serial_algorithm     (reorder_algorithm algorithm);
+int    is_parallel_algorithm   (reorder_algorithm algorithm);
+int    is_sloan_algorithm      (reorder_algorithm algorithm);
+double get_total_time          (test defs);
+test   test_reorder_algorithm  (test defs);
+void   run_all_reordering_tests();
