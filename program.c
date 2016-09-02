@@ -40,6 +40,7 @@
  * 	6: Leveled RCM
  * 	7: Bucket RCM
  * 	8: Parallel Sloan
+ * 	9: Boost RCM
  * -p <number of threads>
  * -b <percent of chunk for Unordered RCM>
  * -t <test suite>:

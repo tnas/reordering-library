@@ -183,6 +183,14 @@ test test_reorder_algorithm(test defs)
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
+		case boost_rcm : // t = 9
+			defs.algorithm_name = "Boost RCM";
+			defs.algorithm      = boost_rcm;
+			time = omp_get_wtime(); 
+			Boost_RCM(mgraph, &permutation, defs.root);
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			break;
+			
 		default :
 			printf("*** [Error] Algorithm must be between 0 and 8 ***\n");
 			exit(1);

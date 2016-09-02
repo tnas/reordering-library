@@ -47,6 +47,7 @@ typedef struct
 	GRAPH* graph;
 	int vertex_min_degree;
 	int size;
+	int edges;
 } METAGRAPH; 
 
 typedef struct 

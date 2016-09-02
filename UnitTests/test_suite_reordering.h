@@ -14,6 +14,9 @@
  * limitations under the License.
  * 
  */
+#ifndef TEST_SUITE_REORDERING_H
+#define TEST_SUITE_REORDERING_H
+
 #include <assert.h>
 #include <limits.h>
 #include <float.h>
@@ -24,6 +27,7 @@
 #include "../Reorderings/rcm.h"
 #include "../Reorderings/rcm_hsl.h"
 #include "../Reorderings/rcm_parallel.h"
+#include "../Reorderings/rcm_boost.h"
 #include "../Reorderings/spectral.h"
 #include "../Reorderings/sloan.h"
 #include "../Reorderings/sloan_hsl.h"
@@ -41,7 +45,8 @@ typedef enum {
 	unordered_rcm,
 	leveled_rcm,
 	bucket_rcm,
-	parallel_sloan
+	parallel_sloan,
+	boost_rcm
 } reorder_algorithm;
 
 
@@ -72,3 +77,5 @@ int    is_sloan_algorithm      (reorder_algorithm algorithm);
 double get_total_time          (test defs);
 test   test_reorder_algorithm  (test defs);
 void   run_all_reordering_tests();
+
+#endif

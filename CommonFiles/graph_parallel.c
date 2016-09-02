@@ -251,6 +251,7 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 	meta_graph->size  = size_graph;
 	meta_graph->graph = malloc(size_graph * sizeof(GRAPH));
 	meta_graph->mat   = mat;
+	meta_graph->edges = mat->nz;
 	
 	#pragma omp parallel 
 	{

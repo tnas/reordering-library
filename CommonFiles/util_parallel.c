@@ -47,7 +47,7 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 		for (node = 0; node < n_nodes; ++node)
 		{
 			++local_count[id_thread][levels[node]];
-			local_max[id_thread] = max(local_max[id_thread], levels[node]); 
+			local_max[id_thread] = maximun(local_max[id_thread], levels[node]); 
 		}
 		
 // 		#pragma omp for reduction(max:max_level)
@@ -55,7 +55,7 @@ int count_nodes_by_level(const int* levels, const int n_nodes, int** counts)
 // 			max_level = max(max_level, local_max[count_thread]);
 
 		#pragma omp critical
-		max_level = max(max_level, local_max[id_thread]);
+		max_level = maximun(max_level, local_max[id_thread]);
 		
 		#pragma omp barrier
 		
