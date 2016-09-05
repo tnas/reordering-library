@@ -23,6 +23,7 @@ add_executable(reordering-library  program.c
 	./Reorderings/sloan.c
 	./Reorderings/sloan_hsl.c
 	./Reorderings/sloan_parallel.c
+	./Reorderings/sloan_boost.cpp
 	./UnitTests/test_suite_reordering.c
 	./UnitTests/test_suite_prefixsum.c
 	./UnitTests/test_suite_matrix.c
@@ -42,7 +43,7 @@ install(TARGETS reordering-library RUNTIME DESTINATION bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -o3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fopenmp -o3")
 
-# set_property(TARGET reordering-library PROPERTY LINKER_LANGUAGE C)
+# set_property(TARGET reordering-library PROPERTY LINKER_LANGUAGE CXX)
 
 add_subdirectory(CommonFiles)
 add_subdirectory(Matrices)

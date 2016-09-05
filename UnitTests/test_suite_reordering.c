@@ -51,7 +51,7 @@ int inline is_parallel_algorithm(reorder_algorithm algorithm)
 int inline is_sloan_algorithm(reorder_algorithm algorithm)
 {
 	if (algorithm == hsl_sloan || algorithm == parallel_sloan ||
-	    algorithm == serial_sloan)
+	    algorithm == serial_sloan || algorithm == boost_sloan)
 		return 1;
 	
 	return 0;
@@ -191,8 +191,17 @@ test test_reorder_algorithm(test defs)
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
+		case boost_sloan : // t = 10
+			defs.algorithm_name = "Boost Sloan";
+			defs.algorithm      = boost_sloan;
+			time = omp_get_wtime();
+			Boost_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			defs.time_permutation = 0;
+			break;
+			
 		default :
-			printf("*** [Error] Algorithm must be between 0 and 8 ***\n");
+			printf("*** [Error] Algorithm must be between 0 and 9 ***\n");
 			exit(1);
 	}
 	

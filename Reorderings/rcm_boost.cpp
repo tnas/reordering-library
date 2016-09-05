@@ -59,7 +59,7 @@ Graph build_boost_graph(const METAGRAPH* mgraph)
 	int* neighboors;
 	Pair edge;
 	
-	num_nodes    = mgraph->size; 
+	num_nodes = mgraph->size; 
 	Graph bgraph(num_nodes);
 	
 	for (node = 0; node < num_nodes; ++node)

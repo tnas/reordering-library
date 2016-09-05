@@ -32,6 +32,7 @@
 #include "../Reorderings/sloan.h"
 #include "../Reorderings/sloan_hsl.h"
 #include "../Reorderings/sloan_parallel.h"
+#include "../Reorderings/sloan_boost.h"
 
 
 #define TEST_EXEC_TIMES 10
@@ -46,7 +47,8 @@ typedef enum {
 	leveled_rcm,
 	bucket_rcm,
 	parallel_sloan,
-	boost_rcm
+	boost_rcm,
+	boost_sloan
 } reorder_algorithm;
 
 
