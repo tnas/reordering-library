@@ -184,24 +184,19 @@ test test_reorder_algorithm(test defs)
 			break;
 			
 		case boost_rcm : // t = 9
-			defs.algorithm_name = "Boost RCM";
-			defs.algorithm      = boost_rcm;
-			time = omp_get_wtime(); 
-			Boost_RCM(mgraph, &permutation, defs.root);
-			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			defs.algorithm_name  = "Boost RCM";
+			defs.algorithm       = boost_rcm;
+			defs.time_reordering = Boost_RCM(mgraph, &permutation, defs.root);
 			break;
 			
 		case boost_sloan : // t = 10
-			defs.algorithm_name = "Boost Sloan";
-			defs.algorithm      = boost_sloan;
-			time = omp_get_wtime();
-			Boost_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
-			defs.time_reordering = (omp_get_wtime() - time)/100.0;
-			defs.time_permutation = 0;
+			defs.algorithm_name  = "Boost Sloan";
+			defs.algorithm       = boost_sloan;
+			defs.time_reordering = Boost_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			break;
 			
 		default :
-			printf("*** [Error] Algorithm must be between 0 and 9 ***\n");
+			printf("*** [Error] Algorithm must be between 0 and 10 ***\n");
 			exit(1);
 	}
 	
@@ -317,7 +312,7 @@ void run_all_reordering_tests()
 // 		"../Big-Matrices/delaunay_n24.mtx",
 // 		"../Big-Matrices/road_usa.mtx"
 		
-		"../Big-Matrices/dw8192.mtx",
+// 		"../Big-Matrices/dw8192.mtx",
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
 // 		"../Big-Matrices/inline_1.mtx",
@@ -331,15 +326,16 @@ void run_all_reordering_tests()
 // 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx",
-// 		"../Matrices/Dubcova2.mtx",
-// 		"../Matrices/FEM_3D_thermal1.mtx"
+		"../Matrices/rail_5177.mtx",
+		"../Matrices/Dubcova2.mtx",
+		"../Matrices/FEM_3D_thermal1.mtx"
 	};
 	
-	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-// 	int nthreads[] = { 1 };
+// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
+	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, bucket_rcm, boost_rcm };
+// 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
 // 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	
 	/* *****************

@@ -74,10 +74,12 @@ SloanGraph build_boost_sloan_graph(const METAGRAPH* mgraph)
 }
 
 
-void Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
+double Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	SloanGraph bgraph = build_boost_sloan_graph(mgraph);
   
+	double time = omp_get_wtime();
+	
 	*permutation  = new int[mgraph->size];
 	
 	//Creating two iterators over the vertices
@@ -119,6 +121,8 @@ void Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int
 				get(vertex_degree, bgraph), get(vertex_priority, bgraph));
     
 	std::copy(sloan_order.begin(), sloan_order.end(), *permutation);
+	
+	return (omp_get_wtime() - time)/100.0;
 	
 // 	for (std::vector<SloanVertex>::const_iterator i = sloan_order.begin(); i != sloan_order.end(); ++i)
 // 		cout << index_map[*i] << " ";

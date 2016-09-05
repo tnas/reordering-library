@@ -79,10 +79,12 @@ Graph build_boost_graph(const METAGRAPH* mgraph)
 
 
 
-void Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root)
+double Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root)
 {
 	Graph bgraph = build_boost_graph(mgraph);
-  
+	
+	double time = omp_get_wtime();
+	
 	*permut  = new int[mgraph->size];
 	
 	graph_traits<Graph>::vertex_iterator ui, ui_end;
@@ -112,6 +114,8 @@ void Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root)
 // 	cout << endl;
 
 	std::copy(inv_perm.begin(), inv_perm.end(), *permut);
+	
+	return (omp_get_wtime() - time)/100.0;
 	
 // 	for (size_type c = 0; c != inv_perm.size(); ++c)
 // 	{

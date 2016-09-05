@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-void	Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root);
+double	Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root);
 
 #ifdef __cplusplus
 }

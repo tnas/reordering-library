@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-void Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
+double Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
 
 #ifdef __cplusplus
 }
