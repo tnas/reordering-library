@@ -20,6 +20,7 @@ add_executable(reordering-library  program.c
 	./Reorderings/rcm_parallel.c 
 	./Reorderings/rcm_galois.cpp
 	./Reorderings/rcm_boost.cpp
+# 	./Reorderings/rcm_octave.cpp
 	./Reorderings/sloan.c
 	./Reorderings/sloan_hsl.c
 	./Reorderings/sloan_parallel.c
@@ -32,6 +33,17 @@ add_executable(reordering-library  program.c
 	
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
+include_directories(/usr/include/octave-4.0.0/octave)
+
+# set(MKOCTFILE "mkoctfile")
+# set(OCTAVERCM "${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/rcm_octave.cpp")
+# add_custom_command(
+# 	TARGET reordering-library
+# 	PRE_LINK
+# 	COMMAND ${MKOCTFILE} --link-stand-alone ${OCTAVERCM}
+# 	COMMENT "-- Compiling Octave RCM algorithm.")
+# add_custom_target(run ALL DEPENDS rcm_octave.out)
+
 
 target_link_libraries(reordering-library ${Boost_LIBRARIES})
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)

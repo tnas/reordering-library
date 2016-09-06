@@ -28,6 +28,7 @@
 #include "../Reorderings/rcm_hsl.h"
 #include "../Reorderings/rcm_parallel.h"
 #include "../Reorderings/rcm_boost.h"
+#include "../Reorderings/rcm_octave.h"
 #include "../Reorderings/spectral.h"
 #include "../Reorderings/sloan.h"
 #include "../Reorderings/sloan_hsl.h"
@@ -48,7 +49,8 @@ typedef enum {
 	bucket_rcm,
 	parallel_sloan,
 	boost_rcm,
-	boost_sloan
+	boost_sloan,
+	octave_rcm
 } reorder_algorithm;
 
 

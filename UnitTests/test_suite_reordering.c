@@ -31,7 +31,7 @@ int inline is_hsl_algorithm(reorder_algorithm algorithm)
 int inline is_serial_algorithm(reorder_algorithm algorithm)
 {
 	if (algorithm == serial_rcm || 
-	    algorithm == serial_sloan ||
+	    algorithm == serial_sloan || algorithm == boost_rcm ||
 	    is_hsl_algorithm(algorithm))
 		return 1;
 	
@@ -194,9 +194,15 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm       = boost_sloan;
 			defs.time_reordering = Boost_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			break;
+		
+		case octave_rcm : // t = 11
+			defs.algorithm_name  = "Octave RCM";
+			defs.algorithm       = octave_rcm;
+// 			defs.time_reordering = Octave_RCM(mgraph, &permutation, defs.root);
+			break;
 			
 		default :
-			printf("*** [Error] Algorithm must be between 0 and 10 ***\n");
+			printf("*** [Error] Algorithm must be between 0 and 11 ***\n");
 			exit(1);
 	}
 	
@@ -326,15 +332,15 @@ void run_all_reordering_tests()
 // 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-		"../Matrices/rail_5177.mtx",
-		"../Matrices/Dubcova2.mtx",
+// 		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/Dubcova2.mtx",
 		"../Matrices/FEM_3D_thermal1.mtx"
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, bucket_rcm, boost_rcm };
+	reorder_algorithm algorithm[] = { serial_rcm, unordered_rcm, bucket_rcm, boost_rcm };
 // 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
 // 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	
