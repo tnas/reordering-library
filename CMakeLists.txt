@@ -20,7 +20,7 @@ add_executable(reordering-library  program.c
 	./Reorderings/rcm_parallel.c 
 	./Reorderings/rcm_galois.cpp
 	./Reorderings/rcm_boost.cpp
-# 	./Reorderings/rcm_octave.cpp
+	./Reorderings/rcm_octave.cpp
 	./Reorderings/sloan.c
 	./Reorderings/sloan_hsl.c
 	./Reorderings/sloan_parallel.c
@@ -33,22 +33,40 @@ add_executable(reordering-library  program.c
 	
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
-include_directories(/usr/include/octave-4.0.0/octave)
+# file(GLOB_RECURSE OCTAVE_INCLUDE LIST_DIRECTORIES true RELATIVE /usr/include/octave-4.0.2/octave octave.h)
+# message("OCTAVE INCLUDE: " ${OCTAVE_INCLUDE})
+# include_directories(/usr/include)
+include_directories(/usr/include/octave-4.0.2/octave)
+link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+# set(OCTAVE_INCLUDE /usr/include/octave-4.0.0/octave)
 # set(MKOCTFILE "mkoctfile")
-# set(OCTAVERCM "${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/rcm_octave.cpp")
+# set(OCTAVE_RCM_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/rcm_octave.cpp")
+
 # add_custom_command(
 # 	TARGET reordering-library
-# 	PRE_LINK
-# 	COMMAND ${MKOCTFILE} --link-stand-alone ${OCTAVERCM}
+# 	PRE_BUILD
+# 	COMMAND ${MKOCTFILE} -v ${OCTAVE_RCM_SOURCE}
 # 	COMMENT "-- Compiling Octave RCM algorithm.")
-# add_custom_target(run ALL DEPENDS rcm_octave.out)
 
+# add_custom_command(
+# 	OUTPUT rcm_octave.o
+# 	COMMAND ${MKOCTFILE} -v ${OCTAVE_RCM_SOURCE}
+# 	COMMENT "-- Compiling Octave RCM algorithm.")
+# add_library(rcm_octave STATIC rcm_octave.o)
+# set_source_files_properties(rcm_octave.o 
+# 	PROPERTIES 
+# 	EXTERNAL_OBJECT true
+# 	GENERATED true)
+# set_target_properties(rcm_octave
+# 	PROPERTIES
+# 	LINKER_LANGUAGE CXX)
+# target_link_libraries(reordering-library rcm_octave)
 
 target_link_libraries(reordering-library ${Boost_LIBRARIES})
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/libhsl_mc73.a)
-target_link_libraries(reordering-library m gfortran blas)
+target_link_libraries(reordering-library m gfortran blas octave)
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
 

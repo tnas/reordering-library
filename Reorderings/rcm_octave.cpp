@@ -17,7 +17,10 @@
 
 #include "rcm_octave.h"
 
+// #ifdef HAVE_CONFIG_H
 #include <config.h>
+// #endif
+
 #include "ov.h"
 #include "defun-dld.h"
 #include "error.h"
@@ -32,6 +35,7 @@
 
 /**
  * Dependencies: libsuitesparse-dev
+ * 		 liboctave-dev
  */
 
 typedef int octave_idx_type;
@@ -208,7 +212,7 @@ double Octave_RCM(METAGRAPH* mgraph, int** perm, int root)
 	// that have degree==0 and build a CC of the graph.
 	
 	boolNDArray btmp (dim_vector (1, N), false);
-	bool *visit = btmp.fortran_vec ();
+	bool *visit = btmp.fortran_vec();
 	
 }
 
