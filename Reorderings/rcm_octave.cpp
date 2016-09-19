@@ -173,8 +173,50 @@ static octave_idx_type calc_degrees (METAGRAPH* mgraph)
 }
 
 
+
+// Transpose of the structure of a square sparse matrix
+static void transpose (octave_idx_type N, const octave_idx_type *ridx,
+            const octave_idx_type *cidx, octave_idx_type *ridx2,
+            octave_idx_type *cidx2)
+{
+	octave_idx_type nz = cidx[N];
+	
+	OCTAVE_LOCAL_BUFFER (octave_idx_type, w, N + 1);
+	for (octave_idx_type i = 0; i < N; i++)
+		w[i] = 0;
+	
+	for (octave_idx_type i = 0; i < nz; i++)
+		w[ridx[i]]++;
+	
+	nz = 0;
+	
+	for (octave_idx_type i = 0; i < N; i++)
+	{
+		OCTAVE_QUIT;
+		cidx2[i] = nz;
+		nz += w[i];
+		w[i] = cidx2[i];
+	}
+	
+	cidx2[N] = nz;
+	w[N] = nz;
+	
+	for (octave_idx_type j = 0; j < N; j++)
+		for (octave_idx_type k = cidx[j]; k < cidx[j + 1]; k++)
+		{
+			OCTAVE_QUIT;
+			octave_idx_type q = w[ridx[k]]++;
+			ridx2[q] = j;
+		}
+}
+
+
+
 double Octave_RCM(METAGRAPH* mgraph, int** perm, int root) 
 {
+	octave_idx_type *cidx2 = mgraph->mat->JA;
+	octave_idx_type *ridx2 = mgraph->mat->IA;
+	
 	// size of heaps
 	octave_idx_type s = 0;
 	
@@ -186,8 +228,12 @@ double Octave_RCM(METAGRAPH* mgraph, int** perm, int root)
 	// dimension of the matrix
 	octave_idx_type N = mgraph->size;
 	
+	OCTAVE_LOCAL_BUFFER (octave_idx_type, cidx, N + 1);
+	OCTAVE_LOCAL_BUFFER (octave_idx_type, ridx, cidx2[N]);
+	transpose (N, ridx2, cidx2, ridx, cidx);
+	
 	// the permutation vector
-// 	NDArray P (dim_vector (1, N));
+	(*perm) = (int*) calloc(N, sizeof(int));
 	
 	octave_idx_type max_deg = calc_degrees(mgraph);
 	
@@ -214,5 +260,176 @@ double Octave_RCM(METAGRAPH* mgraph, int** perm, int root)
 	boolNDArray btmp (dim_vector (1, N), false);
 	bool *visit = btmp.fortran_vec();
 	
+	do
+	{
+		// locate an unvisited starting node of the graph
+		octave_idx_type i;
+		for (i = 0; i < N; i++)
+			if (! visit[i]) break;
+		
+		// locate a probably better starting node
+		v.id = root;
+		
+		// mark the node as visited and enqueue it (a starting node
+		// for the BFS). Since the node will be a root of a spanning
+		// tree, its dist is 0.
+		v.deg = mgraph->graph[v.id].degree;
+		v.dist = 0;
+		visit[v.id] = true;
+		Q_enq (Q, N, qt, v);
+		
+		// lower bound for the bandwidth of a subgraph
+		// keep a "level" in the spanning tree (= min. distance to the
+		// root) for determining the bandwidth of the computed
+		// permutation P
+		octave_idx_type Bsub = 0;
+		// min. dist. to the root is 0
+		octave_idx_type level = 0;
+		// the root is the first/only node on level 0
+		octave_idx_type level_N = 1;
+		
+		 while (! Q_empty (Q, N, qh, qt))
+		{
+			v = Q_deq (Q, N, qh);
+			i = v.id;
+		
+			c++;
+		
+			// for computing the inverse permutation P where
+			// A(inv(P),inv(P)) or P'*A*P is banded
+			//         P(i) = c;
+		
+			// for computing permutation P where
+			// A(P(i),P(j)) or P*A*P' is banded
+			(*perm)[c] = i;
+		
+			// put all unvisited neighbors j of node i on the heap
+			s = 0;
+			octave_idx_type j1 = cidx[i];
+			octave_idx_type j2 = cidx2[i];
+		
+			OCTAVE_QUIT;
+			while (j1 < cidx[i+1] || j2 < cidx2[i+1])
+			{
+				OCTAVE_QUIT;
+				if (j1 == cidx[i+1])
+				{
+					octave_idx_type r2 = ridx2[j2++];
+					
+					if (! visit[r2])
+					{
+						// the distance of node j is dist(i)+1
+						w.id = r2;
+						w.deg = mgraph->graph[r2].degree;
+						w.dist = v.dist+1;
+						H_insert (S, s, w);
+						visit[r2] = true;
+					}
+				}
+				else if (j2 == cidx2[i+1])
+				{
+					octave_idx_type r1 = ridx[j1++];
+					
+					if (! visit[r1])
+					{
+						w.id = r1;
+						w.deg = mgraph->graph[r1].degree;
+						w.dist = v.dist+1;
+						H_insert (S, s, w);
+						visit[r1] = true;
+					}
+				}
+				else
+				{
+					octave_idx_type r1 = ridx[j1];
+					octave_idx_type r2 = ridx2[j2];
+					
+					if (r1 <= r2)
+					{
+						if (! visit[r1])
+						{
+							w.id = r1;
+							w.deg = mgraph->graph[r1].degree;
+							w.dist = v.dist+1;
+							H_insert (S, s, w);
+							visit[r1] = true;
+						}
+						
+						j1++;
+						
+						if (r1 == r2) j2++;
+					}
+					else
+					{
+						if (! visit[r2])
+						{
+							w.id = r2;
+							w.deg = mgraph->graph[r2].degree;
+							w.dist = v.dist+1;
+							H_insert (S, s, w);
+							visit[r2] = true;
+						}
+						
+						j2++;
+					}
+				}
+			}
+			
+			// add the neighbors to the queue (sorted by node degree)
+			while (! H_empty (S, s))
+			{
+				OCTAVE_QUIT;
+			
+				// locate a neighbor of i with minimal degree in O(log(N))
+				v = H_remove_min (S, s, 1);
+			
+				// entered the BFS a new level?
+				if (v.dist > level)
+				{
+					// adjustment of bandwith:
+					// "[...] the minimum bandwidth that
+					// can be obtained [...] is the
+					//  maximum number of nodes per level"
+					if (Bsub < level_N) Bsub = level_N;
+			
+					level = v.dist;
+					// v is the first node on the new level
+					level_N = 1;
+				}
+				else
+				{
+					// there is no new level but another node on
+					// this level:
+					level_N++;
+				}
+			
+				// enqueue v in O(1)
+				Q_enq (Q, N, qt, v);
+			}
+		
+			// synchronize the bandwidth with level_N once again:
+			if (Bsub < level_N) Bsub = level_N;
+		}
+		
+		// finish of BFS. If there are still unvisited nodes in the graph
+		// then it is split into CCs. The computed bandwidth is the maximum
+		// of all subgraphs. Update:
+		if (Bsub > B) B = Bsub;
+	}
+	// are there any nodes left?
+	while (c+1 < N);
+ 
+	// compute the reverse-ordering
+	s = N / 2 - 1;
+	for (octave_idx_type i = 0, j = N - 1; i <= s; i++, j--)
+		std::swap ((*perm)[i], (*perm)[j]);
+	
+	std::cout << "Permutation array: ";
+	
+	for (int i = 0; i < N; ++i)
+		printf("%d ", (*perm)[i]);fflush(stdout);
+	std::cout << "\n";
+	
+	return 0;
 }
 

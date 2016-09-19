@@ -198,7 +198,9 @@ test test_reorder_algorithm(test defs)
 		case octave_rcm : // t = 11
 			defs.algorithm_name  = "Octave RCM";
 			defs.algorithm       = octave_rcm;
-			defs.time_reordering = Octave_RCM(mgraph, &permutation, defs.root);
+			time = omp_get_wtime();
+			Octave_RCM(mgraph, &permutation, defs.root);
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		default :
