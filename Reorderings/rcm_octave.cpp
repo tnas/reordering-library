@@ -211,7 +211,9 @@ static void transpose (octave_idx_type N, const octave_idx_type *ridx,
 }
 
 
-
+/**
+ * It does not work.
+ */
 double Octave_RCM(METAGRAPH* mgraph, int** perm, int root) 
 {
 	octave_idx_type *cidx2 = mgraph->mat->JA;

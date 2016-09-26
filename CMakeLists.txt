@@ -17,8 +17,7 @@ add_executable(reordering-library  program.c
 	./Reorderings/spectral.c 
 	./Reorderings/rcm.c 
 	./Reorderings/rcm_hsl.c
-	./Reorderings/rcm_parallel.c 
-	./Reorderings/rcm_galois.cpp
+	./Reorderings/rcm_parallel.c
 	./Reorderings/rcm_boost.cpp
 	./Reorderings/rcm_octave.cpp
 	./Reorderings/sloan.c

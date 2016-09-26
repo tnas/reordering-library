@@ -1,0 +1,2 @@
+/usr/bin/ar qc librcm_octave.a  rcm_octave.o
+/usr/bin/ranlib librcm_octave.a

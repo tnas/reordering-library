@@ -17,111 +17,6 @@
 
 #include "rcm_parallel.h"
 
-/**
- * @Deprecated
- */
-void place_original(MAT* mat, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
-{
-	int level, node, degree, count;
-	int* read_offset;
-	int* write_offset;
-	int colors[mat->n];
-	GRAPH* children;
-	const int num_threads = omp_get_max_threads();
-	omp_lock_t locks[num_threads];
-	
-	#pragma omp parallel sections 
-	{
-		#pragma omp section 
-		{
-			read_offset  = calloc(max_dist, sizeof(int));
-			bcopy(sums, read_offset, max_dist * sizeof(int));
-		}
-		
-		#pragma omp section 
-		{
-			write_offset = calloc(max_dist, sizeof(int));
-			bcopy(sums, write_offset, max_dist * sizeof(int));
-			write_offset[0] = 1;
-		}
-		
-		#pragma omp section
-		(*perm)[0] =  source_node;
-		
-		#pragma omp section 
-		for (count = 0; count < num_threads; ++count)
-			omp_init_lock(&locks[count]);
-	}
-	
-	
-	#pragma omp parallel for num_threads(num_threads)
-	for (count = 0; count < mat->n; ++count)
-		colors[count] = UNREACHED;
-
-	#pragma omp parallel private (level, node, children, degree, count) 
-	{
-		level = omp_get_thread_num();
-		
-		omp_set_lock(&locks[level]);
-		#pragma omp barrier
-		
-		while (level < max_dist - 1)
-		{
-			
-			while (read_offset[level] != sums[level+1]) // There are nodes to read
-			{
-				#pragma omp flush (write_offset)
-				
-				// Spin
-				while (read_offset[level] == write_offset[level]) 
-				{
-					omp_set_lock(&locks[(level-1)%num_threads]);
-				} 
-				
-				if (level > 0) omp_unset_lock(&locks[(level-1)%num_threads]);
-				
-				node = (*perm)[read_offset[level]];
-				++read_offset[level];
-				
-				// Edges of node with dist == level + 1
-				degree   = GRAPH_degree_per_level(mat, node, levels, level+1, colors);
-				children = GRAPH_adjacent_per_level(mat, node, levels, level+1, colors);
-				
-				// Sorting children by degree
-				qsort(children, degree, sizeof(GRAPH), COMPARE_degr_ASC);
-				
-				for (count = 0; count < degree; ++count)
-				{
-					omp_test_lock(&locks[level%num_threads]);
-					
-					(*perm)[write_offset[level+1]] = children[count].label;
-					colors[children[count].label] = LABELED;
-					++write_offset[level+1];
-					
-					omp_unset_lock(&locks[level%num_threads]);
-				}
-				
-				free(children);
-			}
-			
-			level += num_threads;
-		}
-	}
-	
-	#pragma omp parallel sections 
-	{
-		#pragma omp section
-		free(read_offset);
-		
-		#pragma omp section
-		free(write_offset);
-		
-		#pragma omp section
-		for (count = 0; count < num_threads; ++count)
-			omp_destroy_lock(&locks[count]);
-	}
-}
-
 
 void place(MAT* mat, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
 {
@@ -915,6 +810,7 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 	
 	graph_size = mgraph->size;
 	perm_size  = perm_offset = total_size_children = 0;
+	root = 1;
 	
 	#pragma omp parallel
 	{
@@ -981,6 +877,7 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 								if (mgraph->graph[neighbors[n_ch]].status == UNREACHED)
 								{
 									mgraph->graph[neighbors[n_ch]].status = LABELED;
+// 									printf("Setting %d at bucket %d\n", mgraph->graph[neighbors[n_ch]].label, pos_parent_gen);
 									generation[pos_parent_gen].children[generation[pos_parent_gen].num_children++] =  mgraph->graph[neighbors[n_ch]];
 								}
 							}
@@ -988,6 +885,19 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 					}
 				}
 			}
+			
+// 			#pragma omp single
+// 			{
+// 				int i, j;
+// 				for (i = 0; i < generation_size; ++i)
+// 				{
+// 					printf("Bucket %d: ", i);
+// 					for (j = 0; j < generation[i].num_children; ++j)
+// 						printf("%d ", generation[i].children[j].label);
+// 					printf("\n");
+// 				}
+// 				printf("-----------------------------------------------\n");
+// 			}
 			
 			#pragma omp single nowait
 			total_size_children = 0;
