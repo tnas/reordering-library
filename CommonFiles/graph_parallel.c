@@ -346,6 +346,154 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 
 
 
+void GRAPH_parallel_fixedpoint_iterative_BFS(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
+{
+	int n_nodes, not_finished_bfs;
+	
+	n_nodes = mgraph->size;
+	not_finished_bfs = 1;
+
+	#pragma omp parallel
+	{
+		int node, has_unreached_nodes, node_degree, count_nodes, adj_node, level;
+		int* neighboors;
+		
+		#pragma omp for
+		for (node = 0; node < n_nodes; ++node) 
+			(*levels)[node] = INFINITY_LEVEL;
+		
+		#pragma omp single
+		(*levels)[root] = 0;
+		
+		#pragma omp single
+		not_finished_bfs = 1;
+		
+		while (not_finished_bfs)
+		{
+			has_unreached_nodes = 0;
+			
+			#pragma omp for
+			for (node = 0; node < n_nodes; ++node)
+			{
+				if ((*levels)[node] == INFINITY_LEVEL) 
+				{
+					has_unreached_nodes = 1;
+				}
+				else
+				{
+					neighboors  = mgraph->graph[node].neighboors;
+					node_degree = mgraph->graph[node].degree;
+					
+					for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
+					{
+						adj_node = neighboors[count_nodes];
+						level    = (*levels)[node] + 1;
+						
+						if (level < (*levels)[adj_node])
+						{
+							#pragma omp critical
+							(*levels)[adj_node] = level;
+							
+							has_unreached_nodes = 1;
+						}
+					}
+				}
+			}
+			
+			#pragma omp single
+			not_finished_bfs = 0;
+			
+			#pragma omp atomic
+			not_finished_bfs |= has_unreached_nodes;
+			
+			#pragma omp barrier
+		}
+	}
+}
+
+
+
+
+void GRAPH_parallel_fixedpoint_static_vector_BFS(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
+{
+	int n_nodes, not_finished_bfs;
+	
+	n_nodes = mgraph->size;
+	not_finished_bfs = 1;
+
+	#pragma omp parallel
+	{
+		int node, has_unreached_nodes, node_degree, count_nodes, adj_node, level;
+		int* neighboors;
+		
+		#pragma omp for
+		for (node = 0; node < n_nodes; ++node) 
+			(*levels)[node] = INFINITY_LEVEL;
+		
+		#pragma omp single
+		(*levels)[root] = 0;
+		
+		#pragma omp single
+		not_finished_bfs = 1;
+		
+		while (not_finished_bfs)
+		{
+// 			printf("thread %d Starting iteration ...\n", omp_get_thread_num());fflush(stdout);
+			
+			has_unreached_nodes = 0;
+			
+			#pragma omp for
+			for (node = 0; node < n_nodes; ++node)
+			{
+				if ((*levels)[node] == INFINITY_LEVEL) 
+				{
+					has_unreached_nodes = 1;
+				}
+				else
+				{
+					neighboors  = mgraph->graph[node].neighboors;
+					node_degree = mgraph->graph[node].degree;
+					
+					for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
+					{
+						adj_node = neighboors[count_nodes];
+						level    = (*levels)[node] + 1;
+						
+						if (level < (*levels)[adj_node])
+						{
+							#pragma omp critical
+							(*levels)[adj_node] = level;
+							
+							has_unreached_nodes = 1;
+						}
+					}
+				}
+			}
+			
+			#pragma omp single
+			not_finished_bfs = 0;
+			
+			#pragma omp atomic
+			not_finished_bfs |= has_unreached_nodes;
+			
+			#pragma omp barrier
+			
+// 			#pragma omp single
+// 			{
+// 				for (node = 0; node < n_nodes; ++node)
+// 					printf("%d ", (*levels)[node]);
+// 				printf("\n");fflush(stdout);
+// 			}
+		}
+		
+// 		printf("thread %d out of while\n", omp_get_thread_num());fflush(stdout);
+		
+	}
+}
+
+
+
+
 /**
  * Build a METAGRAPH from an adjacency matrix using multithreads. 
  * 

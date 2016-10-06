@@ -13,3 +13,5 @@ Three parallelized algorithms were builded from the serial RCM:
 About the serial Sloan, just one parallel algorithm was implemented. It uses the concept of "Logical Bags" as main data structure.
 
 All algorithms have been implemented using the OpenMP parallel platform. Moreover, the programming language used is C.
+
+

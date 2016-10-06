@@ -23,7 +23,7 @@ inline static int QUEUE_deque(int** queue, int size, int* head_index)
 }
 
 // Predicate (queue empty)
-#define QUEUE_empty(queue, head, tail)  ((head) == (tail))
+#define QUEUE_empty(queue, head, tail) ((head) == (tail))
 
 
 typedef struct node
