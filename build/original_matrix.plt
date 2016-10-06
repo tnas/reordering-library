@@ -1,6 +1,6 @@
 #!/bin/sh
-set xrange [0:10]
-set yrange [0:10] reverse
+set xrange [0:5177]
+set yrange [0:5177] reverse
 set size square
 set terminal png
 set output "original_matrix.png"

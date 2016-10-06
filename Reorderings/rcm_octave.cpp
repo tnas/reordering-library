@@ -73,8 +73,9 @@ inline static CMK_Node Q_deq(CMK_Node *Q, octave_idx_type N, octave_idx_type& qh
 #define Q_empty(Q, N, qh, qt)  ((qh) == (qt))
 
 
-// A simple, array-based binary heap (used as a priority queue for nodes)
-
+/*
+ * A simple, array-based binary heap (used as a priority queue for nodes)
+ */
 // the left descendant of entry i
 #define LEFT(i)		(((i) << 1) + 1)		// = (2*(i) + 1)
 //the right descendant of entry i
@@ -84,7 +85,6 @@ inline static CMK_Node Q_deq(CMK_Node *Q, octave_idx_type N, octave_idx_type& qh
 
 // Builds a min-heap (the root contains the smallest element). A is an array
 // with the graph's nodes, i is a starting position, size is the length of A.
- 
 static void H_heapify_min (CMK_Node *A, octave_idx_type i, octave_idx_type size)
 {
    octave_idx_type j = i;
@@ -116,7 +116,6 @@ static void H_heapify_min (CMK_Node *A, octave_idx_type i, octave_idx_type size)
 }
  
  // Heap operation insert. Running time is O(log(n))
- 
 static void H_insert (CMK_Node *H, octave_idx_type& h, const CMK_Node& o)
 {
    octave_idx_type i = h++;

@@ -67,6 +67,7 @@ typedef enum {
 
 void        	  GRAPH_parallel_fixedpoint_bfs             (MAT* adjacency, int root, int** levels, const float percent_chunk);
 void 		  GRAPH_parallel_fixedpoint_BFS		    (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
+void 		  GRAPH_parallel_fixedpoint_static_BFS	    (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
 METAGRAPH* 	  GRAPH_parallel_build_METAGRAPH            (MAT* mat);
 void  	  	  GRAPH_parallel_destroy_METAGRAPH          (METAGRAPH* mgraph);
 GRAPH*  	  GRAPH_shrinking_strategy_half_sorted      (GRAPH* nodes, int* length);
