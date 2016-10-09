@@ -195,13 +195,13 @@ test test_reorder_algorithm(test defs)
 			defs.time_reordering = Boost_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			break;
 		
-		case octave_rcm : // t = 11
-			defs.algorithm_name  = "Octave RCM";
-			defs.algorithm       = octave_rcm;
-			time = omp_get_wtime();
-			Octave_RCM(mgraph, &permutation, defs.root);
-			defs.time_reordering = (omp_get_wtime() - time)/100.0;
-			break;
+// 		case octave_rcm : // t = 11
+// 			defs.algorithm_name  = "Octave RCM";
+// 			defs.algorithm       = octave_rcm;
+// 			time = omp_get_wtime();
+// 			Octave_RCM(mgraph, &permutation, defs.root);
+// 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+// 			break;
 			
 		default :
 			printf("*** [Error] Algorithm must be between 0 and 11 ***\n");
@@ -309,40 +309,39 @@ void run_all_reordering_tests()
 	float bfs_chunk_percent = .5;
 	
 	char* matrices[] = {
-// 		"../Big-Matrices/inline_1.mtx",
-// 		"../Big-Matrices/audikw_1.mtx",
-// 		"../Big-Matrices/dielFilterV3real.mtx",
-// 		"../Big-Matrices/G3_circuit.mtx",
-// 		"../Big-Matrices/M6.mtx",
-// 		"../Big-Matrices/333SP.mtx",
-// 		"../Big-Matrices/NLR.mtx",
-// 		"../Big-Matrices/hugetric-00020.mtx",
+		"../Big-Matrices/10-hugetric-00000.mtx",
+		"../Big-Matrices/09-channel-500x100x100-b050.mtx",
+		"../Big-Matrices/08-NLR.mtx",
+		"../Big-Matrices/07-venturiLevel3.mtx",
+		"../Big-Matrices/06-333SP.mtx",
+		"../Big-Matrices/05-M6.mtx",
+		"../Big-Matrices/04-G3_circuit.mtx",
+		"../Big-Matrices/03-dielFilterV3real.mtx",
+		"../Big-Matrices/02-audikw_1.mtx",
+		"../Big-Matrices/01-inline_1.mtx",		
+		
 // 		"../Big-Matrices/delaunay_n24.mtx",
 // 		"../Big-Matrices/road_usa.mtx"
-		
 // 		"../Big-Matrices/dw8192.mtx",
 // 		"../Big-Matrices/rail_79841.mtx",
 // 		"../Big-Matrices/Dubcova3.mtx",
-// 		"../Big-Matrices/inline_1.mtx",
 // 		"../Big-Matrices/audikw_1.mtx",
 // 		"../Big-Matrices/dielFilterV3real.mtx",
 // 		"../Big-Matrices/atmosmodj.mtx",
 // 		"../Big-Matrices/G3_circuit.mtx"
-		
-		
 // 		"../Matrices/hsl.mtx",
 // 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-		"../Matrices/FEM_3D_thermal1.mtx"
+// 		"../Matrices/FEM_3D_thermal1.mtx"
 	};
 	
-// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	int nthreads[] = { 4 };
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+// 	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithm[] = { serial_rcm, unordered_rcm, bucket_rcm, boost_rcm };
+	reorder_algorithm algorithm[] = { boost_rcm, unordered_rcm, bucket_rcm };
 // 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
 // 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	

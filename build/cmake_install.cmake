@@ -1,4 +1,4 @@
-# Install script for directory: /home/thiago/Documents/git-projects/reordering-library.git
+# Install script for directory: /home/thiago/Documents/git-projects/reordering-library
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/reordering-library"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/thiago/Documents/git-projects/reordering-library.git/build/reordering-library")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/thiago/Documents/git-projects/reordering-library/build/reordering-library")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/reordering-library" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/reordering-library")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -50,10 +50,10 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/thiago/Documents/git-projects/reordering-library.git/build/CommonFiles/cmake_install.cmake")
-  include("/home/thiago/Documents/git-projects/reordering-library.git/build/Matrices/cmake_install.cmake")
-  include("/home/thiago/Documents/git-projects/reordering-library.git/build/Reorderings/cmake_install.cmake")
-  include("/home/thiago/Documents/git-projects/reordering-library.git/build/UnitTests/cmake_install.cmake")
+  include("/home/thiago/Documents/git-projects/reordering-library/build/CommonFiles/cmake_install.cmake")
+  include("/home/thiago/Documents/git-projects/reordering-library/build/Matrices/cmake_install.cmake")
+  include("/home/thiago/Documents/git-projects/reordering-library/build/Reorderings/cmake_install.cmake")
+  include("/home/thiago/Documents/git-projects/reordering-library/build/UnitTests/cmake_install.cmake")
 
 endif()
 
@@ -65,5 +65,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/thiago/Documents/git-projects/reordering-library.git/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/thiago/Documents/git-projects/reordering-library/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

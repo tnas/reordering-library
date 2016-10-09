@@ -7,12 +7,12 @@ Current Build Directory Index=0
 ProjectRootRelative=./
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=file:///home/thiago/Documents/git-projects/reordering-library.git/build
+Build Directory Path=file:///home/thiago/Documents/git-projects/reordering-library/build
 Build Type=Debug
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=
 Extra Arguments=
-Install Directory=file:///usr/local
+Install Directory=
 
 [Defines And Includes][Compiler]
 Name=GCC
@@ -29,16 +29,16 @@ Name=reordering-library
 Type=Native Application
 
 [Launch][Launch Configuration 0][Data]
-Arguments=-m ../Matrices/FEM_3D_thermal1.mtx -a 5 -p 4 -b .5
+Arguments=-m ../Matrices/rail_5177.mtx -a 5 -p 4 -b .5
 Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x02\x00\x00\x00$\x00r\x00e\x00o\x00r\x00d\x00e\x00r\x00i\x00n\x00g\x00-\x00l\x00i\x00b\x00r\x00a\x00r\x00y\x00\x00\x00$\x00r\x00e\x00o\x00r\x00d\x00e\x00r\x00i\x00n\x00g\x00-\x00l\x00i\x00b\x00r\x00a\x00r\x00y)
 Dependency Action=Build
 EnvironmentGroup=
-Executable=file:///home/thiago/Documents/git-projects/reordering-library.git/
+Executable=file:///home/thiago/Documents/git-projects/reordering-library/build/reordering-library
 External Terminal=konsole --noclose --workdir %workdir -e %exe
 Project Target=reordering-library,reordering-library
 Use External Terminal=false
 Working Directory=
-isExecutable=false
+isExecutable=true
 
 [Project]
 VersionControlSupport=kdevgit

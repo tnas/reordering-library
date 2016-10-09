@@ -13,7 +13,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o"
   "CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o"
   "CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o"
-  "CMakeFiles/reordering-library.dir/Reorderings/rcm_octave.cpp.o"
   "CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o"
   "CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o"
   "CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o"

@@ -19,7 +19,7 @@ add_executable(reordering-library  program.c
 	./Reorderings/rcm_hsl.c
 	./Reorderings/rcm_parallel.c
 	./Reorderings/rcm_boost.cpp
-	./Reorderings/rcm_octave.cpp
+# 	./Reorderings/rcm_octave.cpp
 	./Reorderings/sloan.c
 	./Reorderings/sloan_hsl.c
 	./Reorderings/sloan_parallel.c
@@ -32,13 +32,13 @@ add_executable(reordering-library  program.c
 	
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
-include_directories(/usr/include/octave-4.0.2/octave)
+# include_directories(/usr/include/octave-4.0.2/octave)
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(reordering-library ${Boost_LIBRARIES})
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/hsl_mc73d.o)
 target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings/hsl_mc73/libhsl_mc73.a)
-target_link_libraries(reordering-library m gfortran blas octave)
+target_link_libraries(reordering-library m gfortran blas)
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
 

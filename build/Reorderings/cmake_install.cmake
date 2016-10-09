@@ -1,4 +1,4 @@
-# Install script for directory: /home/thiago/Documents/git-projects/reordering-library.git/Reorderings
+# Install script for directory: /home/thiago/Documents/git-projects/reordering-library/Reorderings
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,8 +34,8 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/thiago/Documents/git-projects/reordering-library.git/build/Reorderings/hsl_mc73/cmake_install.cmake")
-  include("/home/thiago/Documents/git-projects/reordering-library.git/build/Reorderings/hsl_mc60/cmake_install.cmake")
+  include("/home/thiago/Documents/git-projects/reordering-library/build/Reorderings/hsl_mc73/cmake_install.cmake")
+  include("/home/thiago/Documents/git-projects/reordering-library/build/Reorderings/hsl_mc60/cmake_install.cmake")
 
 endif()
 

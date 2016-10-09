@@ -7,11 +7,11 @@ C_FLAGS =  -Wall -fopenmp -o3 -g
 
 C_DEFINES = 
 
-C_INCLUDES = -I/usr/include/octave-4.0.2/octave 
+C_INCLUDES = 
 
 CXX_FLAGS =  -Wall -fopenmp -o3 -g  
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/include/octave-4.0.2/octave 
+CXX_INCLUDES = 
 

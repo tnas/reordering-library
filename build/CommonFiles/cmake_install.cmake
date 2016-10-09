@@ -1,4 +1,4 @@
-# Install script for directory: /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles
+# Install script for directory: /home/thiago/Documents/git-projects/reordering-library/CommonFiles
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

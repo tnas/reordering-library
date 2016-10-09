@@ -6,33 +6,33 @@
 
 #IncludeRegexTransform: 
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph.h
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 linked_list.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/linked_list.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/linked_list.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_hsl.h
 ../Reorderings/hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_parallel.h
 omp.h
 -
 graph.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph.h
 util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/linked_list.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/linked_list.h
 stdlib.h
 -
 stdio.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 stdio.h
 -
 stdlib.h
@@ -40,13 +40,13 @@ stdlib.h
 string.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix_parallel.h
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util.h
 stdlib.h
 -
 time.h
@@ -60,103 +60,103 @@ limits.h
 math.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util_parallel.h
 omp.h
 -
 math.h
 -
 util.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 ../CommonFiles/graph.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_boost.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_boost.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_hsl.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 ../CommonFiles/matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_octave.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_octave.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_parallel.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_parallel.h
 ../CommonFiles/util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util_parallel.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/reordering.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/reordering.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/reordering.h
 ../CommonFiles/graph.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan_boost.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan_boost.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan_hsl.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/reordering.h
 ../CommonFiles/matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan_parallel.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_parallel.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/reordering.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/spectral.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/spectral.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 ../CommonFiles/matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_graph_parallel.h
 assert.h
 -
 ../CommonFiles/graph_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_hsl.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite.h
 ../CommonFiles/matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite_matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite_matrix.h
 assert.h
 -
 ../CommonFiles/matrix_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite_prefixsum.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite_prefixsum.h
 assert.h
 -
 ../CommonFiles/util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite_reordering.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite_reordering.h
 assert.h
 -
 limits.h
@@ -164,87 +164,87 @@ limits.h
 float.h
 -
 ../CommonFiles/matrix_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/matrix_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/matrix_parallel.h
 ../CommonFiles/graph_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/graph_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/graph_hsl.h
 ../CommonFiles/util.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util.h
 ../Reorderings/hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/hsl.h
 ../Reorderings/rcm.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm.h
 ../Reorderings/rcm_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_hsl.h
 ../Reorderings/rcm_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_parallel.h
 ../Reorderings/rcm_boost.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_boost.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_boost.h
 ../Reorderings/rcm_octave.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/rcm_octave.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/rcm_octave.h
 ../Reorderings/spectral.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/spectral.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/spectral.h
 ../Reorderings/sloan.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan.h
 ../Reorderings/sloan_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan_hsl.h
 ../Reorderings/sloan_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan_parallel.h
 ../Reorderings/sloan_boost.h
-/home/thiago/Documents/git-projects/reordering-library.git/./Reorderings/sloan_boost.h
+/home/thiago/Documents/git-projects/reordering-library/./Reorderings/sloan_boost.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_util.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_util.h
 assert.h
 -
 ../CommonFiles/util.h
-/home/thiago/Documents/git-projects/reordering-library.git/./CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/./CommonFiles/util.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.c
 graph.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.h
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 linked_list.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.c
 graph_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.h
 ../Reorderings/hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.c
 graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 omp.h
 -
 graph.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.h
 util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.c
 linked_list.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.h
 stdlib.h
 -
 stdio.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.c
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 stdio.h
 -
 stdlib.h
@@ -252,21 +252,21 @@ stdlib.h
 string.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.c
 matrix_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.h
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.c
 util.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.h
 stdlib.h
 -
 time.h
@@ -280,147 +280,147 @@ limits.h
 math.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.c
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.c
 util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
 omp.h
 -
 math.h
 -
 util.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm.c
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm.c
 rcm.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 ../CommonFiles/graph.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_hsl.c
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_hsl.c
 rcm_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_hsl.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_hsl.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 ../CommonFiles/matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_octave.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_octave.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_parallel.c
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_parallel.c
 rcm_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_parallel.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 ../CommonFiles/util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/reordering.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/reordering.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan.c
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan.c
 sloan.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/reordering.h
 ../CommonFiles/graph.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_hsl.c
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_hsl.c
 sloan_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_hsl.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_hsl.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/reordering.h
 ../CommonFiles/matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_parallel.c
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_parallel.c
 sloan_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_parallel.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/reordering.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/reordering.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/spectral.c
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/spectral.c
 spectral.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/spectral.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/spectral.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/spectral.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/spectral.h
 hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 ../CommonFiles/matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_graph_parallel.c
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_graph_parallel.c
 test_graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_graph_parallel.h
 assert.h
 -
 ../CommonFiles/graph_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_matrix.c
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_matrix.c
 test_suite_matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_matrix.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_matrix.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_matrix.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_matrix.h
 assert.h
 -
 ../CommonFiles/matrix_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_prefixsum.c
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_prefixsum.c
 test_suite_prefixsum.h
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_prefixsum.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_prefixsum.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_prefixsum.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_prefixsum.h
 assert.h
 -
 ../CommonFiles/util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_reordering.c
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_reordering.c
 test_suite_reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_reordering.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_reordering.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_reordering.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_reordering.h
 assert.h
 -
 limits.h
@@ -428,59 +428,59 @@ limits.h
 float.h
 -
 ../CommonFiles/matrix_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.h
 ../CommonFiles/graph_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.h
 ../CommonFiles/util.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.h
 ../Reorderings/hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl.h
 ../Reorderings/rcm.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm.h
 ../Reorderings/rcm_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_hsl.h
 ../Reorderings/rcm_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_parallel.h
 ../Reorderings/rcm_boost.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.h
 ../Reorderings/rcm_octave.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_octave.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_octave.h
 ../Reorderings/spectral.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/spectral.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/spectral.h
 ../Reorderings/sloan.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan.h
 ../Reorderings/sloan_hsl.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_hsl.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_hsl.h
 ../Reorderings/sloan_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_parallel.h
 ../Reorderings/sloan_boost.h
-/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.h
+/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_util.c
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_util.c
 test_util.h
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_util.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_util.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_util.h
+/home/thiago/Documents/git-projects/reordering-library/UnitTests/test_util.h
 assert.h
 -
 ../CommonFiles/util.h
-/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.h
 
-/home/thiago/Documents/git-projects/reordering-library.git/program.c
+/home/thiago/Documents/git-projects/reordering-library/program.c
 unistd.h
 -
 ctype.h
 -
 ./UnitTests/test_suite.h
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite.h
 ./UnitTests/test_suite_reordering.h
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite_reordering.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite_reordering.h
 ./UnitTests/test_suite_prefixsum.h
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite_prefixsum.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite_prefixsum.h
 ./UnitTests/test_suite_matrix.h
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_suite_matrix.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_suite_matrix.h
 ./UnitTests/test_graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_graph_parallel.h
 ./UnitTests/test_util.h
-/home/thiago/Documents/git-projects/reordering-library.git/./UnitTests/test_util.h
+/home/thiago/Documents/git-projects/reordering-library/./UnitTests/test_util.h
 

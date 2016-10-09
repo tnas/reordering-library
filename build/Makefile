@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/thiago/Documents/git-projects/reordering-library.git
+CMAKE_SOURCE_DIR = /home/thiago/Documents/git-projects/reordering-library
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/thiago/Documents/git-projects/reordering-library.git/build
+CMAKE_BINARY_DIR = /home/thiago/Documents/git-projects/reordering-library/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -124,9 +124,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles /home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles /home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -463,33 +463,6 @@ Reorderings/rcm_hsl.s: Reorderings/rcm_hsl.c.s
 Reorderings/rcm_hsl.c.s:
 	$(MAKE) -f CMakeFiles/reordering-library.dir/build.make CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.s
 .PHONY : Reorderings/rcm_hsl.c.s
-
-Reorderings/rcm_octave.o: Reorderings/rcm_octave.cpp.o
-
-.PHONY : Reorderings/rcm_octave.o
-
-# target to build an object file
-Reorderings/rcm_octave.cpp.o:
-	$(MAKE) -f CMakeFiles/reordering-library.dir/build.make CMakeFiles/reordering-library.dir/Reorderings/rcm_octave.cpp.o
-.PHONY : Reorderings/rcm_octave.cpp.o
-
-Reorderings/rcm_octave.i: Reorderings/rcm_octave.cpp.i
-
-.PHONY : Reorderings/rcm_octave.i
-
-# target to preprocess a source file
-Reorderings/rcm_octave.cpp.i:
-	$(MAKE) -f CMakeFiles/reordering-library.dir/build.make CMakeFiles/reordering-library.dir/Reorderings/rcm_octave.cpp.i
-.PHONY : Reorderings/rcm_octave.cpp.i
-
-Reorderings/rcm_octave.s: Reorderings/rcm_octave.cpp.s
-
-.PHONY : Reorderings/rcm_octave.s
-
-# target to generate assembly for a file
-Reorderings/rcm_octave.cpp.s:
-	$(MAKE) -f CMakeFiles/reordering-library.dir/build.make CMakeFiles/reordering-library.dir/Reorderings/rcm_octave.cpp.s
-.PHONY : Reorderings/rcm_octave.cpp.s
 
 Reorderings/rcm_parallel.o: Reorderings/rcm_parallel.c.o
 
@@ -861,9 +834,6 @@ help:
 	@echo "... Reorderings/rcm_hsl.o"
 	@echo "... Reorderings/rcm_hsl.i"
 	@echo "... Reorderings/rcm_hsl.s"
-	@echo "... Reorderings/rcm_octave.o"
-	@echo "... Reorderings/rcm_octave.i"
-	@echo "... Reorderings/rcm_octave.s"
 	@echo "... Reorderings/rcm_parallel.o"
 	@echo "... Reorderings/rcm_parallel.i"
 	@echo "... Reorderings/rcm_parallel.s"
