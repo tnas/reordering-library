@@ -309,16 +309,16 @@ void run_all_reordering_tests()
 	float bfs_chunk_percent = .5;
 	
 	char* matrices[] = {
-		"../Big-Matrices/10-hugetric-00000.mtx",
-		"../Big-Matrices/09-channel-500x100x100-b050.mtx",
-		"../Big-Matrices/08-NLR.mtx",
-		"../Big-Matrices/07-venturiLevel3.mtx",
-		"../Big-Matrices/06-333SP.mtx",
-		"../Big-Matrices/05-M6.mtx",
-		"../Big-Matrices/04-G3_circuit.mtx",
-		"../Big-Matrices/03-dielFilterV3real.mtx",
-		"../Big-Matrices/02-audikw_1.mtx",
-		"../Big-Matrices/01-inline_1.mtx",		
+		"./Big-Matrices/10-hugetric-00000.mtx",
+		"./Big-Matrices/09-channel-500x100x100-b050.mtx",
+		"./Big-Matrices/08-NLR.mtx",
+		"./Big-Matrices/07-venturiLevel3.mtx",
+		"./Big-Matrices/06-333SP.mtx",
+		"./Big-Matrices/05-M6.mtx",
+		"./Big-Matrices/04-G3_circuit.mtx",
+		"./Big-Matrices/03-dielFilterV3real.mtx",
+		"./Big-Matrices/02-audikw_1.mtx",
+		"./Big-Matrices/01-inline_1.mtx",		
 		
 // 		"../Big-Matrices/delaunay_n24.mtx",
 // 		"../Big-Matrices/road_usa.mtx"
