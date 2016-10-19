@@ -1,4 +1,4 @@
-# Install script for directory: /home/thiago/Documents/git-projects/reordering-library/Matrices
+# Install script for directory: /home/thiago/Documents/git-projects/reordering-library.git/Matrices
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

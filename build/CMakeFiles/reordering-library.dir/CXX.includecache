@@ -6,27 +6,27 @@
 
 #IncludeRegexTransform: 
 
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.h
 matrix.h
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
 linked_list.h
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.h
 
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
 omp.h
 -
 graph.h
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.h
 util_parallel.h
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.h
 stdlib.h
 -
 stdio.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.h
 stdio.h
 -
 stdlib.h
@@ -34,7 +34,7 @@ stdlib.h
 string.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.h
 stdlib.h
 -
 time.h
@@ -48,21 +48,21 @@ limits.h
 math.h
 -
 
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.h
 omp.h
 -
 math.h
 -
 util.h
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.h
 
-/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.cpp
+/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.cpp
 boost/config.hpp
 -
 vector
 -
 rcm_boost.h
-/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.h
+/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.h
 boost/config.hpp
 -
 vector
@@ -78,13 +78,13 @@ boost/graph/properties.hpp
 boost/graph/bandwidth.hpp
 -
 
-/home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.h
+/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
 
-/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.cpp
+/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.cpp
 sloan_boost.h
-/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.h
+/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.h
 boost/config.hpp
 -
 vector
@@ -104,7 +104,7 @@ boost/graph/profile.hpp
 boost/graph/wavefront.hpp
 -
 
-/home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.h
+/home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.h
 ../CommonFiles/graph_parallel.h
-/home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.h
+/home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.h
 

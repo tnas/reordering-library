@@ -1,6 +1,6 @@
 #!/bin/sh
-set xrange [0:5177]
-set yrange [0:5177] reverse
+set xrange [0:102158]
+set yrange [0:102158] reverse
 set size square
 set terminal png
 set output "reordered_matrix.png"

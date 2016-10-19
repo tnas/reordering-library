@@ -1,4 +1,4 @@
-# Install script for directory: /home/thiago/Documents/git-projects/reordering-library/UnitTests
+# Install script for directory: /home/thiago/Documents/git-projects/reordering-library.git/UnitTests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

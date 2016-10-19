@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/thiago/Documents/git-projects/reordering-library
+CMAKE_SOURCE_DIR = /home/thiago/Documents/git-projects/reordering-library.git
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/thiago/Documents/git-projects/reordering-library/build
+CMAKE_BINARY_DIR = /home/thiago/Documents/git-projects/reordering-library.git/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/reordering-library.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/reordering-library.dir/flags.make
 
 CMakeFiles/reordering-library.dir/program.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/program.c.o: ../program.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/reordering-library.dir/program.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/program.c.o   -c /home/thiago/Documents/git-projects/reordering-library/program.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/reordering-library.dir/program.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/program.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/program.c
 
 CMakeFiles/reordering-library.dir/program.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/program.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/program.c > CMakeFiles/reordering-library.dir/program.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/program.c > CMakeFiles/reordering-library.dir/program.c.i
 
 CMakeFiles/reordering-library.dir/program.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/program.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/program.c -o CMakeFiles/reordering-library.dir/program.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/program.c -o CMakeFiles/reordering-library.dir/program.c.s
 
 CMakeFiles/reordering-library.dir/program.c.o.requires:
 
@@ -83,16 +83,16 @@ CMakeFiles/reordering-library.dir/program.c.o.provides.build: CMakeFiles/reorder
 
 CMakeFiles/reordering-library.dir/CommonFiles/util.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/util.c.o: ../CommonFiles/util.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/util.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/util.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/util.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/util.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/util.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/util.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.c > CMakeFiles/reordering-library.dir/CommonFiles/util.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.c > CMakeFiles/reordering-library.dir/CommonFiles/util.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/util.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/util.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/util.c -o CMakeFiles/reordering-library.dir/CommonFiles/util.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util.c -o CMakeFiles/reordering-library.dir/CommonFiles/util.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/util.c.o.requires:
 
@@ -107,16 +107,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/util.c.o.provides.build: CMakeFile
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o: ../CommonFiles/matrix.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.c > CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.c > CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix.c -o CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix.c -o CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o.requires:
 
@@ -131,16 +131,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/matrix.c.o.provides.build: CMakeFi
 
 CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o: ../CommonFiles/linked_list.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.c > CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.c > CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/linked_list.c -o CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/linked_list.c -o CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o.requires:
 
@@ -155,16 +155,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/linked_list.c.o.provides.build: CM
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o: ../CommonFiles/graph.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/graph.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.c > CMakeFiles/reordering-library.dir/CommonFiles/graph.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.c > CMakeFiles/reordering-library.dir/CommonFiles/graph.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/graph.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph.c -o CMakeFiles/reordering-library.dir/CommonFiles/graph.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph.c -o CMakeFiles/reordering-library.dir/CommonFiles/graph.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o.requires:
 
@@ -179,16 +179,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/graph.c.o.provides.build: CMakeFil
 
 CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o: ../CommonFiles/util_parallel.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.c > CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.c > CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/util_parallel.c -o CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/util_parallel.c -o CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o.requires:
 
@@ -203,16 +203,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/util_parallel.c.o.provides.build: 
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o: ../CommonFiles/matrix_parallel.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.c > CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.c > CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/matrix_parallel.c -o CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/matrix_parallel.c -o CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o.requires:
 
@@ -227,16 +227,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/matrix_parallel.c.o.provides.build
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o: ../CommonFiles/graph_parallel.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.c > CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.c > CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_parallel.c -o CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_parallel.c -o CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o.requires:
 
@@ -251,16 +251,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/graph_parallel.c.o.provides.build:
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o: ../CommonFiles/graph_hsl.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o   -c /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.c
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.c > CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.c > CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.i
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/CommonFiles/graph_hsl.c -o CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/CommonFiles/graph_hsl.c -o CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.s
 
 CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o.requires:
 
@@ -275,16 +275,16 @@ CMakeFiles/reordering-library.dir/CommonFiles/graph_hsl.c.o.provides.build: CMak
 
 CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o: ../Reorderings/spectral.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o   -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/spectral.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/spectral.c
 
 CMakeFiles/reordering-library.dir/Reorderings/spectral.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/Reorderings/spectral.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/spectral.c > CMakeFiles/reordering-library.dir/Reorderings/spectral.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/spectral.c > CMakeFiles/reordering-library.dir/Reorderings/spectral.c.i
 
 CMakeFiles/reordering-library.dir/Reorderings/spectral.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/Reorderings/spectral.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/spectral.c -o CMakeFiles/reordering-library.dir/Reorderings/spectral.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/spectral.c -o CMakeFiles/reordering-library.dir/Reorderings/spectral.c.s
 
 CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o.requires:
 
@@ -299,16 +299,16 @@ CMakeFiles/reordering-library.dir/Reorderings/spectral.c.o.provides.build: CMake
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o: ../Reorderings/rcm.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o   -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm.c
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/Reorderings/rcm.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm.c > CMakeFiles/reordering-library.dir/Reorderings/rcm.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm.c > CMakeFiles/reordering-library.dir/Reorderings/rcm.c.i
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/Reorderings/rcm.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm.c -o CMakeFiles/reordering-library.dir/Reorderings/rcm.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm.c -o CMakeFiles/reordering-library.dir/Reorderings/rcm.c.s
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o.requires:
 
@@ -323,16 +323,16 @@ CMakeFiles/reordering-library.dir/Reorderings/rcm.c.o.provides.build: CMakeFiles
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o: ../Reorderings/rcm_hsl.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o   -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_hsl.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_hsl.c
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_hsl.c > CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_hsl.c > CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.i
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_hsl.c -o CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_hsl.c -o CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.s
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o.requires:
 
@@ -347,16 +347,16 @@ CMakeFiles/reordering-library.dir/Reorderings/rcm_hsl.c.o.provides.build: CMakeF
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o: ../Reorderings/rcm_parallel.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_parallel.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_parallel.c
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_parallel.c > CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_parallel.c > CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.i
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_parallel.c -o CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_parallel.c -o CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.s
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o.requires:
 
@@ -371,16 +371,16 @@ CMakeFiles/reordering-library.dir/Reorderings/rcm_parallel.c.o.provides.build: C
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o: ../Reorderings/rcm_boost.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.cpp
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.cpp > CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.cpp > CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.i
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/rcm_boost.cpp -o CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/rcm_boost.cpp -o CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.s
 
 CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o.requires:
 
@@ -395,16 +395,16 @@ CMakeFiles/reordering-library.dir/Reorderings/rcm_boost.cpp.o.provides.build: CM
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o: ../Reorderings/sloan.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o   -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan.c
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/Reorderings/sloan.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan.c > CMakeFiles/reordering-library.dir/Reorderings/sloan.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan.c > CMakeFiles/reordering-library.dir/Reorderings/sloan.c.i
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/Reorderings/sloan.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan.c -o CMakeFiles/reordering-library.dir/Reorderings/sloan.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan.c -o CMakeFiles/reordering-library.dir/Reorderings/sloan.c.s
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o.requires:
 
@@ -419,16 +419,16 @@ CMakeFiles/reordering-library.dir/Reorderings/sloan.c.o.provides.build: CMakeFil
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o: ../Reorderings/sloan_hsl.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o   -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_hsl.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_hsl.c
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_hsl.c > CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_hsl.c > CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.i
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_hsl.c -o CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_hsl.c -o CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.s
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o.requires:
 
@@ -443,16 +443,16 @@ CMakeFiles/reordering-library.dir/Reorderings/sloan_hsl.c.o.provides.build: CMak
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o: ../Reorderings/sloan_parallel.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_parallel.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_parallel.c
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_parallel.c > CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_parallel.c > CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.i
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_parallel.c -o CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_parallel.c -o CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.s
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o.requires:
 
@@ -467,16 +467,16 @@ CMakeFiles/reordering-library.dir/Reorderings/sloan_parallel.c.o.provides.build:
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o: ../Reorderings/sloan_boost.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o -c /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o -c /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.cpp
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.cpp > CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.cpp > CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.i
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/Reorderings/sloan_boost.cpp -o CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/sloan_boost.cpp -o CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.s
 
 CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o.requires:
 
@@ -491,16 +491,16 @@ CMakeFiles/reordering-library.dir/Reorderings/sloan_boost.cpp.o.provides.build: 
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o: ../UnitTests/test_suite_reordering.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o   -c /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_reordering.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_reordering.c
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_reordering.c > CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_reordering.c > CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.i
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_reordering.c -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_reordering.c -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.s
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o.requires:
 
@@ -515,16 +515,16 @@ CMakeFiles/reordering-library.dir/UnitTests/test_suite_reordering.c.o.provides.b
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o: ../UnitTests/test_suite_prefixsum.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o   -c /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_prefixsum.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_prefixsum.c
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_prefixsum.c > CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_prefixsum.c > CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.i
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_prefixsum.c -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_prefixsum.c -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.s
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o.requires:
 
@@ -539,16 +539,16 @@ CMakeFiles/reordering-library.dir/UnitTests/test_suite_prefixsum.c.o.provides.bu
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o: ../UnitTests/test_suite_matrix.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o   -c /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_matrix.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_matrix.c
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_matrix.c > CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_matrix.c > CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.i
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_suite_matrix.c -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_suite_matrix.c -o CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.s
 
 CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o.requires:
 
@@ -563,16 +563,16 @@ CMakeFiles/reordering-library.dir/UnitTests/test_suite_matrix.c.o.provides.build
 
 CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o: ../UnitTests/test_graph_parallel.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_graph_parallel.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_graph_parallel.c
 
 CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_graph_parallel.c > CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_graph_parallel.c > CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.i
 
 CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_graph_parallel.c -o CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_graph_parallel.c -o CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.s
 
 CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o.requires:
 
@@ -587,16 +587,16 @@ CMakeFiles/reordering-library.dir/UnitTests/test_graph_parallel.c.o.provides.bui
 
 CMakeFiles/reordering-library.dir/UnitTests/test_util.c.o: CMakeFiles/reordering-library.dir/flags.make
 CMakeFiles/reordering-library.dir/UnitTests/test_util.c.o: ../UnitTests/test_util.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_util.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_util.c.o   -c /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_util.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/reordering-library.dir/UnitTests/test_util.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/reordering-library.dir/UnitTests/test_util.c.o   -c /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_util.c
 
 CMakeFiles/reordering-library.dir/UnitTests/test_util.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/reordering-library.dir/UnitTests/test_util.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_util.c > CMakeFiles/reordering-library.dir/UnitTests/test_util.c.i
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_util.c > CMakeFiles/reordering-library.dir/UnitTests/test_util.c.i
 
 CMakeFiles/reordering-library.dir/UnitTests/test_util.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/reordering-library.dir/UnitTests/test_util.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library/UnitTests/test_util.c -o CMakeFiles/reordering-library.dir/UnitTests/test_util.c.s
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/thiago/Documents/git-projects/reordering-library.git/UnitTests/test_util.c -o CMakeFiles/reordering-library.dir/UnitTests/test_util.c.s
 
 CMakeFiles/reordering-library.dir/UnitTests/test_util.c.o.requires:
 
@@ -665,7 +665,7 @@ reordering-library: CMakeFiles/reordering-library.dir/build.make
 reordering-library: ../Reorderings/hsl_mc73/hsl_mc73d.o
 reordering-library: ../Reorderings/hsl_mc73/libhsl_mc73.a
 reordering-library: CMakeFiles/reordering-library.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Linking CXX executable reordering-library"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Linking CXX executable reordering-library"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/reordering-library.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -704,6 +704,6 @@ CMakeFiles/reordering-library.dir/clean:
 .PHONY : CMakeFiles/reordering-library.dir/clean
 
 CMakeFiles/reordering-library.dir/depend:
-	cd /home/thiago/Documents/git-projects/reordering-library/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/thiago/Documents/git-projects/reordering-library /home/thiago/Documents/git-projects/reordering-library /home/thiago/Documents/git-projects/reordering-library/build /home/thiago/Documents/git-projects/reordering-library/build /home/thiago/Documents/git-projects/reordering-library/build/CMakeFiles/reordering-library.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/thiago/Documents/git-projects/reordering-library.git/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/thiago/Documents/git-projects/reordering-library.git /home/thiago/Documents/git-projects/reordering-library.git /home/thiago/Documents/git-projects/reordering-library.git/build /home/thiago/Documents/git-projects/reordering-library.git/build /home/thiago/Documents/git-projects/reordering-library.git/build/CMakeFiles/reordering-library.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/reordering-library.dir/depend
 

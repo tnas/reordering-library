@@ -1,4 +1,4 @@
-# Install script for directory: /home/thiago/Documents/git-projects/reordering-library/Reorderings/hsl_mc60
+# Install script for directory: /home/thiago/Documents/git-projects/reordering-library.git/Reorderings/hsl_mc60
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

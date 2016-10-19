@@ -309,7 +309,7 @@ void run_all_reordering_tests()
 	float bfs_chunk_percent = .5;
 	
 	char* matrices[] = {
-		"./Big-Matrices/10-hugetric-00000.mtx",
+/*		"./Big-Matrices/10-hugetric-00000.mtx",
 		"./Big-Matrices/09-channel-500x100x100-b050.mtx",
 		"./Big-Matrices/08-NLR.mtx",
 		"./Big-Matrices/07-venturiLevel3.mtx",
@@ -318,7 +318,7 @@ void run_all_reordering_tests()
 		"./Big-Matrices/04-G3_circuit.mtx",
 		"./Big-Matrices/03-dielFilterV3real.mtx",
 		"./Big-Matrices/02-audikw_1.mtx",
-		"./Big-Matrices/01-inline_1.mtx",		
+		"./Big-Matrices/01-inline_1.mtx",*/		
 		
 // 		"../Big-Matrices/delaunay_n24.mtx",
 // 		"../Big-Matrices/road_usa.mtx"
@@ -335,15 +335,15 @@ void run_all_reordering_tests()
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-// 		"../Matrices/FEM_3D_thermal1.mtx"
+// 		"../Matrices/FEM_3D_thermal1.mtx",
+		"../Matrices/thermomech_TC.mtx"
 	};
 	
-	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-// 	int nthreads[] = { 4 };
+// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithm[] = { boost_rcm, unordered_rcm, bucket_rcm };
-// 	reorder_algorithm algorithm[] = { hsl_rcm, unordered_rcm, leveled_rcm, bucket_rcm };
-// 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
+// 	reorder_algorithm algorithm[] = { boost_rcm, unordered_rcm, bucket_rcm };
+	reorder_algorithm algorithm[] = { unordered_rcm };
 	
 	/* *****************
 	 * Tests execution

@@ -19,7 +19,6 @@ add_executable(reordering-library  program.c
 	./Reorderings/rcm_hsl.c
 	./Reorderings/rcm_parallel.c
 	./Reorderings/rcm_boost.cpp
-# 	./Reorderings/rcm_octave.cpp
 	./Reorderings/sloan.c
 	./Reorderings/sloan_hsl.c
 	./Reorderings/sloan_parallel.c
