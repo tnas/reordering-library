@@ -339,11 +339,11 @@ void run_all_reordering_tests()
 // 		"../Matrices/thermomech_TC.mtx"
 	};
 	
-// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	int nthreads[] = { 1 };
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+// 	int nthreads[] = { 1 };
 	
 // 	reorder_algorithm algorithm[] = { boost_rcm, unordered_rcm, bucket_rcm };
-	reorder_algorithm algorithm[] = { hsl_rcm };
+	reorder_algorithm algorithm[] = { bucket_rcm };
 	
 	/* *****************
 	 * Tests execution
