@@ -18,6 +18,11 @@
 #include "rcm_parallel.h"
 
 
+/*----------------------------------------------------------------------------
+ * Auxiliar procedure used to allocation of nodes into a permutation array.
+ * It is supposed to use by the Unordered RCM algorithm in the placement
+ * step.
+ *--------------------------------------------------------------------------*/
 void place(MAT* mat, const int source_node, const int* sums, const int max_dist, int** perm, const int* levels)
 {
 	int level, node, degree, count;
@@ -122,61 +127,9 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 }
 
 /*----------------------------------------------------------------------------
- * Unordered RCM reordering from the LEVEL STRUCTURE 
+ * Implementation of the Unordered RCM algorithm proposed by Karantasis.
  *--------------------------------------------------------------------------*/
-void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk)
-{ 
-	int n_nodes, max_level, count_nodes;
-	int* levels;
-	int* counts;
-	int* sums;
-	int* tperm;
-	
-	n_nodes = A->n;
-	
-	#pragma omp parallel sections
-	{
-		#pragma omp section
-		(*perm) = calloc(n_nodes, sizeof(int));
-		
-		#pragma omp section
-		tperm = calloc(n_nodes, sizeof(int));
-		
-		#pragma omp section
-		levels = calloc(n_nodes, sizeof(int));
-	}
-	
-	GRAPH_parallel_fixedpoint_bfs(A, root, &levels, percent_chunk);
-	
-	max_level = count_nodes_by_level(levels, n_nodes, &counts);
-	
-	prefix_sum(counts, &sums, max_level);
-	
-	place(A, root, sums, max_level, &tperm, levels);
-	
-	#pragma omp parallel 
-	{
-		/* Reverse order */
-		#pragma omp for private (count_nodes)
-		for (count_nodes = 0; count_nodes < n_nodes; ++count_nodes) 
-			(*perm)[n_nodes-1-count_nodes] = tperm[count_nodes]; 
-		
-		#pragma omp single nowait
-		free(levels);
-		
-		#pragma omp single nowait
-		free(counts);
-		
-		#pragma omp single nowait
-		free(sums);
-		
-		#pragma omp single nowait
-		free(tperm);
-	}
-}
-
-
-void Unordered_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root, const float percent_chunk)
+void Unordered_RCM(const METAGRAPH* mgraph, int** perm, int root, const float percent_chunk)
 { 
 	int n_nodes, max_level, count_nodes;
 	int* levels;
@@ -198,8 +151,13 @@ void Unordered_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root, cons
 		levels = calloc(n_nodes, sizeof(int));
 	}
 	
-// 	GRAPH_parallel_fixedpoint_BFS(mgraph, root, &levels, percent_chunk);
-	GRAPH_parallel_fixedpoint_static_BFS(mgraph, root, &levels, percent_chunk);
+	GRAPH_parallel_fixedpoint_BFS(mgraph, root, &levels, percent_chunk);
+// 	GRAPH_parallel_fixedpoint_static_BFS(mgraph, root, &levels, percent_chunk);
+	
+	int node;
+	for (node = 0; node < n_nodes; ++node)
+		printf("%d,", levels[node]);
+	printf("\n");fflush(stdout);
 	
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
 	
@@ -229,227 +187,12 @@ void Unordered_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root, cons
 }
 
 
-void Leveled_RCM(MAT* mat, int** perm, int root) 
-{
-	int graph_size, perm_size, node, perm_offset, size_children, size_offset, node_offset;
-	GRAPH* graph;
-	int* counts;
-	int* psum;
-	int* parent_index;
-	LIST* children;
-	LIST* ch_pointer;
-	
-	graph_size = mat->n;
-	perm_size  = perm_offset = 0;
-	
-	#pragma omp parallel
-	{
-		#pragma omp single nowait
-		*perm  = calloc(graph_size, sizeof(int));
-		
-		#pragma omp single 
-		graph  = calloc(graph_size, sizeof(GRAPH));
-		
-		#pragma omp for private(node)
-		for (node = 0; node < graph_size; ++node)
-		{
-			graph[node].distance = INFINITY_LEVEL;
-			graph[node].parent   = -1;
-			graph[node].chnum    = 0;
-			graph[node].label    = node;
-			graph[node].degree   = GRAPH_degree(mat, node);
-		}
-		
-		#pragma omp single nowait
-		graph[root].distance = 0;
-		
-		#pragma omp single nowait
-		graph[root].parent = NON_VERTEX;
-		
-		#pragma omp single nowait
-		graph[root].chnum = 0;
-		
-		#pragma omp single nowait
-		(*perm)[0] = root;
-		
-		#pragma omp single nowait
-		perm_size++;
-	}
-	
-	while (perm_size < graph_size)
-	{
-		#pragma omp parallel
-		{
-			int n_par, n_ch, degree;
-			int* neighbors;
-			
-			// ******************************
-			// Step 1: Expansion
-			// ******************************
-			
-			#pragma omp single nowait
-			children = NULL;
-			
-			#pragma omp for schedule(static) ordered
-			for (n_par = perm_offset; n_par < perm_size; ++n_par)
-			{
-				degree    = graph[(*perm)[n_par]].degree;
-				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
-				
-				for (n_ch = 0; n_ch < degree; ++n_ch)
-				{
-					if (graph[neighbors[n_ch]].parent == NON_VERTEX) 
-					{
-						#pragma omp critical
-						graph[neighbors[n_ch]].parent = (*perm)[n_par];
-					}
-					
-					
-					if (graph[neighbors[n_ch]].distance > 
-						graph[(*perm)[n_par]].distance)
-					{
-						if (graph[neighbors[n_ch]].distance > 
-							graph[(*perm)[n_par]].distance + 1)
-						{
-							#pragma omp ordered
-							{
-								graph[neighbors[n_ch]].distance =
-									graph[(*perm)[n_par]].distance + 1;
-								children = LIST_insert_IF_NOT_EXIST(children, neighbors[n_ch]);
-							}
-						}
-						
-						if (graph[(*perm)[n_par]].distance < graph[graph[neighbors[n_ch]].parent].distance)
-						{
-							#pragma omp critical
-							graph[neighbors[n_ch]].parent = (*perm)[n_par];
-						}
-					}
-				}
-				
-				free(neighbors);
-			}
-
-		}
-		
-		// ******************************
-		// Step 2: Reduction
-		// ******************************
-		
-		size_children = children->size;
-		ch_pointer    = children;
-		
-		while (ch_pointer != NULL)
-		{
-			graph[graph[ch_pointer->data].parent].chnum++;
-			ch_pointer = ch_pointer->next;
-		}
-		
-		size_offset = perm_size - perm_offset;
-		counts = calloc(size_offset+1, sizeof(int));
-		counts[0] = perm_size;
-		node_offset = 0;
-		
-		for (node = 0; node < size_offset; ++node)
-		{
-			if (graph[(*perm)[node+perm_offset]].chnum > 0)
-			{
-				++node_offset;
-				counts[node_offset] = graph[(*perm)[node+perm_offset]].chnum;
-				graph[(*perm)[node+perm_offset]].index = node_offset - 1;
-			}
-		}
-		
-		// *********************
-		// Step 3: Prefix sum
-		// *********************
-		prefix_sum(counts, &psum, size_offset+1);
-		
-		#pragma omp parallel
-		{
-			int child, ch, num_children, index_children;
-			GRAPH* p_children;
-			
-			#pragma omp single
-			{
-				parent_index  = calloc(size_offset+1, sizeof(int));
-				bcopy(psum, parent_index, (size_offset+1) * sizeof(int));
-			}
-			
-			// *********************
-			// Step 4: Placement
-			// *********************
-			while (children != NULL)
-			{
-				child = NON_VERTEX;
-				
-				#pragma omp critical
-				{
-					if (children != NULL)
-					{
-						child    = LIST_first(children);
-						children = LIST_remove(children, child);
-					}
-				}
-				
-				if (child != NON_VERTEX)
-				{
-					#pragma omp critical
-					{
-						(*perm)[parent_index[graph[graph[child].parent].index]++] = child;
-					}
-					
-					if (parent_index[graph[graph[child].parent].index] == psum[graph[graph[child].parent].index + 1])
-					{
-						num_children   = graph[graph[child].parent].chnum;
-						index_children = psum[graph[graph[child].parent].index];
-						
-						if (num_children > 1)
-						{
-							// Sorting children by degree
-							
-							p_children = calloc(num_children, sizeof(GRAPH));
-							
-							for (ch = 0; ch < num_children; ++ch)
-							{
-								p_children[ch].label  = (*perm)[index_children + ch];
-								p_children[ch].degree = graph[(*perm)[index_children + ch]].degree;
-							}
-							
-							qsort(&((*perm)[index_children]), num_children, sizeof(int), COMPARE_int_ASC);
-							
-							for (ch = 0; ch < num_children; ++ch)
-								(*perm)[index_children + ch] = p_children[ch].label;
-							
-							free(p_children);
-						}
-					}
-				}
-			}
-			
-			#pragma omp barrier
-			
-			#pragma omp single
-			perm_size += size_children;
-			
-			#pragma omp single
-			perm_offset = perm_size - size_children;
-			
-			#pragma omp single nowait
-			free(counts);
-
-			#pragma omp single nowait
-			free(psum);
-			
-			#pragma omp single nowait
-			free(parent_index);
-		}
-	}
-	
-	free(graph);
-}
-
-void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root) 
+/*----------------------------------------------------------------------------
+ * Free implementation of the Leveled RCM proposed by Karantasis.
+ * It uses a dynamic FIFO queue as data structure for node management 
+ * among levels.
+ *--------------------------------------------------------------------------*/
+void Leveled_RCM(METAGRAPH* mgraph, int** perm, int root) 
 {
 	int graph_size, perm_size, node, perm_offset, size_children, size_offset, node_offset;
 	int* counts;
@@ -649,161 +392,12 @@ void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root)
 }
 
 
-void Bucket_RCM(MAT* mat, int** perm, int root) 
-{ 
-	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads,
-		children_offset_gen, generation_size, gen_pos_reference;
-	GRAPH* graph;
-	genealogy* generation;
-	
-	graph_size = mat->n;
-	perm_size  = perm_offset = total_size_children = 0;
-	
-	#pragma omp parallel
-	{
-		int node, n_par, n_ch, degree, pos_child_gen, pos_parent_gen, gen_pos, num_children;
-		int* neighbors;
-		
-		#pragma omp single nowait
-		num_threads = omp_get_num_threads();
-		
-		#pragma omp single nowait
-		*perm  = calloc(graph_size, sizeof(int));
-		
-		#pragma omp single 
-		graph  = calloc(graph_size, sizeof(GRAPH));
-		
-		#pragma omp for
-		for (node = 0; node < graph_size; ++node)
-		{
-			graph[node].label    = node;
-			graph[node].distance = INFINITY_LEVEL;
-			graph[node].parent   = NON_VERTEX;
-			graph[node].status   = UNREACHED;
-			graph[node].degree   = GRAPH_degree(mat, node);
-		}
-		
-		#pragma omp single nowait
-		graph[root].distance = 0;
-		
-		#pragma omp single nowait
-		graph[root].status = LABELED;
-		
-		#pragma omp single nowait
-		(*perm)[0] = root;
-		
-		#pragma omp single nowait
-		perm_size++;
-		
-		#pragma omp barrier
-	
-		while (perm_size < graph_size)
-		{
-			pos_child_gen = 0;
-			
-			#pragma omp single
-			generation_size = perm_size - perm_offset;
-			
-			#pragma omp single nowait
-			chunk_size = ceil((float) generation_size / num_threads);
-			
-			#pragma omp single 
-			generation = calloc(generation_size, sizeof(genealogy));
-			
-			#pragma omp for schedule(static, chunk_size) ordered
-			for (n_par = perm_offset; n_par < perm_size; ++n_par)
-			{
-				degree    = graph[(*perm)[n_par]].degree;
-				neighbors = GRAPH_adjacent(mat, (*perm)[n_par]);
-				
-				pos_parent_gen = n_par - perm_offset;
-				generation[pos_parent_gen].num_children = 0;
-				generation[pos_parent_gen].children = calloc(degree, sizeof(GRAPH));
-				
-				// Processing children from a parent
-				for (n_ch = 0; n_ch < degree; ++n_ch)
-				{
-					if (graph[neighbors[n_ch]].parent == NON_VERTEX)
-						graph[neighbors[n_ch]].parent = (*perm)[n_par];
-					
-					if (graph[neighbors[n_ch]].distance > graph[(*perm)[n_par]].distance)
-					{
-						if (graph[neighbors[n_ch]].distance > graph[(*perm)[n_par]].distance + 1)
-						{
-							#pragma omp ordered
-							{
-								graph[neighbors[n_ch]].distance = graph[(*perm)[n_par]].distance + 1;
-									
-								if (graph[neighbors[n_ch]].status == UNREACHED)
-								{
-									graph[neighbors[n_ch]].status = LABELED;
-									generation[pos_parent_gen].children[generation[pos_parent_gen].num_children++] =  graph[neighbors[n_ch]];
-								}
-							}
-						}
-					}
-				}
-				
-				free(neighbors);
-			}
-			
-			#pragma omp single nowait
-			total_size_children = 0;
-			
-			#pragma omp single nowait
-			children_offset_gen = 0;
-			
-			#pragma omp single
-			gen_pos_reference = 0;
-			
-			while (gen_pos_reference < generation_size)
-			{
-				gen_pos = generation_size;
-				
-				#pragma omp critical
-				{
-					if (gen_pos_reference < generation_size)
-					{
-						gen_pos       = gen_pos_reference++;
-						num_children  = generation[gen_pos].num_children;
-						pos_child_gen = gen_pos + perm_size + children_offset_gen;
-						children_offset_gen += num_children - 1; // excluding itself node
-						total_size_children += num_children;
-					}
-				}
-				
-				if (gen_pos < generation_size)
-				{
-					qsort(generation[gen_pos].children, num_children, sizeof(GRAPH), COMPARE_degr_ASC);
-				
-					for (node = 0; node < num_children; ++node)
-						(*perm)[pos_child_gen + node] = generation[gen_pos].children[node].label;
-				}
-			}
-				
-			#pragma omp barrier
-			
-			#pragma omp for
-			for (node = 0; node < generation_size; ++node)
-				free(generation[node].children);
-			
-			#pragma omp single nowait
-			free(generation);
-			
-			#pragma omp single
-			perm_size += total_size_children;
-			
-			#pragma omp single
-			perm_offset = perm_size - total_size_children;
-
-		}
-	}
-		
-	free(graph);
-}
-
-
-void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root) 
+/*----------------------------------------------------------------------------
+ * Implementation of parallel RCM based on the Leveled RCM algorithm 
+ * proposed by Karantasis. It uses a static Bucket as data structure for node 
+ * management among levels.
+ *--------------------------------------------------------------------------*/
+void Bucket_RCM(const METAGRAPH* mgraph, int** perm, int root) 
 { 
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads,
 		children_offset_gen, generation_size, gen_pos_reference;
@@ -811,7 +405,6 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 	
 	graph_size = mgraph->size;
 	perm_size  = perm_offset = total_size_children = 0;
-	root = 1;
 	
 	#pragma omp parallel
 	{
@@ -878,7 +471,6 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 								if (mgraph->graph[neighbors[n_ch]].status == UNREACHED)
 								{
 									mgraph->graph[neighbors[n_ch]].status = LABELED;
-// 									printf("Setting %d at bucket %d\n", mgraph->graph[neighbors[n_ch]].label, pos_parent_gen);
 									generation[pos_parent_gen].children[generation[pos_parent_gen].num_children++] =  mgraph->graph[neighbors[n_ch]];
 								}
 							}
@@ -886,19 +478,6 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 					}
 				}
 			}
-			
-// 			#pragma omp single
-// 			{
-// 				int i, j;
-// 				for (i = 0; i < generation_size; ++i)
-// 				{
-// 					printf("Bucket %d: ", i);
-// 					for (j = 0; j < generation[i].num_children; ++j)
-// 						printf("%d ", generation[i].children[j].label);
-// 					printf("\n");
-// 				}
-// 				printf("-----------------------------------------------\n");
-// 			}
 			
 			#pragma omp single nowait
 			total_size_children = 0;
@@ -951,3 +530,112 @@ void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root)
 		}
 	}
 }
+
+
+/*----------------------------------------------------------------------------
+ * Evolution of the Bucket RCM. All algorithm steps are executed in a 
+ * same loop. The placement are executed node by node (parent) instead of
+ * bucket by bucket as executed by original Bucket RCM.
+ * 
+ * @since 21-10-2016
+ *--------------------------------------------------------------------------*/
+void Bucket_RCM_shrinked(const METAGRAPH* mgraph, int** perm, int root) 
+{ 
+	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads, generation_size;
+	
+	graph_size = mgraph->size;
+	perm_size  = perm_offset = total_size_children = 0;
+	
+	#pragma omp parallel
+	{
+		int node, n_par, n_ch, degree, num_children;
+		int* neighbors;
+		genealogy generation;
+		
+		#pragma omp single nowait
+		num_threads = omp_get_num_threads();
+		
+		#pragma omp single nowait
+		{
+			*perm  = calloc(graph_size, sizeof(int));
+			(*perm)[0] = root;
+		}
+		
+		#pragma omp single nowait
+		mgraph->graph[root].distance = 0;
+		
+		#pragma omp single nowait
+		mgraph->graph[root].status = LABELED;
+		
+		#pragma omp single nowait
+		perm_size++;
+		
+		#pragma omp barrier
+	
+		while (perm_size < graph_size)
+		{
+			#pragma omp single
+			generation_size = perm_size - perm_offset;
+			
+			#pragma omp single nowait
+			chunk_size = ceil((float) generation_size / num_threads);
+			
+			#pragma omp single nowait
+			total_size_children = 0;
+			
+			#pragma omp for schedule(static, chunk_size) ordered
+			for (n_par = perm_offset; n_par < perm_size; ++n_par)
+			{
+				degree    = mgraph->graph[(*perm)[n_par]].degree;
+				neighbors = mgraph->graph[(*perm)[n_par]].neighboors;
+				
+				generation.num_children = 0;
+				generation.children = calloc(degree, sizeof(GRAPH));
+				
+				// Processing children from a parent
+				for (n_ch = 0; n_ch < degree; ++n_ch)
+				{
+					if (mgraph->graph[neighbors[n_ch]].parent == NON_VERTEX)
+						mgraph->graph[neighbors[n_ch]].parent = (*perm)[n_par];
+					
+					if (mgraph->graph[neighbors[n_ch]].distance > mgraph->graph[(*perm)[n_par]].distance)
+					{
+						if (mgraph->graph[neighbors[n_ch]].distance > mgraph->graph[(*perm)[n_par]].distance + 1)
+						{
+							#pragma omp ordered
+							{
+								mgraph->graph[neighbors[n_ch]].distance = mgraph->graph[(*perm)[n_par]].distance + 1;
+									
+								if (mgraph->graph[neighbors[n_ch]].status == UNREACHED)
+								{
+									mgraph->graph[neighbors[n_ch]].status = LABELED;
+									generation.children[generation.num_children++] =  mgraph->graph[neighbors[n_ch]];
+								}
+							}
+						}
+					}
+				}
+				
+				// Placement
+				#pragma omp ordered
+				{
+					num_children = generation.num_children;
+					
+					for (node = 0; node < num_children; ++node)
+						(*perm)[perm_size + total_size_children + node] = generation.children[node].label;
+					
+					total_size_children += num_children;
+				}
+				
+				free(generation.children);
+			}
+			
+			#pragma omp single
+			perm_size += total_size_children;
+			
+			#pragma omp single
+			perm_offset = perm_size - total_size_children;
+		}
+	}
+}
+

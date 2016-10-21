@@ -329,40 +329,42 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 			
 			if (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
 			{
-				#pragma omp critical
-				{
-					if (lock_tail < tail) lock_tail = tail;
-					th_tail = lock_tail;
-					size_chunk = cache_tail - cache_head;
-					lock_tail += size_chunk;
-				}
-				
-				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
-				{
-					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
-					QUEUE_enque(&work_set, ws_size, &th_tail, active_node);
-				}
-				
-				#pragma omp critical
-				{
-					if (th_tail > tail) tail = th_tail;
-				}
-				
 // 				#pragma omp critical
 // 				{
-// 					th_tail = tail;
+// 					if (lock_tail < tail) lock_tail = tail;
+// 					th_tail = lock_tail;
 // 					size_chunk = cache_tail - cache_head;
-// 				
-// 					for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
-// 					{
-// 						active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
-// 						QUEUE_enque(&work_set, ws_size, &th_tail, active_node);
-// 					}
-// 					
-// 					tail = th_tail;
+// 					lock_tail += size_chunk;
 // 				}
+// 				
+// 				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
+// 				{
+// 					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
+// 					QUEUE_enque(&work_set, ws_size, &th_tail, active_node);
+// 				}
+// 				
+// 				#pragma omp critical
+// 				{
+// 					if (th_tail > tail) tail = th_tail;
+// 				}
+				
+				#pragma omp critical
+				{
+					th_tail = tail;
+					size_chunk = cache_tail - cache_head;
+				
+					for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
+					{
+						active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
+						QUEUE_enque(&work_set, ws_size, &th_tail, active_node);
+					}
+					
+					tail = th_tail;
+				}
 			}
 		}
+		
+// 		printf("thread %d has finished.\n", omp_get_thread_num());fflush(stdout);
 		
 		free(active_chunk_ws);
 		free(cache_work_set);

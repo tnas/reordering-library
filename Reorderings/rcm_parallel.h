@@ -20,9 +20,7 @@
 #include "reordering.h"
 
 
-void Unordered_RCM(MAT* A, int** perm, int root, const float percent_chunk);
-void Unordered_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root, const float percent_chunk);
-void Leveled_RCM(MAT* mat, int** perm, int root);
-void Leveled_RCM_METAGRAPH(METAGRAPH* mgraph, int** perm, int root);
-void Bucket_RCM(MAT* mat, int** perm, int root);
-void Bucket_RCM_METAGRAPH(const METAGRAPH* mgraph, int** perm, int root);
+void Unordered_RCM		(const METAGRAPH* mgraph, int** perm, int root, const float percent_chunk);
+void Leveled_RCM		(METAGRAPH* mgraph, int** perm, int root);
+void Bucket_RCM			(const METAGRAPH* mgraph, int** perm, int root);
+void Bucket_RCM_shrinked	(const METAGRAPH* mgraph, int** perm, int root) ;

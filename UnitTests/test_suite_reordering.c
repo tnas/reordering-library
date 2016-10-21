@@ -155,7 +155,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Unordered RCM";
 			defs.algorithm      = unordered_rcm;
 			time = omp_get_wtime();
-			Unordered_RCM_METAGRAPH(mgraph, &permutation, defs.root, defs.percent_chunk);
+			Unordered_RCM(mgraph, &permutation, defs.root, defs.percent_chunk);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -163,7 +163,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Leveled RCM";
 			defs.algorithm      = leveled_rcm;
 			time = omp_get_wtime();
-			Leveled_RCM_METAGRAPH(mgraph, &permutation, defs.root);
+			Leveled_RCM(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -171,7 +171,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
 			time = omp_get_wtime(); 
-			Bucket_RCM_METAGRAPH(mgraph, &permutation, defs.root);
+			Bucket_RCM(mgraph, &permutation, defs.root);
+// 			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -340,7 +341,7 @@ void run_all_reordering_tests()
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-// 	int nthreads[] = { 1 };
+// 	int nthreads[] = { 8 };
 	
 // 	reorder_algorithm algorithm[] = { boost_rcm, unordered_rcm, bucket_rcm };
 	reorder_algorithm algorithm[] = { bucket_rcm };
