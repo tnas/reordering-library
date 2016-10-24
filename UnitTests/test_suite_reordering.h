@@ -36,7 +36,7 @@
 #include "../Reorderings/sloan_boost.h"
 
 
-#define TEST_EXEC_TIMES 10
+#define TEST_EXEC_TIMES 1
 
 typedef enum {
 	serial_rcm,

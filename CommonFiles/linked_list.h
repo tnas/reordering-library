@@ -11,14 +11,14 @@
 inline static void QUEUE_enque(int** queue, const int size, int* tail_index, const int value)
 {
 	(*queue)[*tail_index] = value;
-	*tail_index = (*tail_index + 1) % (size + 1);
+	*tail_index = (*tail_index + 1) % size;
 }
 
 // Dequeue operation (removes a node from the head)
 inline static int QUEUE_deque(int** queue, int size, int* head_index)
 {
 	int value = (*queue)[*head_index];
-	*head_index = (*head_index + 1) % (size + 1);
+	*head_index = (*head_index + 1) % size;
 	return value;
 }
 

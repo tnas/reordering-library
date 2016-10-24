@@ -206,7 +206,11 @@ void MATRIX_read_from_path(const char* path_matrix_file, MAT** matrix)
 	FILE* matrix_file;
 	
 	if ((matrix_file = fopen(path_matrix_file, "r")) == NULL) 
+	{
+		fprintf (stderr,"\n [MATRIX_read_from_path] Error: File %s could not be opened. \n\n",
+			path_matrix_file);
 		exit(1);
+	}
 	
 	*matrix = (MAT*) malloc(sizeof(MAT));
 	MATRIX_readCSR(*matrix, matrix_file);

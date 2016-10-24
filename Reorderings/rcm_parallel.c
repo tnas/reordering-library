@@ -33,6 +33,8 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 	const int num_threads = omp_get_max_threads();
 	omp_lock_t locks[num_threads];
 	
+	int nth = 0;
+	
 	#pragma omp parallel private(level, node, children, degree, count)
 	{
 		#pragma omp single nowait
@@ -70,6 +72,9 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 		
 		while (level < max_dist - 1)
 		{
+			#pragma omp critical
+			printf("thread %d - level: %d\n", omp_get_thread_num(), level);fflush(stdout);
+			
 			while (read_offset[level] != sums[level+1]) // There are nodes to read
 			{
 				#pragma omp flush (write_offset)
@@ -109,7 +114,13 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 			level += num_threads;
 		}
 		
+		#pragma omp atomic
+		++nth;
+		
 		#pragma omp barrier
+		
+		#pragma omp single
+		printf("Num threads finished place: %d\n", nth);fflush(stdout);
 		
 		#pragma omp single nowait
 		free(read_offset);
@@ -128,6 +139,8 @@ void place(MAT* mat, const int source_node, const int* sums, const int max_dist,
 
 /*----------------------------------------------------------------------------
  * Implementation of the Unordered RCM algorithm proposed by Karantasis.
+ * It was presented at CNMAC 2016 - Congresso Nacional de Matemática
+ * Aplicada e Computacional.
  *--------------------------------------------------------------------------*/
 void Unordered_RCM(const METAGRAPH* mgraph, int** perm, int root, const float percent_chunk)
 { 
@@ -151,15 +164,33 @@ void Unordered_RCM(const METAGRAPH* mgraph, int** perm, int root, const float pe
 		levels = calloc(n_nodes, sizeof(int));
 	}
 	
-	GRAPH_parallel_fixedpoint_BFS(mgraph, root, &levels, percent_chunk);
-// 	GRAPH_parallel_fixedpoint_static_BFS(mgraph, root, &levels, percent_chunk);
+// 	printf("root: %d\n", root); fflush(stdout);
+// 	GRAPH_parallel_fixedpoint_BFS(mgraph, root, &levels, percent_chunk);
+	GRAPH_parallel_fixedpoint_static_BFS(mgraph, root, &levels, percent_chunk);
+
 	
-	int node;
-	for (node = 0; node < n_nodes; ++node)
-		printf("%d,", levels[node]);
-	printf("\n");fflush(stdout);
+// 	int node;
+// 	for (node = 0; node < n_nodes; ++node)
+// 	{
+// 		if (levels[node] != levels_pat[node])
+// 			printf("Position %d value pat-notpat [%d-%d]\n", node, levels_pat[node], levels[node]);
+// 	}
+	
+	
+// 	FILE* out_file;
+// 	if ((out_file = fopen("levels_rcm.txt", "w")) == NULL) exit(1);
+// 	
+// 	int node;
+// 	for (node = 0; node < n_nodes; ++node)
+// 	{
+// 		fprintf(out_file, "%d,", levels[node]);
+// 		if (node % 50 == 0) fprintf(out_file, "\n");
+// 	}
+// 	fclose(out_file);
 	
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);
+	
+	printf("max_level: %d\n", max_level);fflush(stdout);
 	
 	prefix_sum(counts, &sums, max_level);
 	
@@ -190,7 +221,8 @@ void Unordered_RCM(const METAGRAPH* mgraph, int** perm, int root, const float pe
 /*----------------------------------------------------------------------------
  * Free implementation of the Leveled RCM proposed by Karantasis.
  * It uses a dynamic FIFO queue as data structure for node management 
- * among levels.
+ * among levels. It was presented at SBPO 2016 - Simpósio Brasileiro de
+ * Pesquisa Operacional.
  *--------------------------------------------------------------------------*/
 void Leveled_RCM(METAGRAPH* mgraph, int** perm, int root) 
 {
@@ -395,7 +427,8 @@ void Leveled_RCM(METAGRAPH* mgraph, int** perm, int root)
 /*----------------------------------------------------------------------------
  * Implementation of parallel RCM based on the Leveled RCM algorithm 
  * proposed by Karantasis. It uses a static Bucket as data structure for node 
- * management among levels.
+ * management among levels. It was presented at SBPO 2016 - Simpósio Brasileiro 
+ * de Pesquisa Operacional.
  *--------------------------------------------------------------------------*/
 void Bucket_RCM(const METAGRAPH* mgraph, int** perm, int root) 
 { 
