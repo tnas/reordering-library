@@ -234,152 +234,6 @@ void GRAPH_parallel_fixedpoint_BFS(const METAGRAPH* mgraph, int root, int** leve
 }
 
 
-
-
-void GRAPH_parallel_fixedpoint_static_BFS_old(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
-{
-	int node, n_nodes, ws_size, has_unreached_nodes, tail, head, lock_tail;
-	int* work_set;
-	
-	n_nodes = mgraph->size;
-	ws_size = 2 * n_nodes; // oversizing estimate
-	
-	int cth = 0;
-	#pragma omp parallel 
-	{
-		int active_node, adj_node, node_degree, count_nodes, level, 
-		    count_chunk, size_chunk;
-		int* neighboors;
-		int* cache_work_set;
-		int* active_chunk_ws;
-		int th_head, th_tail, active_head, active_tail, cache_head, cache_tail;
-		
-		#pragma omp for private(node)
-		for (node = 0; node < n_nodes; ++node) 
-			(*levels)[node] = INFINITY_LEVEL;
-		
-		#pragma omp sections 
-		{
-			#pragma omp section
-			(*levels)[root] = 0;
-			
-			#pragma omp section
-			{
-				work_set = calloc(2*n_nodes, sizeof(int)); 
-				tail = head = 0;
-				QUEUE_enque(&work_set, n_nodes, &tail, root);
-			}
-			
-			#pragma omp section
-			has_unreached_nodes = n_nodes - 1;
-		}
-		
-		active_chunk_ws = calloc(n_nodes, sizeof(int));
-		active_head = active_tail = 0;
-		
-		cache_work_set = calloc(n_nodes, sizeof(int));
-		cache_head = cache_tail = 0;
-		
-		while ((!QUEUE_empty(work_set, head, tail)) || has_unreached_nodes > 0) 
-		{
-			if (!QUEUE_empty(work_set, head, tail)) 
-			{
-				#pragma omp critical
-				{
-					th_tail = tail;
-					th_head = head;	
-					size_chunk = ceil(percent_chunk * (th_tail - th_head));
-					head += size_chunk;
-					
-// 					printf("thread %d set head to %d by adding chunck of %d [%d, %d]\n", omp_get_thread_num(), head, size_chunk, th_head, th_tail);fflush(stdout);
-				}
-				
-				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
-				{
-					active_node = QUEUE_deque(&work_set, ws_size, &th_head);
-					QUEUE_enque(&active_chunk_ws, n_nodes, &active_tail, active_node);
-				}
-			}
-			
-			// Fixed Point Iteration
-			while (!QUEUE_empty(active_chunk_ws, active_head, active_tail))
-			{
-				active_node = QUEUE_deque(&active_chunk_ws, n_nodes, &active_head);
-				
-				neighboors  = mgraph->graph[active_node].neighboors;
-				node_degree = mgraph->graph[active_node].degree;
-				
-				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
-				{
-					adj_node = neighboors[count_nodes];
-					level    = (*levels)[active_node] + 1;
-					
-					#pragma omp critical
-					{
-						if (level < (*levels)[adj_node])
-						{
-							if ((*levels)[adj_node] == INFINITY_LEVEL) 
-								--has_unreached_nodes;
-							
-							(*levels)[adj_node] = level;
-							
-							QUEUE_enque(&cache_work_set, n_nodes, &cache_tail, adj_node);
-						}
-					}
-				}
-			}
-			
-			if (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
-			{
-				#pragma omp critical
-				{
-					if (lock_tail < tail) lock_tail = tail;
-					th_tail = lock_tail;
-					size_chunk = cache_tail - cache_head;
-					lock_tail += size_chunk;
-				}
-				
-				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
-				{
-					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
-					QUEUE_enque(&work_set, ws_size, &th_tail, active_node);
-				}
-				
-				#pragma omp critical
-				{
-					if (th_tail > tail) tail = th_tail;
-				}
-				
-// 				#pragma omp critical
-// 				{
-// 					th_tail = tail;
-// 					size_chunk = cache_tail - cache_head;
-// 				
-// 					for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
-// 					{
-// 						active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
-// 						QUEUE_enque(&work_set, ws_size, &th_tail, active_node);
-// 					}
-// 					
-// 					tail = th_tail;
-// 				}
-			}
-		}
-		
-		#pragma omp atomic
-		++cth;
-		
-		free(active_chunk_ws);
-		free(cache_work_set);
-	}
-	
-	printf("Num threads finished: %d\n", cth); fflush(stdout);
-	free(work_set);
-}
-
-
-	
-
 void GRAPH_parallel_fixedpoint_static_BFS_original(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
 {
 	int node, n_nodes, ws_size, has_unreached_nodes, size_workset, tail, head;
@@ -403,7 +257,7 @@ void GRAPH_parallel_fixedpoint_static_BFS_original(const METAGRAPH* mgraph, int 
 	
 	omp_init_lock(&lock);
 	
-	#pragma omp parallel 
+	#pragma omp parallel shared(head, tail)
 	{
 		int active_node, adj_node, node_degree, count_nodes, level, count_chunk;
 		int* neighboors;
@@ -432,6 +286,8 @@ void GRAPH_parallel_fixedpoint_static_BFS_original(const METAGRAPH* mgraph, int 
 				{
 					active_node = QUEUE_deque(&work_set, ws_size, &head);
 					--size_workset;
+// 					if (size_workset != (tail - head))
+// 						printf("Deque: tail %d, head %d, size %d\n", tail, head, size_workset);fflush(stdout);
 					QUEUE_enque(&active_chunk_ws, n_nodes, &active_tail, active_node);
 					++count_chunk;
 				}
@@ -474,8 +330,11 @@ void GRAPH_parallel_fixedpoint_static_BFS_original(const METAGRAPH* mgraph, int 
 				while (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
 				{
 					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
+// 					printf("QUEUE(th %d): tail %d, head %d\n", omp_get_thread_num(), tail, head);fflush(stdout);
 					QUEUE_enque(&work_set, ws_size, &tail, active_node);
 					++size_workset;
+// 					if (size_workset != (tail - head))
+// 						printf(">>>>>>>>>>>>>QUEUE: tail %d, head %d, size %d\n", tail, head, size_workset);fflush(stdout);
 				}
 				
 				omp_unset_lock(&lock);
@@ -485,10 +344,11 @@ void GRAPH_parallel_fixedpoint_static_BFS_original(const METAGRAPH* mgraph, int 
 		free(active_chunk_ws);
 		free(cache_work_set);
 	}
-	
+// 	printf("head: %d, tail: %d\n", head, tail);fflush(stdout);
 	free(work_set);
 	omp_destroy_lock(&lock);
 }
+
 
 void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
 {
@@ -516,7 +376,7 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 	#pragma omp parallel 
 	{
 		int active_node, adj_node, node_degree, count_nodes, level, count_chunk, 
-	            th_head, th_tail, span;
+	            th_head, th_tail, th_size_workset;
 		int* neighboors;
 		int* cache_work_set;
 		int* active_chunk_ws;
@@ -538,40 +398,19 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 				omp_set_lock(&lock);
 				th_tail = tail;
 				th_head = head;	
-				span    = th_tail - th_head;
-				
-				if (head + 30 > tail)
-				{
-					
-				}
-				else 
-				{
-				}
-				
-// 				size_chunk = span;
-// 				size_chunk = percent_chunk * span > 1 ? trunc(percent_chunk * span) : 1;
-// 				head += size_chunk;
-				omp_unset_lock(&lock);	
-				
-// 				size_chunk = percent_chunk * span > 1 ? trunc(percent_chunk * span) : 1;				
-// 				size_chunk = ceil(percent_chunk * span);
-// 				if (head + size_chunk > tail) head += span;
-// 				else head += size_chunk;
-// 				size_chunk = th_tail - th_head;
-// 				printf("th_head: %d, th_tail: %d, percent: %f, size_chunk: %f\n", th_head, th_tail, percent_chunk * (th_tail - th_head),  size_chunk);fflush(stdout);
-// 				if (size_chunk > 0) size_chunk = 1;
-// 				printf("th_head: %d, th_tail: %d, size_chunk: %f\n", th_head, th_tail, size_chunk);fflush(stdout);
-// 				if (size_chunk < 0) printf("th_head: %d, th_tail: %d, size_chunk: %f\n", th_head, th_tail, size_chunk);fflush(stdout);
-// 				if (head + size_chunk > tail)
-// 				{
-// 					printf("th_head: %d, th_tail: %d, size_chunk: %f\n", th_head, th_tail, size_chunk);fflush(stdout);
-// 				}
-// 				
-
+				th_size_workset = size_workset;
+				size_chunk = percent_chunk * th_size_workset;
+				head += size_chunk;
+				printf("th_head: %d, th_tail: %d, th_size_workset: %d\n", th_head, th_tail, th_size_workset);fflush(stdout);
+				omp_unset_lock(&lock);
 				
 				while ((!QUEUE_empty(work_set, th_head, th_tail)) && count_chunk < size_chunk)
 				{
 					active_node = QUEUE_deque(&work_set, ws_size, &th_head);
+					
+					#pragma omp atomic
+					--size_workset;
+					
 					QUEUE_enque(&active_chunk_ws, n_nodes, &active_tail, active_node);
 					++count_chunk;
 				}
@@ -627,6 +466,7 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 				{
 					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
 					QUEUE_enque(&work_set, ws_size, &tail, active_node);
+					#pragma omp atomic
 					++size_workset;
 				}
 				
@@ -644,7 +484,7 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 	omp_destroy_lock(&lock);
 }
 
-void GRAPH_parallel_fixedpoint_static_BFS_new(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
+void GRAPH_parallel_fixedpoint_static_BFS_definitive_new(const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk)
 {
 	int node, n_nodes, ws_size, has_unreached_nodes, tail, head, virtual_tail;
 	int* work_set;
