@@ -153,8 +153,6 @@ void Unordered_RCM(const METAGRAPH* mgraph, int** perm, int root, const float pe
 		levels = calloc(n_nodes, sizeof(int));
 	}
 	
-// 	printf("root: %d\n", root); fflush(stdout);
-// 	GRAPH_parallel_fixedpoint_BFS(mgraph, root, &levels, percent_chunk);
 	GRAPH_parallel_fixedpoint_static_BFS(mgraph, root, &levels, percent_chunk);
 	
 	max_level = count_nodes_by_level(levels, n_nodes, &counts);

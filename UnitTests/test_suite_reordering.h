@@ -50,7 +50,6 @@ typedef enum {
 	parallel_sloan,
 	boost_rcm,
 	boost_sloan,
-	octave_rcm
 } reorder_algorithm;
 
 

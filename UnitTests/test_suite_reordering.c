@@ -171,8 +171,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
 			time = omp_get_wtime(); 
-			Bucket_RCM(mgraph, &permutation, defs.root);
-// 			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
+// 			Bucket_RCM(mgraph, &permutation, defs.root);
+			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -180,7 +180,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Parallel Sloan";
 			defs.algorithm      = parallel_sloan;
 			time = omp_get_wtime();
-			Parallel_Sloan_METAGRAPH(mgraph, &permutation, defs.start_node, defs.end_node);
+			Parallel_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -195,17 +195,9 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm       = boost_sloan;
 			defs.time_reordering = Boost_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			break;
-		
-// 		case octave_rcm : // t = 11
-// 			defs.algorithm_name  = "Octave RCM";
-// 			defs.algorithm       = octave_rcm;
-// 			time = omp_get_wtime();
-// 			Octave_RCM(mgraph, &permutation, defs.root);
-// 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
-// 			break;
 			
 		default :
-			printf("*** [Error] Algorithm must be between 0 and 11 ***\n");
+			printf("*** [Error] Algorithm must be between 0 and 10 ***\n");
 			exit(1);
 	}
 	
@@ -328,20 +320,20 @@ void run_all_reordering_tests()
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/hsl.mtx",
 // 		"../Matrices/sample.mtx",
-		"../Matrices/bcspwr01.mtx",
+// 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
-// 		"../Matrices/thermomech_TC.mtx"
+		"../Matrices/thermomech_TC.mtx"
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	int nthreads[] = { 128 };
+	int nthreads[] = { 4 };
 	
-// 	reorder_algorithm algorithm[] = { boost_rcm, unordered_rcm, bucket_rcm };
-	reorder_algorithm algorithm[] = { unordered_rcm };
+	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
+// 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	
 	/* *****************
 	 * Tests execution

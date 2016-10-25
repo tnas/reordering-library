@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-# project(reordering-library C CXX Fortran)
 project(reordering-library)
-
-# set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 add_executable(reordering-library  program.c 
 	./CommonFiles/util.c 
@@ -31,7 +28,6 @@ add_executable(reordering-library  program.c
 	
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
-# include_directories(/usr/include/octave-4.0.2/octave)
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(reordering-library ${Boost_LIBRARIES})
@@ -43,8 +39,6 @@ install(TARGETS reordering-library RUNTIME DESTINATION bin)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -o3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fopenmp -o3")
-
-# set_property(TARGET reordering-library PROPERTY LINKER_LANGUAGE CXX)
 
 add_subdirectory(CommonFiles)
 add_subdirectory(Matrices)
