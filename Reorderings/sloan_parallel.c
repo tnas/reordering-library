@@ -311,6 +311,8 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 		#pragma omp single nowait
 		size_bags  = calloc(num_nodes^2, sizeof(LIST*)); // oversizing estimate
 		
+		
+		
 		#pragma omp single nowait
 		min_priority = INFINITY_LEVEL;
 		
