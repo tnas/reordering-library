@@ -22,9 +22,18 @@
 #define SLOAN_CURR_PRIOR 0
 #define SLOAN_NEW_PRIOR 1
 
-typedef enum { 
+typedef enum 
+{ 
 	INACTIVE, PREACTIVE, ACTIVE, NUMBERED 
 	
 } SLOAN_STATE;
+
+typedef struct 
+{
+	int priority;
+	int head;
+	int tail;
+	int* elements;
+} priority_set;
 
 void Parallel_Sloan	(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
