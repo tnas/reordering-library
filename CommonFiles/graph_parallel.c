@@ -135,7 +135,7 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 	omp_lock_t lock;
 	
 	n_nodes = mgraph->size;
-	ws_size = omp_get_max_threads() * n_nodes; // oversizing estimate
+	ws_size = (omp_get_max_threads() + 1) * n_nodes; // oversizing estimate
 	
 	#pragma omp parallel 
 	{
