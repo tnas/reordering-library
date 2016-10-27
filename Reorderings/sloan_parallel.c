@@ -266,42 +266,28 @@ void Parallel_Sloan_original(const METAGRAPH* mgraph, int** permutation, int sta
 }
 
 
-inline static void prioritize_node(const int* priority, const int node, const int num_nodes, priority_set* th_max_priority_set)
-{
-	if (priority[node] > th_max_priority_set->priority)
-	{
-		th_max_priority_set->priority = priority[node];
-		th_max_priority_set->head = th_max_priority_set->tail = 0;
-		QUEUE_enque(&th_max_priority_set->elements, num_nodes, &(th_max_priority_set->tail), node);
-	}
-	else if (priority[node] == th_max_priority_set->priority)
-	{
-		QUEUE_enque(&th_max_priority_set->elements, num_nodes, &(th_max_priority_set->tail), node);
-	}
-}
-
 
 void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
-	int num_nodes, next_id, num_threads, chunk_size;
+	int num_nodes, next_id, num_threads, chunk_size, min_priority, max_priority, num_prior_bags;
 	int* distance;
-	int* priority;
+	bag* bags_priority;
 	int* status;
 	int* degree;
+	int* priority;
 	omp_lock_t* lock_priority;
-	priority_set* max_priority_set;
 	
 	num_nodes = mgraph->size;
-	distance  = calloc(num_nodes, sizeof (int));
+	distance  = calloc(num_nodes, sizeof(int));
 	GRAPH_parallel_fixedpoint_static_BFS(mgraph, end_node, &distance, BFS_PERCENT_CHUNK);
 	
 	#pragma omp parallel 
 	{
 		int node, index_vertex, vertex, vertex_degree, neighbor, ngb, neighbor_degree, 
-		    far_ngb, far_neighbor, update_far;
+		    far_ngb, far_neighbor, update_far, th_min_priority, th_max_priority, n_bag;
 		int* neighbors;
 		int* far_neighbors;
-		priority_set* th_max_priority_set;
+		bag* th_max_priority_set;
 		
 		#pragma omp sections
 		{
@@ -316,33 +302,26 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 			*permutation = calloc(num_nodes, sizeof(int));
 			
 			#pragma omp section
-			priority = calloc(num_nodes, sizeof(int));
-			
-			#pragma omp section
 			lock_priority = malloc(num_nodes * sizeof(omp_lock_t));
 			
 			#pragma omp section
 			status = calloc(num_nodes, sizeof(int));
 			
 			#pragma omp section
+			priority = calloc(num_nodes, sizeof(int));
+			
+			#pragma omp section
 			degree = calloc(num_nodes, sizeof(int));
 			
 			#pragma omp section
-			{
-				max_priority_set           = malloc(sizeof(priority_set));
-				max_priority_set->priority = -INFINITY_LEVEL;
-				max_priority_set->head     = 0;
-				max_priority_set->tail     = 0;
-				max_priority_set->elements = calloc(num_nodes, sizeof(int));
-			}
+			min_priority = INFINITY_LEVEL;
+			
+			#pragma omp section
+			max_priority = -INFINITY_LEVEL;
 		}
 		
-		// Thread-local maximum priority set
-		th_max_priority_set           = malloc(sizeof(priority_set));
-		th_max_priority_set->priority = -INFINITY_LEVEL;
-		th_max_priority_set->head     = 0;
-		th_max_priority_set->tail     = 0;
-		th_max_priority_set->elements = calloc(num_nodes, sizeof(int));
+		th_min_priority = INFINITY_LEVEL;
+		th_max_priority = -INFINITY_LEVEL;
 		
 		/* ********************************
 		 * ****** Pre-processing **********
@@ -355,44 +334,62 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 			status[node]   = INACTIVE;
 			degree[node]   = mgraph->graph[node].degree;
 			priority[node] = SLOAN_W1*distance[node] - SLOAN_W2*(degree[node] + 1);
-			printf("node: %d, priority: %d\n", node, priority[node]);fflush(stdout);
 			
-			// Thread-local maximmum priority
-			if (priority[node] >= th_max_priority_set->priority)
-				prioritize_node(priority, node, num_nodes, th_max_priority_set);
+			if (priority[node] > th_max_priority) th_max_priority = priority[node];
+			if (priority[node] < th_min_priority) th_min_priority = priority[node];
 		}
 		
-		// Defining initial maximum priority 
+		// Defining initial minimum and maximum priority 
 		#pragma omp critical
 		{
-			if (th_max_priority_set->priority > max_priority_set->priority)
-				max_priority_set->priority = th_max_priority_set->priority;
+			if (th_max_priority > max_priority) max_priority = th_max_priority;
+			if (th_min_priority < min_priority) min_priority = th_min_priority;
 		}
 		
 		#pragma omp barrier
 		
-		// Defining initial maximum priority set
-		#pragma omp critical
+		/* ********************************
+		 * *** Generating Priority Bags ***
+		 * ********************************
+		 */
+		
+		#pragma omp single
 		{
-			if (th_max_priority_set->priority == max_priority_set->priority)
-			{
-				for (node = th_max_priority_set->head; node < th_max_priority_set->tail; ++node)
-					QUEUE_enque(&max_priority_set->elements, num_nodes, 
-							&(max_priority_set->tail), th_max_priority_set->elements[node]);
-			}
+			// oversizing estimate
+			num_prior_bags = SLOAN_PRIORITY_FACTOR * (priority[start_node] - min_priority); 
+			bags_priority = malloc(num_prior_bags * sizeof(bag));
 		}
 		
-		// Reseting each thread-local max priority set
-		th_max_priority_set->priority = -INFINITY_LEVEL;
-		th_max_priority_set->head = th_max_priority_set->tail = 0;
+		// Initializing priority bags
+		#pragma omp for 
+		for (n_bag = 0; n_bag < num_prior_bags; ++n_bag)
+		{
+			bags_priority[n_bag].elements = calloc(num_nodes, sizeof(int));
+			omp_init_lock(&bags_priority[n_bag].lock);
+		}
 		
-		#pragma omp single nowait
-		status[start_node] = PREACTIVE; 
+		// Loading priority bags
+		#pragma omp for schedule(static, chunk_size)
+		for (node = 0; node < num_nodes; ++node)
+		{
+			priority[node] -= min_priority;
+			
+			omp_set_lock(&(bags_priority[priority[node]].lock));
+			QUEUE_enque(&(bags_priority[priority[node]].elements), num_nodes, &(bags_priority[priority[node]].tail), node);
+			omp_unset_lock(&(bags_priority[priority[node]].lock));
+		}
 		
-		#pragma omp single nowait
-		next_id = 0;
-		
-		#pragma omp barrier
+		#pragma omp sections
+		{
+			#pragma omp section
+			max_priority -= min_priority;
+			
+			#pragma omp section
+			status[start_node] = PREACTIVE; 
+			
+			#pragma omp section
+			next_id = 0;
+		}
 		
 		/* ************************************
 		 * ********** Processing nodes ********
@@ -402,13 +399,15 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 		{
 			// Processing maximum priority set of nodes
 			#pragma omp for schedule(static, chunk_size)
-			for (index_vertex = max_priority_set->head; 
-			     index_vertex < max_priority_set->tail - max_priority_set->head; ++index_vertex)
+			for (index_vertex = bags_priority[max_priority].head; 
+			     index_vertex < bags_priority[max_priority].tail - bags_priority[max_priority].head; ++index_vertex)
 			{
-				vertex        = max_priority_set->elements[index_vertex];
+				vertex        = bags_priority[max_priority].elements[index_vertex];
 				neighbors     = mgraph->graph[vertex].neighboors;
 				vertex_degree = mgraph->graph[vertex].degree;
-				printf("processing node %d with priority %d\n", vertex, priority[vertex]);fflush(stdout);
+// 				printf("processing node %d with priority %d\n", vertex, priority[vertex]);fflush(stdout);
+				
+				if (status[vertex] == NUMBERED) continue;
 				
 				for (ngb = 0; ngb < vertex_degree; ++ngb)
 				{
@@ -421,15 +420,22 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 						{
 							omp_set_lock(&lock_priority[neighbor]);
 							priority[neighbor] += SLOAN_W2;
-							prioritize_node(priority, neighbor, num_nodes, th_max_priority_set);
 							omp_unset_lock(&lock_priority[neighbor]);
+							
+							omp_set_lock(&(bags_priority[priority[node]].lock));
+							QUEUE_enque(&(bags_priority[priority[node]].elements), num_nodes, &(bags_priority[priority[node]].tail), neighbor);
+							omp_unset_lock(&(bags_priority[priority[node]].lock));
+			
 						}
 						else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
 						{
 							omp_set_lock(&lock_priority[neighbor]);
 							priority[neighbor] += SLOAN_W2;
-							prioritize_node(priority, neighbor, num_nodes, th_max_priority_set);
 							omp_unset_lock(&lock_priority[neighbor]);
+							
+							omp_set_lock(&(bags_priority[priority[node]].lock));
+							QUEUE_enque(&(bags_priority[priority[node]].elements), num_nodes, &(bags_priority[priority[node]].tail), neighbor);
+							omp_unset_lock(&(bags_priority[priority[node]].lock));
 							
 							#pragma omp critical
 							status[neighbor] = ACTIVE;
@@ -441,8 +447,11 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 					{
 						omp_set_lock(&lock_priority[neighbor]);
 						priority[neighbor] += SLOAN_W2;
-						prioritize_node(priority, neighbor, num_nodes, th_max_priority_set);
 						omp_unset_lock(&lock_priority[neighbor]);
+						
+						omp_set_lock(&(bags_priority[priority[node]].lock));
+						QUEUE_enque(&(bags_priority[priority[node]].elements), num_nodes, &(bags_priority[priority[node]].tail), neighbor);
+						omp_unset_lock(&(bags_priority[priority[node]].lock));
 						
 						#pragma omp critical
 						status[neighbor] = ACTIVE;
@@ -471,14 +480,20 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 								
 								omp_set_lock(&lock_priority[far_neighbor]);
 								priority[far_neighbor] += SLOAN_W2;
-								prioritize_node(priority, far_neighbor, num_nodes, th_max_priority_set);
 								omp_unset_lock(&lock_priority[far_neighbor]);
+								
+								omp_set_lock(&(bags_priority[priority[node]].lock));
+								QUEUE_enque(&(bags_priority[priority[node]].elements), num_nodes, &(bags_priority[priority[node]].tail), far_neighbor);
+								omp_unset_lock(&(bags_priority[priority[node]].lock));
 							}
 							
 							omp_set_lock(&lock_priority[far_neighbor]);
 							priority[neighbor] += SLOAN_W2;
-							prioritize_node(priority, far_neighbor, num_nodes, th_max_priority_set);
 							omp_unset_lock(&lock_priority[far_neighbor]);
+							
+							omp_set_lock(&(bags_priority[priority[node]].lock));
+							QUEUE_enque(&(bags_priority[priority[node]].elements), num_nodes, &(bags_priority[priority[node]].tail), far_neighbor);
+							omp_unset_lock(&(bags_priority[priority[node]].lock));
 						}
 					}
 				}
@@ -491,12 +506,9 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 				}
 			}
 			
-			// Reseting max priority set
-			#pragma omp single
-			{
-				max_priority_set->priority = -INFINITY_LEVEL;
-				max_priority_set->head = max_priority_set->tail = 0;
-			}
+			// Cleaning last processed max priority bag
+			#pragma omp single nowait
+			bags_priority[max_priority].head = bags_priority[max_priority].tail = 0;
 			
 			// Defining next max priority set
 			#pragma omp critical

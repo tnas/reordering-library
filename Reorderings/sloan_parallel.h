@@ -30,10 +30,10 @@ typedef enum
 
 typedef struct 
 {
-	int priority;
 	int head;
 	int tail;
 	int* elements;
-} priority_set;
+	omp_lock_t lock;
+} bag;
 
 void Parallel_Sloan	(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
