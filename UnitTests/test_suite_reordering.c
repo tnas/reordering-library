@@ -330,7 +330,7 @@ void run_all_reordering_tests()
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12, 14, 16 };
-	int nthreads[] = { 16 };
+	int nthreads[] = { 8 };
 	
 // 	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
 	reorder_algorithm algorithm[] = { parallel_sloan };
