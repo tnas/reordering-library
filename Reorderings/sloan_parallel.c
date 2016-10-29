@@ -270,12 +270,14 @@ void Parallel_Sloan_original(const METAGRAPH* mgraph, int** permutation, int sta
 void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, num_threads, chunk_size, min_priority, 
-	    max_priority, num_prior_bags, count_threads_on;
+	    max_priority, num_prior_bags, count_threads_on, size_max_bag, 
+	    c_node, max_processed_priority;
 	int* distance;
 	bag* bags_priority;
 	int* status;
 	int* degree;
 	int* priority;
+	int* max_bag;
 	omp_lock_t* lock_priority;
 	
 	num_nodes = mgraph->size;
@@ -313,6 +315,9 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 			
 			#pragma omp section
 			degree = calloc(num_nodes, sizeof(int));
+			
+			#pragma omp section
+			max_bag = calloc(num_nodes, sizeof(int));
 			
 			#pragma omp section
 			min_priority = INFINITY_LEVEL;
@@ -353,7 +358,6 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 		 * *** Generating Priority Bags ***
 		 * ********************************
 		 */
-		th_max_priority = max_priority;
 		
 		#pragma omp single
 		{
@@ -398,18 +402,7 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 			count_threads_on = 0;
 		}
 		
-		#pragma omp critical
-		{
-			printf("thead %d - ready for processing\n", omp_get_thread_num());
-			fflush(stdout);
-		}
-		
 		#pragma omp barrier
-		
-		#pragma omp single
-		{
-			printf("------------------------------------------\n");fflush(stdout);
-		}
 		
 		/* ************************************
 		 * ********** Processing nodes ********
@@ -417,47 +410,70 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 		
 		while (next_id < num_nodes)
 		{
-			#pragma omp critical
-			{
-				printf("thead %d - running\n", omp_get_thread_num());fflush(stdout);
-			}
-		
+// 			#pragma omp critical
+// 			{
+// 				printf("thead %d - running\n", omp_get_thread_num());fflush(stdout);
+// 			}
+			th_max_priority = -INFINITY_LEVEL;
+			
+			// Copying current max priority bag
 			#pragma omp single	
 			{
 				printf("Priority Bag [%d]: ", max_priority);fflush(stdout);
-				for (index_vertex = bags_priority[max_priority].head; 
-					index_vertex < bags_priority[max_priority].tail - bags_priority[max_priority].head; ++index_vertex)
-				     printf("%d ", bags_priority[max_priority].elements[index_vertex]);
+				size_max_bag = bags_priority[max_priority].tail - bags_priority[max_priority].head;
+				c_node = 0;
+				
+				for (index_vertex = bags_priority[max_priority].head; index_vertex < size_max_bag; ++index_vertex)
+				{
+					max_bag[c_node++] = bags_priority[max_priority].elements[index_vertex];
+					printf("%d ", bags_priority[max_priority].elements[index_vertex]);
+				}
 				printf("\n");fflush(stdout);
+			}
+			
+			#pragma omp sections
+			{
+				// Cleaning current processed max priority bag
+				#pragma omp section
+				bags_priority[max_priority].tail = 0;	
+				
+				#pragma omp section
+				max_processed_priority = -INFINITY_LEVEL;
 			}
 			
 			#pragma omp atomic
 			++count_threads_on;
 					
-			// Processing maximum priority set of nodes
-			#pragma omp for schedule(static, chunk_size)
-			for (index_vertex = bags_priority[max_priority].head; 
-			     index_vertex < bags_priority[max_priority].tail - bags_priority[max_priority].head; ++index_vertex)
+			// Processing maximum priority bag of nodes
+			#pragma omp for 
+			for (index_vertex = 0; index_vertex < size_max_bag; ++index_vertex)
 			{
-				vertex        = bags_priority[max_priority].elements[index_vertex];
+				vertex        = max_bag[index_vertex];
 				neighbors     = mgraph->graph[vertex].neighboors;
 				vertex_degree = mgraph->graph[vertex].degree;
-				printf("[th %d]processing node %d with priority %d\n", omp_get_thread_num(), vertex, priority[vertex]);fflush(stdout);
+				printf("[th %d]processing node %d(d=%d) with priority %d from position %d\n", omp_get_thread_num(), vertex, vertex_degree, priority[vertex], index_vertex);fflush(stdout);
 				
-				if (status[vertex] == NUMBERED) continue;
+				if (status[vertex] == NUMBERED) 
+				{
+					printf("[th %d]descarding NUMBERED node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+					continue;
+				}
 				
 				for (ngb = 0; ngb < vertex_degree; ++ngb)
 				{
 					update_far = OFF;
 					neighbor   = neighbors[ngb];
+// 					printf("[th %d]processing neighboor [%d/%d]\n", omp_get_thread_num(), ngb, vertex_degree);fflush(stdout);
 					
 					if (status[vertex] == PREACTIVE)
 					{
 						if (status[neighbor] == ACTIVE)
 						{
 							omp_set_lock(&lock_priority[neighbor]);
+							printf("[th %d]>>>LOCK neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
 							priority[neighbor] += SLOAN_W2;
 							if (priority[neighbor] > th_max_priority) th_max_priority = priority[neighbor];
+							printf("[th %d]<<<UNLOCK neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
 							omp_unset_lock(&lock_priority[neighbor]);
 							
 							omp_set_lock(&(bags_priority[priority[neighbor]].lock));
@@ -468,8 +484,10 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 						else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
 						{
 							omp_set_lock(&lock_priority[neighbor]);
+							printf("[th %d]>>>LOCK neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
 							priority[neighbor] += SLOAN_W2;
 							if (priority[neighbor] > th_max_priority) th_max_priority = priority[neighbor];
+							printf("[th %d]<<<UNLOCK neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
 							omp_unset_lock(&lock_priority[neighbor]);
 							
 							omp_set_lock(&(bags_priority[priority[neighbor]].lock));
@@ -485,8 +503,10 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 					else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
 					{
 						omp_set_lock(&lock_priority[neighbor]);
+						printf("[th %d]>>>LOCK neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
 						priority[neighbor] += SLOAN_W2;
 						if (priority[neighbor] > th_max_priority) th_max_priority = priority[neighbor];
+						printf("[th %d]<<<UNLOCK neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
 						omp_unset_lock(&lock_priority[neighbor]);
 						
 						omp_set_lock(&(bags_priority[priority[neighbor]].lock));
@@ -519,8 +539,10 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 								status[far_neighbor] = PREACTIVE;
 								
 								omp_set_lock(&lock_priority[far_neighbor]);
+								printf("[th %d]>>>LOCK far_neighboor %d\n", omp_get_thread_num(), far_neighbor);fflush(stdout);
 								priority[far_neighbor] += SLOAN_W2;
 								if (priority[far_neighbor] > th_max_priority) th_max_priority = priority[far_neighbor];
+								printf("[th %d]<<<UNLOCK far_neighboor %d\n", omp_get_thread_num(), far_neighbor);fflush(stdout);
 								omp_unset_lock(&lock_priority[far_neighbor]);
 								
 								omp_set_lock(&(bags_priority[priority[far_neighbor]].lock));
@@ -529,8 +551,10 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 							}
 							
 							omp_set_lock(&lock_priority[far_neighbor]);
-							priority[neighbor] += SLOAN_W2;
+							printf("[th %d]>>>LOCK far_neighboor %d\n", omp_get_thread_num(), far_neighbor);fflush(stdout);
+							priority[far_neighbor] += SLOAN_W2;
 							if (priority[far_neighbor] > th_max_priority) th_max_priority = priority[far_neighbor];
+							printf("[th %d]<<<UNLOCK far_neighboor %d\n", omp_get_thread_num(), far_neighbor);fflush(stdout);
 							omp_unset_lock(&lock_priority[far_neighbor]);
 							
 							omp_set_lock(&(bags_priority[priority[far_neighbor]].lock));
@@ -543,32 +567,41 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 				// Placing vertex in permutation array
 				#pragma omp critical
 				{
-// 					printf("nextid %d, vertex %d\n", next_id, vertex);fflush(stdout);
-					(*permutation)[next_id++] = vertex;
-					status[vertex] = NUMBERED;
+					if (status[vertex] != NUMBERED)
+					{
+						printf("[th %d] --> permut: nextid %d, vertex %d\n", omp_get_thread_num(), next_id, vertex);fflush(stdout);
+						(*permutation)[next_id++] = vertex;
+						status[vertex] = NUMBERED;
+					}
+					else
+					{
+						printf("[th %d] not permut NUMBERED node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+					}
 				}
 			}
 			
-			// Cleaning last processed max priority bag
-			#pragma omp single nowait
-			bags_priority[max_priority].head = bags_priority[max_priority].tail = 0;
-			
-			// Defining next max priority 
+			// Defining max processed priority 
 			#pragma omp critical
-			if (th_max_priority > max_priority) max_priority = th_max_priority;
+			{
+				printf("[th %d] max_processed_priority: %d\n", omp_get_thread_num(), th_max_priority);fflush(stdout);
+			if (th_max_priority > max_processed_priority) 
+				max_processed_priority = th_max_priority;
+			}
 			
 			#pragma omp atomic
 			--count_threads_on;
 					
 			while (count_threads_on > 0); // Barrier
 			
-			// Defining nex max priority bag
+			// Defining next max priority bag
 			#pragma omp single
 			{
 				printf("------------------------------------------rrr\n");fflush(stdout);
-				
-				if (QUEUE_empty(bags_priority[max_priority], bags_priority[max_priority].head, 
-					bags_priority[max_priority].tail))
+				if (max_processed_priority >= max_priority)
+				{
+					max_priority = max_processed_priority;
+				}
+				else
 				{
 					// Searching nex max priority bag
 					for (p_bag = max_priority; p_bag >= 0; --p_bag)
@@ -646,14 +679,17 @@ void Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, 
 			
 			#pragma omp section
 			free(bags_priority);
+			
+			#pragma omp section
+			free(max_bag);
 		}
 		
 
 		
-		#pragma omp critical
-		{
-			printf("thread %d has finished!\n", omp_get_thread_num());fflush(stdout);
-		}
+// 		#pragma omp critical
+// 		{
+// 			printf("thread %d has finished!\n", omp_get_thread_num());fflush(stdout);
+// 		}
 	}
 	
 	printf("sloan is over!\n");fflush(stdout);

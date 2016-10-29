@@ -319,9 +319,9 @@ void run_all_reordering_tests()
 // 		"../Matrices/fidapm08.mtx",
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/hsl.mtx",
-		"../Matrices/sample.mtx",
+// 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
-// 		"../Matrices/can24.mtx",
+		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
@@ -330,7 +330,7 @@ void run_all_reordering_tests()
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12, 14, 16 };
-	int nthreads[] = { 8 };
+	int nthreads[] = { 4 };
 	
 // 	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
 	reorder_algorithm algorithm[] = { parallel_sloan };
