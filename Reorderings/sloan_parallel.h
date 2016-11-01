@@ -36,4 +36,4 @@ typedef struct
 	omp_lock_t lock;
 } bag;
 
-void Parallel_Sloan	(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
+double Parallel_Sloan	(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);

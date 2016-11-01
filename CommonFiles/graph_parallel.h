@@ -48,6 +48,7 @@ typedef struct
 	int vertex_min_degree;
 	int size;
 	int edges;
+	omp_lock_t* lock_node;
 } METAGRAPH; 
 
 typedef struct 

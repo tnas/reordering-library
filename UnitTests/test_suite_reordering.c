@@ -171,17 +171,17 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
 			time = omp_get_wtime(); 
-// 			Bucket_RCM(mgraph, &permutation, defs.root);
-			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
+			Bucket_RCM(mgraph, &permutation, defs.root);
+// 			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		case parallel_sloan : // t = 8
 			defs.algorithm_name = "Parallel Sloan";
 			defs.algorithm      = parallel_sloan;
-			time = omp_get_wtime();
-			Parallel_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
-			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+// 			time = omp_get_wtime();
+			defs.time_reordering = Parallel_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
+// 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		case boost_rcm : // t = 9
@@ -321,9 +321,9 @@ void run_all_reordering_tests()
 // 		"../Matrices/hsl.mtx",
 // 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
-		"../Matrices/can24.mtx",
+// 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx",
+		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/thermomech_TC.mtx"
@@ -333,7 +333,7 @@ void run_all_reordering_tests()
 	int nthreads[] = { 4 };
 	
 // 	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
-	reorder_algorithm algorithm[] = { parallel_sloan };
+	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan };
 	
 	/* *****************
 	 * Tests execution

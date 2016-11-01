@@ -260,11 +260,12 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 	size_graph = mat->n;
 	min_degree = INFINITY_LEVEL;
 	
-	meta_graph        = malloc(sizeof(METAGRAPH));
-	meta_graph->size  = size_graph;
-	meta_graph->graph = malloc(size_graph * sizeof(GRAPH));
-	meta_graph->mat   = mat;
-	meta_graph->edges = mat->nz;
+	meta_graph            = malloc(sizeof(METAGRAPH));
+	meta_graph->size      = size_graph;
+	meta_graph->graph     = malloc(size_graph * sizeof(GRAPH));
+	meta_graph->mat       = mat;
+	meta_graph->edges     = mat->nz;
+	meta_graph->lock_node = malloc(size_graph * sizeof(omp_lock_t));
 	
 	#pragma omp parallel 
 	{
@@ -283,6 +284,7 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 			meta_graph->graph[node].label      = node;
 			meta_graph->graph[node].degree     = GRAPH_degree(mat, node);
 			meta_graph->graph[node].neighboors = GRAPH_adjacent(mat, node);
+			omp_init_lock(&meta_graph->lock_node[node]); 
 			
 			if (meta_graph->graph[node].degree < local_min_degree)
 			{
@@ -615,11 +617,15 @@ void inline GRAPH_parallel_destroy_METAGRAPH(METAGRAPH* mgraph)
 	size_graph = mgraph->size;
 	
 	#pragma omp parallel for schedule(static) private(node)
-	for (node = 0; node < size_graph; ++node)
+	for (node = 0; node < size_graph; ++node) 
+	{
 		free(mgraph->graph[node].neighboors);
+		omp_destroy_lock(&mgraph->lock_node[node]);
+	}
 	
 	MATRIX_clean(mgraph->mat);
 	free(mgraph->graph);
+	free(mgraph->lock_node);
 	free(mgraph);
 }
 
