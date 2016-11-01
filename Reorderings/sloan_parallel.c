@@ -284,7 +284,7 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 	int* degree;
 	int* priority;
 	int* max_bag;
-	double time;
+	double time, time_pre, time_pos;
 	
 	num_nodes = mgraph->size;
 	distance  = calloc(num_nodes, sizeof(int));
@@ -298,7 +298,8 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 		int* neighbors;
 		int* far_neighbors;
 		
-		
+		#pragma omp single
+		time_pre = omp_get_wtime();
 		
 		#pragma omp sections
 		{
@@ -406,6 +407,12 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 		
 		#pragma omp barrier
 		
+		#pragma omp single
+		{
+			time_pre = (omp_get_wtime() - time_pre)/100.0;
+			printf("Time pre-processing: %lf\n", time_pre);fflush(stdout);
+		}
+		
 		/* ************************************
 		 * ********** Processing nodes ********
 		 * ************************************/
@@ -413,6 +420,8 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 		#pragma omp single
 		time = omp_get_wtime();
 		
+		// TODO: criar caches de bags priority para somente após o consumo da inteira bag corrente
+		// as threads descarregarem na lista de priority bags
 		while (next_id < num_nodes)
 		{
 // 			#pragma omp critical
@@ -476,7 +485,6 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 						if (status[neighbor] == ACTIVE)
 						{
 							omp_set_lock(&mgraph->lock_node[neighbor]);
-							
 							priority[neighbor] += SLOAN_W2;
 							if (priority[neighbor] > th_max_priority) th_max_priority = priority[neighbor];
 							add_bag(&bags_priority[priority[neighbor]].elements, num_nodes, &bags_priority[priority[neighbor]].tail, neighbor);
@@ -527,7 +535,6 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 							if (status[far_neighbor] == INACTIVE)
 							{
 								omp_set_lock(&mgraph->lock_node[far_neighbor]);
-								
 								priority[far_neighbor] += SLOAN_W2;
 								if (priority[far_neighbor] > th_max_priority) th_max_priority = priority[far_neighbor];
 								if (status[far_neighbor] == INACTIVE) status[far_neighbor] = PREACTIVE;
@@ -536,7 +543,6 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 							}
 							
 							omp_set_lock(&mgraph->lock_node[far_neighbor]);
-							
 							priority[far_neighbor] += SLOAN_W2;
 							if (priority[far_neighbor] > th_max_priority) th_max_priority = priority[far_neighbor];
 							add_bag(&(bags_priority[priority[far_neighbor]].elements), num_nodes, &(bags_priority[priority[far_neighbor]].tail), far_neighbor);
@@ -602,7 +608,10 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 		 * ********************************
 		 */
 		#pragma omp single
-		time = (omp_get_wtime() - time)/100.0;
+		{
+			time = (omp_get_wtime() - time)/100.0;
+			printf("Time processing: %lf\n", time);fflush(stdout);
+		}
 		
 // 		#pragma omp single
 // 		{
@@ -616,6 +625,9 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 // 			printf("thread %d - num_prior_bags %d\n", omp_get_thread_num(), num_prior_bags);
 // 			fflush(stdout);
 // 		}
+		
+		#pragma omp single
+		time_pos = omp_get_wtime();
 		
 		#pragma omp for 
 		for (n_bag = 0; n_bag < num_prior_bags; ++n_bag)
@@ -644,9 +656,15 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 			#pragma omp section
 			free(max_bag);
 		}
+		
+		#pragma omp single
+		{
+			time_pos = (omp_get_wtime() - time_pos)/100.0;
+			printf("Time pos-processing: %lf\n", time_pos);fflush(stdout);
+		}
 	}
 	
-	return time;
+	return time + time_pre + time_pos;
 // 	printf("sloan is over!\n");fflush(stdout);
 }
 
