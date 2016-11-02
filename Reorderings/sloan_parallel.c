@@ -273,7 +273,7 @@ static inline void add_bag(int** elements, const int num_nodes, int* tail, const
 }
 
 
-double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
+double Parallel_Sloan_v1(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, num_threads, chunk_size, min_priority, 
 	    max_priority, num_prior_bags, count_threads_on, size_max_bag, 
@@ -624,6 +624,419 @@ double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node
 // 		{
 // 			printf("thread %d - num_prior_bags %d\n", omp_get_thread_num(), num_prior_bags);
 // 			fflush(stdout);
+// 		}
+		
+		#pragma omp single
+		time_pos = omp_get_wtime();
+		
+		#pragma omp for 
+		for (n_bag = 0; n_bag < num_prior_bags; ++n_bag)
+		{
+			free(bags_priority[n_bag].elements);
+			omp_destroy_lock(&bags_priority[n_bag].lock);
+		}
+		
+		#pragma omp sections
+		{
+			#pragma omp section
+			free(distance);
+			
+			#pragma omp section
+			free(status);
+			
+			#pragma omp section
+			free(degree);
+			
+			#pragma omp section
+			free(priority);
+			
+			#pragma omp section
+			free(bags_priority);
+			
+			#pragma omp section
+			free(max_bag);
+		}
+		
+		#pragma omp single
+		{
+			time_pos = (omp_get_wtime() - time_pos)/100.0;
+			printf("Time pos-processing: %lf\n", time_pos);fflush(stdout);
+		}
+	}
+	
+	return time + time_pre + time_pos;
+// 	printf("sloan is over!\n");fflush(stdout);
+}
+
+
+
+double Parallel_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
+{
+	int num_nodes, next_id, num_threads, chunk_size, min_priority, 
+	    max_priority, second_max_priority, num_prior_bags, size_max_bag, 
+	    max_processed_priority, count_threads_on;
+	int* distance;
+	bag* bags_priority;
+	int* status;
+	int* degree;
+	int* priority;
+	int* max_bag;
+	double time, time_pre, time_pos;
+	
+	num_nodes = mgraph->size;
+	distance  = calloc(num_nodes, sizeof(int));
+	GRAPH_parallel_fixedpoint_static_BFS(mgraph, end_node, &distance, BFS_PERCENT_CHUNK);
+	
+	#pragma omp parallel 
+	{
+		int node, index_vertex, vertex, vertex_degree, neighbor, ngb, neighbor_degree, 
+		    far_ngb, far_neighbor, update_far, th_min_priority, th_fst_max_priority, 
+		    th_scd_max_priority, n_bag, p_bag, tail_bag_change, th_next_id;
+		int* neighbors;
+		int* far_neighbors;
+		GRAPH* bag_change;
+		
+		#pragma omp single
+		time_pre = omp_get_wtime();
+		
+		#pragma omp sections
+		{
+			#pragma omp section
+			{
+				num_threads = omp_get_num_threads();
+				chunk_size = num_nodes / num_threads;
+				chunk_size = chunk_size > 0 ? chunk_size : 1;
+			}
+			
+			#pragma omp section
+			*permutation = calloc(num_nodes, sizeof(int));
+			
+			#pragma omp section
+			status = calloc(num_nodes, sizeof(int));
+			
+			#pragma omp section
+			priority = calloc(num_nodes, sizeof(int));
+			
+			#pragma omp section
+			degree = calloc(num_nodes, sizeof(int));
+			
+			#pragma omp section
+			max_bag = calloc(num_nodes, sizeof(int));
+			
+			#pragma omp section
+			min_priority = INFINITY_LEVEL;
+			
+			#pragma omp section
+			max_priority = -INFINITY_LEVEL;
+			
+			#pragma omp section
+			second_max_priority = -INFINITY_LEVEL;
+			
+			#pragma omp section
+			count_threads_on = 0;
+		}
+		
+		bag_change      = malloc((num_nodes/2) * sizeof(GRAPH));
+		tail_bag_change = 0;
+		th_min_priority = INFINITY_LEVEL;
+		th_fst_max_priority = -INFINITY_LEVEL;
+		th_scd_max_priority = -INFINITY_LEVEL;
+		
+		/* ********************************
+		 * ****** Pre-processing **********
+		 * ********************************
+		 */
+		#pragma omp for schedule(static, chunk_size)
+		for (node = 0; node < num_nodes; ++node)
+		{
+			status[node]   = INACTIVE;
+			degree[node]   = mgraph->graph[node].degree;
+			priority[node] = SLOAN_W1*distance[node] - SLOAN_W2*(degree[node] + 1);
+			
+			if (priority[node] > th_fst_max_priority)
+			{
+				th_scd_max_priority = th_fst_max_priority;
+				th_fst_max_priority = priority[node];
+			}
+			
+			if (priority[node] < th_min_priority) th_min_priority = priority[node];
+		}
+		
+		// Defining initial minimum and maximum priority 
+		#pragma omp critical
+		{
+			if (th_fst_max_priority > max_priority) 
+			{
+				if (th_scd_max_priority > max_priority)
+				{
+					second_max_priority = th_scd_max_priority;
+				}
+				else
+				{
+					second_max_priority = max_priority;
+				}
+				
+				max_priority  = th_fst_max_priority;
+			}
+			else if (th_fst_max_priority > second_max_priority)
+			{
+				second_max_priority = th_fst_max_priority;
+			}
+			
+			if (th_min_priority < min_priority) min_priority = th_min_priority;
+		}
+		
+		#pragma omp barrier
+		
+		/* ********************************
+		 * *** Generating Priority Bags ***
+		 * ********************************
+		 */
+		
+		#pragma omp single
+		{
+			// oversizing estimate
+			num_prior_bags = SLOAN_PRIORITY_FACTOR * (priority[start_node] - min_priority); 
+			bags_priority = malloc(num_prior_bags * sizeof(bag));
+		}
+		
+		// Initializing priority bags
+		#pragma omp for 
+		for (n_bag = 0; n_bag < num_prior_bags; ++n_bag)
+		{
+			bags_priority[n_bag].elements = calloc(num_nodes, sizeof(int));
+			bags_priority[n_bag].head = bags_priority[n_bag].tail = 0;
+			omp_init_lock(&bags_priority[n_bag].lock);
+		}
+		
+		// Loading priority bags
+		#pragma omp for schedule(static, chunk_size)
+		for (node = 0; node < num_nodes; ++node)
+		{
+			priority[node] -= min_priority;
+			omp_set_lock(&(bags_priority[priority[node]].lock));
+			QUEUE_enque(&(bags_priority[priority[node]].elements), num_nodes, &(bags_priority[priority[node]].tail), node);
+			omp_unset_lock(&(bags_priority[priority[node]].lock));
+		}
+		
+		#pragma omp sections
+		{
+			#pragma omp section
+			max_priority -= min_priority;
+			
+			#pragma omp section
+			status[start_node] = PREACTIVE; 
+			
+			#pragma omp section
+			next_id = 0;
+		}
+		
+// 		#pragma omp single
+// 		printf("Initial first max: %d, second max: %d\n", max_priority, second_max_priority); fflush(stdout);
+		
+		#pragma omp barrier
+		
+		#pragma omp single
+		{
+			time_pre = (omp_get_wtime() - time_pre)/100.0;
+			printf("Time pre-processing: %lf\n", time_pre);fflush(stdout);
+		}
+		
+		/* ************************************
+		 * ********** Processing nodes ********
+		 * ************************************/
+		
+		#pragma omp single
+		time = omp_get_wtime();
+		
+		while (next_id < num_nodes)
+		{
+			tail_bag_change = 0;
+			
+// 			#pragma omp atomic
+// 			++count_threads_on;
+			
+			// Cloning current max priority bag
+			#pragma omp single	
+			{
+// 				printf("----------------Priority Bag [%d]\n", max_priority);fflush(stdout);
+				size_max_bag = bags_priority[max_priority].tail - bags_priority[max_priority].head;
+				memcpy(max_bag, bags_priority[max_priority].elements, size_max_bag * sizeof(int));
+			}
+			
+			// Processing maximum priority bag of nodes
+			#pragma omp for 
+			for (index_vertex = 0; index_vertex < size_max_bag; ++index_vertex)
+			{
+				vertex 	      = max_bag[index_vertex];
+				neighbors     = mgraph->graph[vertex].neighboors;
+				vertex_degree = mgraph->graph[vertex].degree;
+// 				printf("[th %d]processing node %d(d=%d) with priority %d from position %d\n", omp_get_thread_num(), vertex, vertex_degree, priority[vertex], index_vertex);fflush(stdout);
+				
+				if (status[vertex] == NUMBERED) 
+				{
+// 					printf("[th %d]descarding NUMBERED node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
+					continue;
+				}
+				
+				for (ngb = 0; ngb < vertex_degree; ++ngb)
+				{
+					neighbor   = neighbors[ngb];
+// 					printf("[th %d]processing neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
+					
+					update_far = OFF;
+					
+					if (status[vertex] == PREACTIVE)
+					{
+						if (status[neighbor] == ACTIVE)
+						{
+							bag_change[tail_bag_change].label    = neighbor;
+							bag_change[tail_bag_change].status   = ACTIVE;
+							bag_change[tail_bag_change].distance = priority[neighbor] + SLOAN_W2;
+							++tail_bag_change;
+						}
+						else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
+						{
+							bag_change[tail_bag_change].label    = neighbor;
+							bag_change[tail_bag_change].status   = ACTIVE;
+							bag_change[tail_bag_change].distance = priority[neighbor] + SLOAN_W2;
+							++tail_bag_change;
+							
+							update_far = ON;
+						}
+					}
+					else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
+					{
+						bag_change[tail_bag_change].label    = neighbor;
+						bag_change[tail_bag_change].status   = ACTIVE;
+						bag_change[tail_bag_change].distance = priority[neighbor] + SLOAN_W2;
+						++tail_bag_change;
+						
+						update_far = ON;
+					}
+			
+					if (update_far)
+					{
+						/* ***********************
+						* Updating far neighbors
+						* ***********************
+						*/
+						
+						far_neighbors   = mgraph->graph[neighbor].neighboors;
+						neighbor_degree = mgraph->graph[neighbor].degree;
+						
+						for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
+						{
+							far_neighbor = far_neighbors[far_ngb];
+							
+							if (far_neighbor == vertex) continue;
+							
+// 							printf("[th %d]processing far_neighboor %d\n", omp_get_thread_num(), far_neighbor);fflush(stdout);
+							bag_change[tail_bag_change].label = far_neighbor;
+							
+							if (status[far_neighbor] == INACTIVE)
+							{
+								bag_change[tail_bag_change].status   = PREACTIVE;
+								bag_change[tail_bag_change].distance = priority[far_neighbor] + SLOAN_W2;
+							}
+							else
+							{
+								bag_change[tail_bag_change].status   = status[far_neighbor];
+								bag_change[tail_bag_change].distance = priority[far_neighbor];
+							}
+							
+							bag_change[tail_bag_change].distance += SLOAN_W2;
+							++tail_bag_change;
+						}
+					}
+				}
+				
+				// Placing vertex in permutation array
+				omp_set_lock(&mgraph->lock_node[vertex]);
+				if (status[vertex] != NUMBERED)
+				{
+					#pragma omp critical
+					th_next_id = next_id++;
+					
+					(*permutation)[th_next_id] = vertex;
+					status[vertex] = NUMBERED;
+				}
+				omp_unset_lock(&mgraph->lock_node[vertex]);
+			}
+			
+			// Cleaning current processed max priority bag
+			#pragma omp single nowait
+			bags_priority[max_priority].tail = 0;	
+			
+			#pragma omp single
+			max_processed_priority = -INFINITY_LEVEL;
+			
+			// Unloading each bag change
+			#pragma omp critical
+			{
+				for (index_vertex = 0; index_vertex < tail_bag_change; ++index_vertex)
+				{
+					vertex = bag_change[index_vertex].label;
+					
+					if (bag_change[index_vertex].status > status[vertex])
+						status[vertex] = bag_change[index_vertex].status;
+					
+					// Defining max processed priority
+					if (bag_change[index_vertex].distance > max_processed_priority) 
+						max_processed_priority = bag_change[index_vertex].distance;
+					
+					priority[vertex] = bag_change[index_vertex].distance;
+					
+					QUEUE_enque(&(bags_priority[priority[vertex]].elements), num_nodes, &(bags_priority[priority[vertex]].tail), vertex);
+				}
+			}
+			
+// 			#pragma omp barrier
+			
+			// Defining next max priority bag
+			#pragma omp single
+			{
+// 				printf("------------------------------------------rrr\n");fflush(stdout);
+				if (max_processed_priority >= max_priority)
+				{
+					max_priority = max_processed_priority;
+				}
+				else
+				{
+					// Searching next max priority bag
+					for (p_bag = max_priority; p_bag >= 0; --p_bag)
+					{
+						if (!QUEUE_empty(bags_priority[p_bag], bags_priority[p_bag].head, 
+							bags_priority[p_bag].tail))
+						{
+							// Find out next max priority bag
+							max_priority = p_bag;
+							p_bag = 0;
+						}
+					}
+				}
+			}
+		}
+		
+		free(bag_change);
+		
+		#pragma omp barrier
+		
+		/* ********************************
+		 * ****** Post-processing *********
+		 * ********************************
+		 */
+		#pragma omp single
+		{
+			time = (omp_get_wtime() - time)/100.0;
+			printf("Time processing: %lf\n", time);fflush(stdout);
+		}
+		
+// 		#pragma omp single
+// 		{
+// 			printf("thead %d - permutation: ", omp_get_thread_num());fflush(stdout);
+// 			for (node = 0; node < num_nodes; ++node) printf("%d ", (*permutation)[node]);fflush(stdout);
+// 			printf("\n");
 // 		}
 		
 		#pragma omp single

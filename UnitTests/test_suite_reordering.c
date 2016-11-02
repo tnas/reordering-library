@@ -323,10 +323,10 @@ void run_all_reordering_tests()
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
-// 		"../Matrices/thermomech_TC.mtx"
+		"../Matrices/thermomech_TC.mtx"
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12, 14, 16 };
