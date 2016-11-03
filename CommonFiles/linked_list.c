@@ -41,7 +41,6 @@ LIST* LIST_insert_IF_NOT_EXIST (LIST* L, int x)
 	return L;
 }
 
-
 /*----------------------------------------------------------------------------
  * Add the value val to the element cell of the LIST list 
  *--------------------------------------------------------------------------*/
@@ -178,15 +177,91 @@ void LIST_destroy (LIST* L)
 {
 	if (L == NULL)
 	{
-		printf("warning: Empty LIST. Returning.. [LIST_destroy]\n");
 		return;
 	}
 	LIST *P;
 	while (L != NULL)
 	{
 		P = L->next;
-		free(L);
 		L->size--;
+		free(L);
 		L = P;
 	}
+}
+
+
+/*----------------------------------------------------------------------------
+ * Initialize an ARRAY_LIST structure. 
+ * 
+ * @since 03-11-2016
+ *--------------------------------------------------------------------------*/
+void ARRAY_LIST_init(ARRAY_LIST** array_list)
+{
+	(*array_list)->first = 
+	(*array_list)->last  = 
+	(*array_list)->node  = NULL;
+	(*array_list)->size  = 0;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Insert an element in the ARRAY_LIST structure. 
+ * Duplicated elements are permitted.
+ * 
+ * @since 03-11-2016
+ *--------------------------------------------------------------------------*/
+void ARRAY_LIST_insert(ARRAY_LIST** array_list, int data)
+{
+	LIST* new_node;
+	
+	if ((*array_list)->first == NULL)
+	{
+		*array_list = malloc(sizeof(ARRAY_LIST));
+		(*array_list)->node = malloc(sizeof(LIST));
+		(*array_list)->node->data = data;
+		(*array_list)->node->next = NULL;
+		(*array_list)->size = 1;
+		(*array_list)->first = (*array_list)->node;
+		(*array_list)->last  = (*array_list)->node;
+	}
+	else 
+	{
+		new_node = (*array_list)->last;
+		new_node->next = malloc(sizeof(LIST));
+		new_node->next->data = data;
+		new_node->next->next = NULL;
+		(*array_list)->last = new_node->next;
+		(*array_list)->size++;
+	}
+}
+
+
+
+/*----------------------------------------------------------------------------
+ * Remove the first element from ARRAY_LIST structure. 
+ * If there is no elements (ARRAY_LIST is null) a NON_ELEMENT is
+ * returned.
+ * 
+ * @since 03-11-2016
+ *--------------------------------------------------------------------------*/
+int ARRAY_LIST_remove_first(ARRAY_LIST** array_list)
+{
+	int data;
+	LIST* garbage;
+	
+	if ((*array_list)->first == NULL)
+	{
+		data = -NON_ELEMENT;
+	}
+	else 
+	{
+		data = (*array_list)->first->data;
+		garbage = (*array_list)->first;
+		(*array_list)->first = garbage->next;
+		garbage->next = NULL;
+		(*array_list)->size--;
+		free(garbage);
+	}
+	
+	return data;
 }

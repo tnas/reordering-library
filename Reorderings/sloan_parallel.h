@@ -33,7 +33,7 @@ typedef struct
 	int head;
 	int tail;
 	int* elements;
-	LIST* list_elements;
+	ARRAY_LIST* list_elements;
 	omp_lock_t lock;
 } bag;
 

@@ -598,7 +598,6 @@ inline GRAPH* GRAPH_shrinking_strategy_five_non_adjacent(GRAPH* nodes, int* leng
 {
 	int node, num_chosen, length_shrink_nodes, chosen, neigh, chose_node;
 	GRAPH* shrinked_nodes;
-	int* neighboors;
 	
 	length_shrink_nodes = 5; // According to Kumfert
 	
