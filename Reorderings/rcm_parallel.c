@@ -237,7 +237,7 @@ void Leveled_RCM(METAGRAPH* mgraph, int** perm, int root)
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
 				degree    = mgraph->graph[(*perm)[n_par]].degree;
-				neighbors = mgraph->graph[(*perm)[n_par]].neighboors;
+				neighbors = GRAPH_adjacent(mgraph->mat, n_par);
 				
 				for (n_ch = 0; n_ch < degree; ++n_ch)
 				{
@@ -269,6 +269,8 @@ void Leveled_RCM(METAGRAPH* mgraph, int** perm, int root)
 						}
 					}
 				}
+				
+				free(neighbors);
 			}
 
 		}
@@ -446,7 +448,7 @@ void Bucket_RCM(const METAGRAPH* mgraph, int** perm, int root)
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
 				degree    = mgraph->graph[(*perm)[n_par]].degree;
-				neighbors = mgraph->graph[(*perm)[n_par]].neighboors;
+				neighbors = GRAPH_adjacent(mgraph->mat, (*perm)[n_par]);
 				
 				pos_parent_gen = n_par - perm_offset;
 				generation[pos_parent_gen].num_children = 0;
@@ -475,6 +477,8 @@ void Bucket_RCM(const METAGRAPH* mgraph, int** perm, int root)
 						}
 					}
 				}
+				
+				free(neighbors);
 			}
 			
 			#pragma omp single nowait
@@ -585,7 +589,7 @@ void Bucket_RCM_shrinked(const METAGRAPH* mgraph, int** perm, int root)
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
 				degree    = mgraph->graph[(*perm)[n_par]].degree;
-				neighbors = mgraph->graph[(*perm)[n_par]].neighboors;
+				neighbors = GRAPH_adjacent(mgraph->mat, (*perm)[n_par]);
 				
 				generation.num_children = 0;
 				generation.children = calloc(degree, sizeof(GRAPH));
@@ -613,6 +617,8 @@ void Bucket_RCM_shrinked(const METAGRAPH* mgraph, int** perm, int root)
 						}
 					}
 				}
+				
+				free(neighbors);
 				
 				// Placement
 				#pragma omp ordered

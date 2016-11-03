@@ -33,7 +33,8 @@ typedef struct
 	int head;
 	int tail;
 	int* elements;
+	LIST* list_elements;
 	omp_lock_t lock;
 } bag;
 
-double Parallel_Sloan	(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
+double Parallel_Sloan	(METAGRAPH* mgraph, int** permutation, int start_node, int end_node);

@@ -17,12 +17,12 @@
 #ifndef RCM_BOOST_H
 #define RCM_BOOST_H
 
-#include "../CommonFiles/graph_parallel.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "../CommonFiles/graph_parallel.h"
+	
 double	Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root);
 
 #ifdef __cplusplus

@@ -81,7 +81,7 @@ void GRAPH_parallel_fixedpoint_BFS(const METAGRAPH* mgraph, int root, int** leve
 				active_node      = LIST_first(active_chunk_ws);
 				active_chunk_ws  = LIST_remove(active_chunk_ws, active_node);
 				
-				neighboors  = mgraph->graph[active_node].neighboors;
+				neighboors  = GRAPH_adjacent(mgraph->mat, active_node);
 				node_degree = mgraph->graph[active_node].degree;
 				
 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
@@ -103,6 +103,8 @@ void GRAPH_parallel_fixedpoint_BFS(const METAGRAPH* mgraph, int root, int** leve
 						cache_work_set = LIST_insert_IF_NOT_EXIST(cache_work_set, adj_node);
 					}
 				}
+				
+				free(neighboors);
 			}
 			
 			if (cache_work_set != NULL)
@@ -199,7 +201,7 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 			{
 				active_node = QUEUE_deque(&active_chunk_ws, n_nodes, &active_head);
 				
-				neighboors  = mgraph->graph[active_node].neighboors;
+				neighboors  = GRAPH_adjacent(mgraph->mat, active_node);
 				node_degree = mgraph->graph[active_node].degree;
 				
 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
@@ -221,6 +223,8 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 						QUEUE_enque(&cache_work_set, n_nodes, &cache_tail, adj_node);
 					}
 				}
+				
+				free(neighboors);
 			}
 			
 			if (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
@@ -247,6 +251,156 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 
 
 
+void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const float percent_chunk)
+{
+	int node, n_nodes, ws_size, has_unreached_nodes, tail, head;
+	int* work_set;
+	int* levels;
+	omp_lock_t lock;
+	n_nodes = mgraph->size;
+	ws_size = (omp_get_max_threads() + 1) * n_nodes; // oversizing estimate
+	
+	#pragma omp parallel 
+	{
+		int active_node, adj_node, node_degree, count_nodes, level, 
+		    count_chunk, size_chunk;
+		int* neighboors;
+		int* cache_work_set;
+		int* active_chunk_ws;
+		int th_head, th_tail, active_head, active_tail, cache_head, cache_tail;
+		
+		#pragma omp sections
+		{
+			#pragma omp section
+			levels = calloc(n_nodes, sizeof(int));
+			
+			#pragma omp section
+			mgraph->sloan_priority = calloc(n_nodes, sizeof(int));
+			
+			#pragma omp section
+			mgraph->min_sloan_priority = INFINITY_LEVEL;
+			
+			#pragma omp section
+			mgraph->max_sloan_priority = -INFINITY_LEVEL;
+		}
+		
+		#pragma omp for private(node)
+		for (node = 0; node < n_nodes; ++node) 
+			levels[node] = INFINITY_LEVEL;
+		
+		#pragma omp sections 
+		{
+			#pragma omp section
+			levels[root] = 0;
+			
+			#pragma omp section
+			{
+				work_set = calloc(ws_size, sizeof(int)); 
+				tail = head = 0;
+				QUEUE_enque(&work_set, ws_size, &tail, root);
+			}
+			
+			#pragma omp section
+			has_unreached_nodes = n_nodes - 1;
+			
+			#pragma omp section
+			omp_init_lock(&lock);
+		}
+		
+		active_chunk_ws = calloc(n_nodes, sizeof(int));
+		active_head = active_tail = 0;
+		
+		cache_work_set = calloc(n_nodes, sizeof(int));
+		cache_head = cache_tail = 0;
+		
+		while ((!QUEUE_empty(work_set, head, tail)) || has_unreached_nodes > 0) 
+		{
+			if (!QUEUE_empty(work_set, head, tail)) 
+			{
+				#pragma omp critical
+				{
+					th_tail = tail;
+					th_head = head;	
+					size_chunk = ceil(percent_chunk * (th_tail - th_head));
+					head += size_chunk;
+				}
+					
+				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
+				{
+					active_node = QUEUE_deque(&work_set, ws_size, &th_head);
+					QUEUE_enque(&active_chunk_ws, n_nodes, &active_tail, active_node);
+				}
+			}
+			
+			// Fixed Point Iteration
+			while (!QUEUE_empty(active_chunk_ws, active_head, active_tail))
+			{
+				active_node = QUEUE_deque(&active_chunk_ws, n_nodes, &active_head);
+				
+				neighboors  = GRAPH_adjacent(mgraph->mat, active_node);
+				node_degree = mgraph->graph[active_node].degree;
+				
+				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
+				{
+					adj_node = neighboors[count_nodes];
+					level    = levels[active_node] + 1;
+					
+					if (level < levels[adj_node])
+					{
+						if (levels[adj_node] == INFINITY_LEVEL) 
+						{
+							#pragma omp atomic
+							--has_unreached_nodes;
+						}
+						
+						#pragma omp critical
+						if (level < levels[adj_node])
+						{
+							levels[adj_node] = level;
+							
+							mgraph->sloan_priority[adj_node] = 
+								SLOAN_W1*levels[adj_node] - SLOAN_W2*(mgraph->graph[adj_node].degree + 1);
+								
+							if (mgraph->sloan_priority[adj_node] > mgraph->max_sloan_priority)
+								mgraph->max_sloan_priority = mgraph->sloan_priority[adj_node];
+							
+							if (mgraph->sloan_priority[adj_node] < mgraph->min_sloan_priority)
+								mgraph->min_sloan_priority = mgraph->sloan_priority[adj_node];
+						}
+						
+						QUEUE_enque(&cache_work_set, n_nodes, &cache_tail, adj_node);
+					}
+				}
+				
+				free(neighboors);
+			}
+			
+			if (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
+			{
+				omp_set_lock(&lock);
+				
+				while (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
+				{
+					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
+					QUEUE_enque(&work_set, ws_size, &tail, active_node);
+				}
+				
+				omp_unset_lock(&lock);
+			}
+		}
+		
+		free(active_chunk_ws);
+		free(cache_work_set);
+	}
+	
+	omp_destroy_lock(&lock);
+	free(levels);
+	free(work_set);
+}
+
+
+
+
 /**
  * Build a METAGRAPH from an adjacency matrix using multithreads. 
  * 
@@ -260,12 +414,13 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 	size_graph = mat->n;
 	min_degree = INFINITY_LEVEL;
 	
-	meta_graph            = malloc(sizeof(METAGRAPH));
-	meta_graph->size      = size_graph;
-	meta_graph->graph     = malloc(size_graph * sizeof(GRAPH));
-	meta_graph->mat       = mat;
-	meta_graph->edges     = mat->nz;
-	meta_graph->lock_node = malloc(size_graph * sizeof(omp_lock_t));
+	meta_graph                 = malloc(sizeof(METAGRAPH));
+	meta_graph->size           = size_graph;
+	meta_graph->graph          = malloc(size_graph * sizeof(GRAPH));
+	meta_graph->mat            = mat;
+	meta_graph->edges          = mat->nz;
+	meta_graph->lock_node      = malloc(size_graph * sizeof(omp_lock_t));
+	meta_graph->sloan_priority = NULL;
 	
 	#pragma omp parallel 
 	{
@@ -283,7 +438,7 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 			meta_graph->graph[node].chnum      = 0;
 			meta_graph->graph[node].label      = node;
 			meta_graph->graph[node].degree     = GRAPH_degree(mat, node);
-			meta_graph->graph[node].neighboors = GRAPH_adjacent(mat, node);
+// 			meta_graph->graph[node].neighboors = GRAPH_adjacent(mat, node);
 			omp_init_lock(&meta_graph->lock_node[node]); 
 			
 			if (meta_graph->graph[node].degree < local_min_degree)
@@ -443,6 +598,7 @@ inline GRAPH* GRAPH_shrinking_strategy_five_non_adjacent(GRAPH* nodes, int* leng
 {
 	int node, num_chosen, length_shrink_nodes, chosen, neigh, chose_node;
 	GRAPH* shrinked_nodes;
+	int* neighboors;
 	
 	length_shrink_nodes = 5; // According to Kumfert
 	
@@ -554,6 +710,12 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph, Shrin
 		size_cand_set  = forwardBFS->num_nodes_at_level[local_diameter];
 		
 		// shrink candidate set to a manageable number
+		if (shrink_type == FIVE_NON_ADJACENT)
+		{
+			for (cand = 0; cand < size_cand_set; ++cand)
+				candidate_set[cand].neighboors = GRAPH_adjacent(meta_graph->mat, candidate_set[cand].label);
+		}
+		
 		candidate_set = strategy[shrink_type](candidate_set, &size_cand_set);
 		
 		min_width = INT_MAX;
@@ -584,6 +746,12 @@ graph_diameter* GRAPH_parallel_pseudodiameter(const METAGRAPH* meta_graph, Shrin
 					diameter->end = candidate;
 				}
 			}
+		}
+		
+		if (shrink_type == FIVE_NON_ADJACENT)
+		{
+			for (cand = 0; cand < size_cand_set; ++cand)
+				free(candidate_set[cand].neighboors);
 		}
 		
 		free(candidate_set);
@@ -618,10 +786,10 @@ void inline GRAPH_parallel_destroy_METAGRAPH(METAGRAPH* mgraph)
 	
 	#pragma omp parallel for schedule(static) private(node)
 	for (node = 0; node < size_graph; ++node) 
-	{
-		free(mgraph->graph[node].neighboors);
 		omp_destroy_lock(&mgraph->lock_node[node]);
-	}
+	
+	if (mgraph->sloan_priority != NULL)
+		free(mgraph->sloan_priority);
 	
 	MATRIX_clean(mgraph->mat);
 	free(mgraph->graph);

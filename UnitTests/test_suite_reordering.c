@@ -75,14 +75,14 @@ test test_reorder_algorithm(test defs)
 	diameter         = NULL;
 	peripheral_nodes = NULL;
 	
+	// Setting threads for parallel algorithms
+	if (is_parallel_algorithm(defs.algorithm)) omp_set_num_threads(defs.num_threads);
+	
 	MATRIX_read_from_path(defs.path_matrix_file, &matrix);
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	
 	MATRIX_write_gnuplot(matrix, "original_matrix");
 	defs.original_band = MATRIX_bandwidth(matrix);
-	
-	// Setting threads for parallel algorithms
-	if (is_parallel_algorithm(defs.algorithm)) omp_set_num_threads(defs.num_threads);
 		
 	// Getting pseudo peripheral nodes
 	if (is_hsl_algorithm(defs.algorithm))
@@ -323,17 +323,17 @@ void run_all_reordering_tests()
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx",
+		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
-		"../Matrices/thermomech_TC.mtx"
+// 		"../Matrices/thermomech_TC.mtx"
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12, 14, 16 };
 	int nthreads[] = { 4 };
 	
-// 	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
-	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan};
+	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
+// 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan};
 	
 	/* *****************
 	 * Tests execution

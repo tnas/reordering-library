@@ -65,13 +65,15 @@ Graph build_boost_graph(const METAGRAPH* mgraph)
 	for (node = 0; node < num_nodes; ++node)
 	{
 		degree     = mgraph->graph[node].degree;
-		neighboors = mgraph->graph[node].neighboors;
+		neighboors = GRAPH_adjacent(mgraph->mat, node);
 		
 		for (neigh = 0; neigh < degree; ++neigh)
 		{
 			edge = Pair(node, neighboors[neigh]);
 			add_edge(edge.first, edge.second, bgraph);
 		}
+		
+		free(neighboors);
 	}
 	
 	return bgraph;

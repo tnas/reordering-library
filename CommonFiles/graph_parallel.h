@@ -17,6 +17,7 @@
 #include <omp.h>
 #include "graph.h"
 #include "util_parallel.h"
+#include "../Reorderings/reordering.h"
 
 #ifndef __GRAPH_PARALLEL_H__
 #define __GRAPH_PARALLEL_H__
@@ -49,6 +50,9 @@ typedef struct
 	int size;
 	int edges;
 	omp_lock_t* lock_node;
+	int* sloan_priority;
+	int min_sloan_priority;
+	int max_sloan_priority;
 } METAGRAPH; 
 
 typedef struct 
@@ -68,6 +72,7 @@ typedef enum {
 
 void 		  GRAPH_parallel_fixedpoint_BFS		    (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
 void 		  GRAPH_parallel_fixedpoint_static_BFS	    (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
+void 		  GRAPH_parallel_fixedpoint_sloan_BFS	    (METAGRAPH* mgraph, int root, const float percent_chunk);
 METAGRAPH* 	  GRAPH_parallel_build_METAGRAPH            (MAT* mat);
 void  	  	  GRAPH_parallel_destroy_METAGRAPH          (METAGRAPH* mgraph);
 GRAPH*  	  GRAPH_shrinking_strategy_half_sorted      (GRAPH* nodes, int* length);
