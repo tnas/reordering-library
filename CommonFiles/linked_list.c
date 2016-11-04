@@ -197,9 +197,9 @@ void LIST_destroy (LIST* L)
  *--------------------------------------------------------------------------*/
 void ARRAY_LIST_init(ARRAY_LIST** array_list)
 {
+	*array_list = malloc(sizeof(ARRAY_LIST));
 	(*array_list)->first = 
-	(*array_list)->last  = 
-	(*array_list)->node  = NULL;
+	(*array_list)->last  = NULL;
 	(*array_list)->size  = 0;
 }
 
@@ -216,13 +216,11 @@ void ARRAY_LIST_insert(ARRAY_LIST** array_list, int data)
 	
 	if ((*array_list)->first == NULL)
 	{
-		*array_list = malloc(sizeof(ARRAY_LIST));
-		(*array_list)->node = malloc(sizeof(LIST));
-		(*array_list)->node->data = data;
-		(*array_list)->node->next = NULL;
+		(*array_list)->first = malloc(sizeof(LIST));
+		(*array_list)->first->data = data;
+		(*array_list)->first->next = NULL;
+		(*array_list)->last  = (*array_list)->first;
 		(*array_list)->size = 1;
-		(*array_list)->first = (*array_list)->node;
-		(*array_list)->last  = (*array_list)->node;
 	}
 	else 
 	{
@@ -261,7 +259,22 @@ int ARRAY_LIST_remove_first(ARRAY_LIST** array_list)
 		garbage->next = NULL;
 		(*array_list)->size--;
 		free(garbage);
+		
+		if ((*array_list)->size == 0) 
+			(*array_list)->last = NULL;
 	}
 	
 	return data;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Destroy an ARRAY_LIST structure. 
+ * 
+ * @since 04-11-2016
+ *--------------------------------------------------------------------------*/
+void ARRAY_LIST_destroy(ARRAY_LIST** array_list)
+{
+	LIST_destroy((*array_list)->first);
+	free(*array_list);
 }

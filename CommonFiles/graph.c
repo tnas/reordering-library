@@ -94,6 +94,28 @@ int* GRAPH_adjacent (MAT* A, int x)
 }
 
 
+/*----------------------------------------------------------------------------
+ * Return all neighboors vertices to x in graph (i.e. matrix) A
+ *--------------------------------------------------------------------------*/
+int* GRAPH_neighboors (MAT* A, int node, int degree)
+{
+	int i, k = 0;
+	
+	int *adj = malloc(degree * sizeof(int));
+
+	for (i = A->IA[node]; i < A->IA[node+1]; ++i)
+	{
+		if (A->JA[i] != node)
+		{
+			adj[k] = A->JA[i];
+			k++;
+		}
+	}
+	
+	return adj;
+}
+
+
 /*-------------------------------------------------------------------------------------
  * Return the degree of the vertex x in graph (i.e. matrix) A at level adjacency_level
  *-------------------------------------------------------------------------------------*/

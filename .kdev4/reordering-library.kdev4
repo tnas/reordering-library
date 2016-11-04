@@ -182,4 +182,4 @@ isExecutable=true
 VersionControlSupport=kdevgit
 
 [SourceFileTemplates]
-LastUsedTemplate=/home/thiago/.kde/share/apps/kdevfiletemplates/template_descriptions/cpp_basic.desktop
+LastUsedTemplate=/home/tnrodrigues/.kde/share/apps/kdevfiletemplates/template_descriptions/c_gobject_private.desktop

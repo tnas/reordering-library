@@ -40,19 +40,20 @@ typedef struct
 /*----------------------------------------------------------------------------
  * GRAPH FUNCTIONS PROTOTYPE IN CSR FORMAT
  *--------------------------------------------------------------------------*/
-extern int      GRAPH_degree             (MAT* A, int x);
-extern int*     GRAPH_adjacent           (MAT* A, int x);
-extern int 	GRAPH_degree_per_level   (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors);
-extern GRAPH* 	GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors);
-extern void     GRAPH_bfs                (MAT* A, int x, int* dist);
-extern int*     GRAPH_bfs_RCM            (MAT* A, int x, int* dist);
-extern int      GRAPH_LS_depth           (int* LS, int n);
-extern int      GRAPH_LS_width           (int* LS, int n);
-extern LIST*    GRAPH_LS_last_level      (MAT* A, int* LS, int n);
-extern int*     GRAPH_LS_peripheral      (MAT* A, int *node_s, int* node_e);
+int      GRAPH_degree             (MAT* A, int x);
+int*     GRAPH_adjacent           (MAT* A, int x);
+int 	 GRAPH_degree_per_level   (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors);
+GRAPH*   GRAPH_adjacent_per_level (MAT* A, int x, const int* levels, const int adjacency_level, const int* colors);
+void     GRAPH_bfs                (MAT* A, int x, int* dist);
+int*     GRAPH_bfs_RCM            (MAT* A, int x, int* dist);
+int      GRAPH_LS_depth           (int* LS, int n);
+int      GRAPH_LS_width           (int* LS, int n);
+LIST*    GRAPH_LS_last_level      (MAT* A, int* LS, int n);
+int*     GRAPH_LS_peripheral      (MAT* A, int *node_s, int* node_e);
+int* 	 GRAPH_neighboors 	  (MAT* A, int node, int degree);
 
-extern int      COMPARE_degr_ASC         (const void * a, const void * b);
-extern int      COMPARE_dist_degr_DES    (const void * a, const void * b);
-extern int      COMPARE_dist_degr_ASC    (const void * a, const void * b);
+int      COMPARE_degr_ASC         (const void * a, const void * b);
+int      COMPARE_dist_degr_DES    (const void * a, const void * b);
+int      COMPARE_dist_degr_ASC    (const void * a, const void * b);
 
 #endif

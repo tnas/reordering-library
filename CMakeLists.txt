@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(reordering-library)
 
-add_executable(reordering-library  program.c 
+add_executable(reordering-library program.c 
 	./CommonFiles/util.c 
 	./CommonFiles/matrix.c 
 	./CommonFiles/linked_list.c 
@@ -24,7 +24,8 @@ add_executable(reordering-library  program.c
 	./UnitTests/test_suite_prefixsum.c
 	./UnitTests/test_suite_matrix.c
 	./UnitTests/test_graph_parallel.c
-	./UnitTests/test_util.c)
+	./UnitTests/test_util.c
+	./UnitTests/test_linked_list.c)
 	
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})

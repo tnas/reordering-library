@@ -27,7 +27,8 @@ typedef enum {
 	PREFIX_SUM,
 	MATRIX,
 	GRAPH_PARALLEL,
-	UTIL_FUNCIONS
+	UTIL_FUNCIONS,
+	LINKED_LIST
 } test_suite;
 
 

@@ -22,6 +22,7 @@
 #include "./UnitTests/test_suite_matrix.h"
 #include "./UnitTests/test_graph_parallel.h"
 #include "./UnitTests/test_util.h"
+#include "./UnitTests/test_linked_list.h"
 
 #define DYNAMIC_OFF 0
 #define OVERWRITE_VARIABLE 1
@@ -51,6 +52,7 @@
  * 	3: wavefront calculus
  * 	4: graph parallel
  * 	5: util functions
+ * 	6: linked list operations
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -130,6 +132,10 @@ int main (int argc, char* argv[]) {
 			
 			case UTIL_FUNCIONS :
 				run_all_util_tests();
+				break;
+				
+			case LINKED_LIST :
+				run_all_linked_list_tests();
 				break;
 		}
 	}

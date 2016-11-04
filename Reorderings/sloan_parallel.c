@@ -737,7 +737,6 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 		{
 // 			bags_priority[n_bag].elements = calloc(num_nodes, sizeof(int)); // so so so expensive
 // 			bags_priority[n_bag].head = bags_priority[n_bag].tail = 0;
-			bags_priority[n_bag].list_elements = malloc(sizeof(ARRAY_LIST));
 			ARRAY_LIST_init(&bags_priority[n_bag].list_elements);
 			omp_init_lock(&bags_priority[n_bag].lock);
 		}
@@ -794,7 +793,6 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 
 			#pragma omp single	
 			{
-				printf("----------------Priority Bag [%d]\n", max_priority);fflush(stdout);
 // 				size_max_bag = bags_priority[max_priority].tail - bags_priority[max_priority].head;
 // 				memcpy(max_bag, bags_priority[max_priority].elements, size_max_bag * sizeof(int));
 				
@@ -807,22 +805,29 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 						ARRAY_LIST_remove_first(&bags_priority[max_priority].list_elements);
 				}
 				
+// 				printf("----------------Priority Bag [%d]: ", max_priority);fflush(stdout);
+// 				for (c_node = 0; c_node < size_max_bag; ++c_node)
+// 					printf("%d ", max_bag[c_node]);
+// 				printf("\n");fflush(stdout);
+				
 			}
 			
 			// Processing maximum priority bag of nodes
 			#pragma omp for 
 			for (index_vertex = 0; index_vertex < size_max_bag; ++index_vertex)
 			{
-				vertex 	      = max_bag[index_vertex];
-				neighbors     = GRAPH_adjacent(mgraph->mat, vertex);
-				vertex_degree = mgraph->graph[vertex].degree;
-// 				printf("[th %d]processing node %d(d=%d) with priority %d from position %d\n", omp_get_thread_num(), vertex, vertex_degree, mgraph->sloan_priority[vertex], index_vertex);fflush(stdout);
+				vertex = max_bag[index_vertex];
 				
 				if (status[vertex] == NUMBERED) 
 				{
 // 					printf("[th %d]descarding NUMBERED node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
 					continue;
 				}
+				
+				vertex_degree = mgraph->graph[vertex].degree;
+				neighbors     = GRAPH_neighboors(mgraph->mat, vertex, vertex_degree);
+				
+// 				printf("[th %d]processing node %d(d=%d) with priority %d from position %d\n", omp_get_thread_num(), vertex, vertex_degree, mgraph->sloan_priority[vertex], index_vertex);fflush(stdout);
 				
 				for (ngb = 0; ngb < vertex_degree; ++ngb)
 				{
@@ -907,7 +912,7 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 					#pragma omp critical
 					th_next_id = next_id++;
 					
-					printf(">>>permut id: %d, vertex %d\n", th_next_id, vertex);fflush(stdout);
+// 					printf(">>>permut id: %d, vertex %d\n", th_next_id, vertex);fflush(stdout);
 					
 					(*permutation)[th_next_id] = vertex;
 					status[vertex] = NUMBERED;
@@ -998,9 +1003,7 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 		#pragma omp for 
 		for (n_bag = 0; n_bag < num_prior_bags; ++n_bag)
 		{
-// 			LIST_print(bags_priority[n_bag].list_elements->node);
-			LIST_destroy(bags_priority[n_bag].list_elements->node);
-			free(bags_priority[n_bag].list_elements);
+			ARRAY_LIST_destroy(&bags_priority[n_bag].list_elements);
 			omp_destroy_lock(&bags_priority[n_bag].lock);
 		}
 		
