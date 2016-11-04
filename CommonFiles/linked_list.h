@@ -65,6 +65,7 @@ typedef struct
 
 void 	ARRAY_LIST_init		  (ARRAY_LIST** array_list);
 void 	ARRAY_LIST_insert	  (ARRAY_LIST** array_list, int data);
+void 	ARRAY_LIST_add_desc_order (ARRAY_LIST** array_list, int data);
 int 	ARRAY_LIST_remove_first   (ARRAY_LIST** array_list);
 void 	ARRAY_LIST_destroy	  (ARRAY_LIST** array_list);
 

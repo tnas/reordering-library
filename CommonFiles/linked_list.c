@@ -206,7 +206,7 @@ void ARRAY_LIST_init(ARRAY_LIST** array_list)
 
 /*----------------------------------------------------------------------------
  * Insert an element in the ARRAY_LIST structure. 
- * Duplicated elements are permitted.
+ * Duplicate elements are permitted.
  * 
  * @since 03-11-2016
  *--------------------------------------------------------------------------*/
@@ -233,6 +233,68 @@ void ARRAY_LIST_insert(ARRAY_LIST** array_list, int data)
 	}
 }
 
+
+/*----------------------------------------------------------------------------
+ * Insert an element in the ARRAY_LIST structure in descending order . 
+ * Duplicate elements are no permitted.
+ * 
+ * @since 04-11-2016
+ *--------------------------------------------------------------------------*/
+void ARRAY_LIST_add_desc_order(ARRAY_LIST** array_list, int data)
+{
+	LIST* new_node;
+	LIST* searcher;
+	
+	if ((*array_list)->first == NULL)
+	{
+		ARRAY_LIST_insert(array_list, data);
+	}
+	else 
+	{
+		if (data == (*array_list)->first->data)
+		{
+			return;
+		}
+		else if (data > (*array_list)->first->data)
+		{
+			new_node = malloc(sizeof(LIST));
+			new_node->data = data;
+			new_node->next = (*array_list)->first;
+			(*array_list)->first = new_node;
+			(*array_list)->size++;
+			
+			return;
+		}
+		else {
+			for (searcher = (*array_list)->first; searcher->next != NULL; searcher = searcher->next)
+			{
+				if (data == searcher->next->data)
+				{
+					return;
+				}
+				else if (data > searcher->next->data)
+				{
+					// Inserting in the middle of array list
+					new_node = malloc(sizeof(LIST));
+					new_node->data = data;
+					new_node->next = searcher->next;
+					searcher->next = new_node;
+					(*array_list)->size++;
+					
+					return;
+				}
+			}
+			
+			// Inserting as new last position
+			new_node = malloc(sizeof(LIST));
+			new_node->data = data;
+			new_node->next = NULL;
+			searcher->next = new_node;
+			(*array_list)->last = new_node;
+			(*array_list)->size++;
+		}
+	}
+}
 
 
 /*----------------------------------------------------------------------------
