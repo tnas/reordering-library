@@ -333,7 +333,7 @@ void run_all_reordering_tests()
 	int nthreads[] = { 4 };
 	
 // 	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
-	reorder_algorithm algorithm[] = { parallel_sloan};
+	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan};
 	
 	/* *****************
 	 * Tests execution

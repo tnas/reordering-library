@@ -813,6 +813,9 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 			
 			tail_bag_change = 0;
 			
+			#pragma omp single
+			max_processed_priority = -INFINITY_LEVEL;
+			
 			// Processing maximum priority bag of nodes
 			#pragma omp for 
 			for (index_vertex = 0; index_vertex < size_max_bag; ++index_vertex)
@@ -912,9 +915,6 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 				{
 					if (status[vertex] != NUMBERED)
 					{
-	// 					#pragma omp critical
-// 						th_next_id = next_id++;
-						
 	// 					printf(">>>permut id: %d, vertex %d\n", th_next_id, vertex);fflush(stdout);
 						
 						(*permutation)[next_id++] = vertex;
@@ -924,27 +924,26 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 // 				omp_unset_lock(&mgraph->lock_node[vertex]);
 			} // priority bag loop
 			
-			#pragma omp single
-			max_processed_priority = -INFINITY_LEVEL;
-			
 			// Unloading each bag change
-			#pragma omp critical
+			if (tail_bag_change > 0)
 			{
-				for (index_vertex = 0; index_vertex < tail_bag_change; ++index_vertex)
+				#pragma omp critical
 				{
-					vertex = bag_change[index_vertex].label;
-					
-					if (bag_change[index_vertex].status > status[vertex])
-						status[vertex] = bag_change[index_vertex].status;
-					
-					// Defining max processed priority
-					if (bag_change[index_vertex].distance > max_processed_priority) 
-						max_processed_priority = bag_change[index_vertex].distance;
-					
-					mgraph->sloan_priority[vertex] = bag_change[index_vertex].distance;
-					
-					ARRAY_LIST_insert(&bags_priority[mgraph->sloan_priority[vertex]].list_elements, vertex);
-// 					ARRAY_LIST_add_desc_order(&priority_queue, mgraph->sloan_priority[vertex]);
+					for (index_vertex = 0; index_vertex < tail_bag_change; ++index_vertex)
+					{
+						vertex = bag_change[index_vertex].label;
+						
+						if (bag_change[index_vertex].status > status[vertex])
+							status[vertex] = bag_change[index_vertex].status;
+						
+//  						// Defining max processed priority
+						if (bag_change[index_vertex].distance > max_processed_priority) 
+							max_processed_priority = bag_change[index_vertex].distance;
+						
+						mgraph->sloan_priority[vertex] = bag_change[index_vertex].distance;
+						
+						ARRAY_LIST_insert(&bags_priority[mgraph->sloan_priority[vertex]].list_elements, vertex);
+					}
 				}
 			}
 			
@@ -1034,4 +1033,5 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 	return time + time_pre + time_pos;
 // 	printf("sloan is over!\n");fflush(stdout);
 }
+
 
