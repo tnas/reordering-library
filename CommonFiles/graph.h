@@ -37,6 +37,25 @@ typedef struct
 } GRAPH;
 
 
+/* ***************************************************************
+ * **************** A simple GRAPH static queue ******************
+ * ***************************************************************/
+
+inline static void GRAPH_enque(GRAPH** queue, const int size, int* tail_index, const GRAPH value)
+{
+	(*queue)[*tail_index] = value;
+	*tail_index = (*tail_index + 1) % size;
+}
+
+// Dequeue operation (removes a node from the head)
+inline static GRAPH GRAPH_deque(GRAPH** queue, int size, int* head_index)
+{
+	GRAPH value = (*queue)[*head_index];
+	*head_index = (*head_index + 1) % size;
+	return value;
+}
+
+
 /*----------------------------------------------------------------------------
  * GRAPH FUNCTIONS PROTOTYPE IN CSR FORMAT
  *--------------------------------------------------------------------------*/
