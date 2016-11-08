@@ -282,6 +282,149 @@ test test_reorder_algorithm(test defs)
 
 
 
+void execute_tests(const char** matrices, const int* nthreads, const reorder_algorithm* algorithm, const int exec_times,
+	const int num_matrices, const int size_set_nthreads, const int num_algorithms)
+{
+	int count_matrix, count_alg, exec, num_threads, count_nthreads;
+	FILE* out_file;
+	test result;
+	statistic norm_values;
+	double time_reorderings[exec_times];
+	double time_peripherals[exec_times];
+	double time_permutations[exec_times];
+	long int bandwidths[exec_times];
+	long int wavefronts[exec_times];
+	
+	float bfs_chunk_percent = .5;
+	
+	if ((out_file = fopen("run_all_tests_normalized_output.txt", "w")) == NULL) 
+		exit(1);
+	
+	for (count_matrix = 0; count_matrix < num_matrices; ++count_matrix)
+	{
+		fprintf(out_file, "-----------------------------------------------------------------------\n");
+		fprintf(out_file, "Tests Execution - Matrix: %s\n", matrices[count_matrix]); fflush(out_file);
+		
+		for (count_alg = 0; count_alg < num_algorithms; ++count_alg)
+		{
+			fprintf(out_file, "-----------------------------------------------------------------------\n");
+			fprintf(out_file, "Algorithm: %d\n", algorithm[count_alg]);
+			fprintf(out_file, "-----------------------------------------------------------------------\n");
+			fflush(out_file);
+			
+			num_threads = is_serial_algorithm(algorithm[count_alg]) ? 1 :
+				size_set_nthreads;
+			
+			for (count_nthreads = 0; count_nthreads < num_threads; ++count_nthreads)
+			{
+				result.algorithm        = algorithm[count_alg];
+				result.path_matrix_file = matrices[count_matrix];
+				result.num_threads      = nthreads[count_nthreads];
+				result.percent_chunk    = bfs_chunk_percent;
+					
+				for (exec = 0; exec < exec_times; ++exec)
+				{
+					result = test_reorder_algorithm(result);
+					time_reorderings[exec]  = result.time_reordering;
+					time_peripherals[exec]  = result.time_peripheral;
+					time_permutations[exec] = result.time_permutation;
+					bandwidths[exec]        = result.reorder_band;
+					wavefronts[exec]        = result.wavefront;
+				}
+				
+				normalize_results(time_peripherals, exec_times, &norm_values);
+				result.time_peripheral = norm_values.average_value; 
+				
+				normalize_results(time_reorderings, exec_times, &norm_values);
+				result.time_reordering = norm_values.average_value; 
+				
+				normalize_results(time_permutations, exec_times, &norm_values);
+				result.time_permutation = norm_values.average_value; 
+				
+				normalize_int_results(bandwidths, exec_times, &norm_values);
+				result.reorder_band = norm_values.average_value; 
+				
+				normalize_int_results(wavefronts, exec_times, &norm_values);
+				result.wavefront = norm_values.average_value; 
+				
+				if (is_sloan_algorithm(result.algorithm))
+				{
+					if (is_hsl_algorithm(result.algorithm))
+					{
+						fprintf(out_file, "%s: Wavefront [ %ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", result.algorithm_name, 
+							result.wavefront, result.time_reordering, result.time_reordering, get_total_time(result)); 
+						fflush(out_file);
+					}
+					else
+					{
+						fprintf(out_file, "[%s] Threads: %d -- Wavefront [ %ld ] -- Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+							result.algorithm_name, is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads],
+							result.wavefront, result.time_peripheral, result.time_reordering, result.time_permutation, get_total_time(result)); 
+						fflush(out_file);
+					}
+				}
+				else
+				{
+					if (is_hsl_algorithm(result.algorithm))
+					{
+						fprintf(out_file, "%s: (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", result.algorithm_name, 
+							result.original_band, result.reorder_band, result.time_peripheral, result.time_reordering, get_total_time(result)); 
+						fflush(out_file);
+					}
+					else 
+					{
+						fprintf(out_file, "[%s] Threads: %d -- Bandwidth (Before/After) [ %ld/%ld ] -- Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+							result.algorithm_name, is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads],
+							result.original_band, result.reorder_band, result.time_peripheral, 
+							result.time_reordering, result.time_permutation, get_total_time(result)); 
+						fflush(out_file);
+					}
+					
+				}
+			}
+		}
+	}
+	
+	fclose(out_file);
+}
+
+
+
+
+void run_tema_journal_tests()
+{
+	int num_executions  = 5;
+	
+	const char* matrices[] = {
+		"../Matrices/dw8192.mtx",
+		"../Matrices/FEM_3D_thermal1.mtx",
+		"../Matrices/rail_79841.mtx",
+		"../Matrices/Dubcova3.mtx",
+		"./Big-Matrices/01-inline_1.mtx",		
+		"./Big-Matrices/02-audikw_1.mtx",
+		"./Big-Matrices/03-dielFilterV3real.mtx",
+		"./Big-Matrices/04-G3_circuit.mtx",
+		"./Big-Matrices/05-M6.mtx",
+		"./Big-Matrices/07-venturiLevel3.mtx"
+	};
+	
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	
+	reorder_algorithm algorithms[] = { boost_rcm, unordered_rcm, bucket_rcm };
+	
+	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
+	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
+	int num_algorithms    = sizeof(algorithms)/sizeof(algorithms[0]);
+	
+	// Running tests
+	execute_tests(matrices, nthreads, algorithms, num_executions, 
+		      num_matrices, size_set_nthreads, num_algorithms);
+}
+
+
+
+
+
 void run_all_reordering_tests()
 {
 	int count_matrix, count_alg, exec, num_threads,

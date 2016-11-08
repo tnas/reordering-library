@@ -28,7 +28,8 @@ typedef enum {
 	MATRIX,
 	GRAPH_PARALLEL,
 	UTIL_FUNCIONS,
-	LINKED_LIST
+	LINKED_LIST,
+	TEMA
 } test_suite;
 
 

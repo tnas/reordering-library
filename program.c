@@ -53,6 +53,7 @@
  * 	4: graph parallel
  * 	5: util functions
  * 	6: linked list operations
+ * 	7: TEMA journal
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -136,6 +137,10 @@ int main (int argc, char* argv[]) {
 				
 			case LINKED_LIST :
 				run_all_linked_list_tests();
+				break;
+			
+			case TEMA :
+				run_tema_journal_tests();
 				break;
 		}
 	}
