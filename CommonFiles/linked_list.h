@@ -27,6 +27,24 @@ inline static int QUEUE_deque(int** queue, int size, int* head_index)
 // Predicate (queue empty)
 #define QUEUE_empty(queue, head, tail) ((head) == (tail))
 
+/* ***************************************************************
+ * **************** A simple GRAPH static queue ******************
+ * ***************************************************************/
+
+inline static void GRAPH_enque(GRAPH** queue, const int size, int* tail_index, const GRAPH value)
+{
+	(*queue)[*tail_index] = value;
+	*tail_index = (*tail_index + 1) % size;
+}
+
+// Dequeue operation (removes a node from the head)
+inline static int GRAPH_deque(GRAPH** queue, int size, int* head_index)
+{
+	GRAPH value = (*queue)[*head_index];
+	*head_index = (*head_index + 1) % size;
+	return value;
+}
+
 
 /* ***************************************************************
  * ***************** A Dynamic FIFO queue ************************
