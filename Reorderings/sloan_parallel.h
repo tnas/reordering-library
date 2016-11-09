@@ -37,4 +37,29 @@ typedef struct
 	omp_lock_t lock;
 } bag;
 
+
+typedef struct 
+{
+	int label;
+	int status;
+	int distance;
+	int* priorities;
+} SLOAN_GRAPH;
+
+
+
+inline static void GRAPH_enque(SLOAN_GRAPH** queue, const int size, int* tail_index, const SLOAN_GRAPH value)
+{
+	(*queue)[*tail_index] = value;
+	*tail_index = (*tail_index + 1) % size;
+}
+
+// Dequeue operation (removes a node from the head)
+inline static SLOAN_GRAPH GRAPH_deque(SLOAN_GRAPH** queue, int size, int* head_index)
+{
+	SLOAN_GRAPH value = (*queue)[*head_index];
+	*head_index = (*head_index + 1) % size;
+	return value;
+}
+
 double Parallel_Sloan	(METAGRAPH* mgraph, int** permutation, int start_node, int end_node);

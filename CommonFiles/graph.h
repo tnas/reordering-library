@@ -40,7 +40,7 @@ typedef struct
 /* ***************************************************************
  * **************** A simple GRAPH static queue ******************
  * ***************************************************************/
-
+/*
 inline static void GRAPH_enque(GRAPH** queue, const int size, int* tail_index, const GRAPH value)
 {
 	(*queue)[*tail_index] = value;
@@ -53,7 +53,7 @@ inline static GRAPH GRAPH_deque(GRAPH** queue, int size, int* head_index)
 	GRAPH value = (*queue)[*head_index];
 	*head_index = (*head_index + 1) % size;
 	return value;
-}
+}*/
 
 
 /*----------------------------------------------------------------------------
