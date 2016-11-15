@@ -404,7 +404,7 @@ void run_tema_journal_tests()
 		"../Big-Matrices/ins2.mtx",		
 // 		"../Big-Matrices/01-inline_1.mtx",		
 // 		"../Big-Matrices/02-audikw_1.mtx",
-		"../Big-Matrices/03-dielFilterV3real.mtx",
+// 		"../Big-Matrices/03-dielFilterV3real.mtx",
 // 		"../Big-Matrices/04-G3_circuit.mtx",
 // 		"../Big-Matrices/05-M6.mtx",
 // 		"../Big-Matrices/07-venturiLevel3.mtx"
