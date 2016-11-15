@@ -396,16 +396,18 @@ void run_tema_journal_tests()
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
-		"../Matrices/dw8192.mtx",
-		"../Matrices/FEM_3D_thermal1.mtx",
-		"../Matrices/rail_79841.mtx",
-		"../Matrices/Dubcova3.mtx",
-		"../Big-Matrices/01-inline_1.mtx",		
-		"../Big-Matrices/02-audikw_1.mtx",
+// 		"../Matrices/dw8192.mtx",
+// 		"../Matrices/FEM_3D_thermal1.mtx",
+// 		"../Matrices/rail_79841.mtx",
+		"../Matrices/thermomech_TC.mtx",
+// 		"../Matrices/Dubcova3.mtx",
+		"../Big-Matrices/ins2.mtx",		
+// 		"../Big-Matrices/01-inline_1.mtx",		
+// 		"../Big-Matrices/02-audikw_1.mtx",
 		"../Big-Matrices/03-dielFilterV3real.mtx",
-		"../Big-Matrices/04-G3_circuit.mtx",
-		"../Big-Matrices/05-M6.mtx",
-		"../Big-Matrices/07-venturiLevel3.mtx"
+// 		"../Big-Matrices/04-G3_circuit.mtx",
+// 		"../Big-Matrices/05-M6.mtx",
+// 		"../Big-Matrices/07-venturiLevel3.mtx"
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
