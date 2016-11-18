@@ -48,7 +48,9 @@ void test_parallel_max_wavefront()
 			
 			printf("Calculated wavefront for matrix %s: %ld\n", 
 			       matrices[mat], calculated_wavefront);fflush(stdout);
+			       
 			assert(calculated_wavefront == expected_wavefront[mat]);
+			
 			printf("Test of wavefront of matrix %s and %d threads ----- OK\n", 
 			       matrices[mat], nthreads[th]);fflush(stdout);
 		}

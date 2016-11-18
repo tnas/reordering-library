@@ -49,7 +49,7 @@
  * 	0: all tests
  * 	1: reordering algorithms 
  * 	2: prefix sum 
- * 	3: wavefront calculus
+ * 	3: matrix operations
  * 	4: graph parallel
  * 	5: util functions
  * 	6: linked list operations

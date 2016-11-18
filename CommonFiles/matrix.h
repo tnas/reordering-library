@@ -15,12 +15,13 @@
  * 
  */
 
+#ifndef __MATRIX_H__
+#define __MATRIX_H__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef __MATRIX_H__
-#define __MATRIX_H__
+#include <math.h>
 
 typedef struct
 {
@@ -57,7 +58,7 @@ extern void     MATRIX_writeCSR          (MAT* A, double* f, int* s, int nP, int
 extern void 	MATRIX_readCSR_SymmUpper (MAT* A, FILE* f);
 extern long int MATRIX_wavefront	 (MAT* A);
 extern void     MATRIX_write_gnuplot     (const MAT *A, const char* file_name);
-
+long int 	MATRIX_avg_nnz_per_row 	 (MAT* A);
 extern int      COMPARE_array            (const void * a, const void * b);
 extern int      COMPARE_eig              (const void * a, const void * b);
 
