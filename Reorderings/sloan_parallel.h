@@ -62,4 +62,4 @@ inline static SLOAN_GRAPH GRAPH_deque(SLOAN_GRAPH** queue, int size, int* head_i
 	return value;
 }
 
-double Parallel_Sloan	(METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
+void Parallel_Sloan	(METAGRAPH* mgraph, int** permutation, int start_node, int end_node);

@@ -179,9 +179,10 @@ test test_reorder_algorithm(test defs)
 		case parallel_sloan : // t = 8
 			defs.algorithm_name = "Parallel Sloan";
 			defs.algorithm      = parallel_sloan;
-// 			time = omp_get_wtime();
-			defs.time_reordering = Parallel_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
-// 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, defs.end_node, BFS_PERCENT_CHUNK);
+			time = omp_get_wtime();
+			Parallel_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
 		case boost_rcm : // t = 9
@@ -216,6 +217,8 @@ test test_reorder_algorithm(test defs)
 		{
 			if (is_parallel_algorithm(defs.algorithm))
 			{
+				printf("%s: Wavefront => Time Reordering: [ %.6f ]\n", defs.algorithm_name, defs.time_reordering);fflush(stdout); 
+				
 				time = omp_get_wtime();
 				MATRIX_PARALLEL_permutation(matrix, permutation);
 				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
@@ -475,7 +478,7 @@ void run_all_reordering_tests()
 	};
 	
 // 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12, 14, 16 };
-	int nthreads[] = { 4 };
+	int nthreads[] = { 12 };
 	
 // 	reorder_algorithm algorithm[] = { boost_rcm, hsl_rcm, unordered_rcm, bucket_rcm };
 	reorder_algorithm algorithm[] = { hsl_sloan, parallel_sloan};
