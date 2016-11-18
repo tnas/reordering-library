@@ -1189,31 +1189,46 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 		
 		while ((!QUEUE_empty(priority_queue, prior_head, prior_tail)) && next_id < num_nodes)
 		{
-			#pragma omp single
-			{
-				omp_set_lock(&queue_lock);
-				
-				qsort(&priority_queue[prior_head], prior_tail-prior_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC);
-				curr_max_priority = priority_queue[prior_head].priorities[priority_queue[prior_head].label];
-			
-				printf("-------------------------------\n");fflush(stdout);
-				for (count = prior_head; count < prior_tail; ++count)
-					printf("[node %d, prior %d]\n", priority_queue[count].label, priority_queue[count].priorities[priority_queue[count].label]);fflush(stdout);
-
-				printf("curr_max_priority: %d\n",curr_max_priority);fflush(stdout);
-				
-				omp_unset_lock(&queue_lock);
-			}
+// 			#pragma omp critical
+// 			{
+// 				omp_set_lock(&queue_lock);
+// 				
+// 				qsort(&priority_queue[prior_head], prior_tail-prior_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC);
+// 				printf("[th-%d] sorting from position %d until position %d\n", omp_get_thread_num(), prior_head, prior_tail);fflush(stdout);
+// 				curr_max_priority = priority_queue[prior_head].priorities[priority_queue[prior_head].label];
+// 			
+// 				printf("-------------------------------\n");fflush(stdout);
+// 				for (count = prior_head; count < prior_tail; ++count)
+// 					printf("[node %d, prior %d]\n", priority_queue[count].label, priority_queue[count].priorities[priority_queue[count].label]);fflush(stdout);
+// 
+// 				printf("curr_max_priority: %d\n",curr_max_priority);fflush(stdout);
+// 				
+// 				omp_unset_lock(&queue_lock);
+// 			}
 			
 			if (!QUEUE_empty(priority_queue, prior_head, prior_tail)) 
 			{
 				omp_set_lock(&queue_lock);
 				
+				if (prior_head < prior_tail)
+				{
+					qsort(&priority_queue[prior_head], prior_tail-prior_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC);
+// 					printf("[th-%d] sorting from position %d until position %d\n", omp_get_thread_num(), prior_head, prior_tail);fflush(stdout);
+					
+					curr_max_priority = priority_queue[prior_head].priorities[priority_queue[prior_head].label];
+			
+// 					printf("-------------------------------\n");fflush(stdout);
+// 					for (count = prior_head; count < prior_tail; ++count)
+// 						printf("[node %d, prior %d]\n", priority_queue[count].label, priority_queue[count].priorities[priority_queue[count].label]);fflush(stdout);
+// 
+// 					printf("curr_max_priority: %d\n",curr_max_priority);fflush(stdout);
+				}
+				
 				th_tail = prior_tail;
 				th_head = prior_head;	
 				size_chunk = ceil(BFS_PERCENT_CHUNK * (th_tail - th_head));
 // 				size_chunk = ceil(BFS_PERCENT_CHUNK * size_priority[curr_max_priority]);
-				printf("size_chunk: %d\n", size_chunk);fflush(stdout);
+// 				printf("[th-%d] size_chunk: %d\n", omp_get_thread_num(), size_chunk);fflush(stdout);
 // 				size_priority[curr_max_priority] -= size_chunk;
 				
 				prior_head += size_chunk;
@@ -1222,8 +1237,8 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 					
 				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
 				{
-					printf("snapping node %d with priority %d from postion %d of priority_queue\n", active_node.label, active_node.priorities[active_node.label], th_head);fflush(stdout);
 					active_node = GRAPH_deque(&priority_queue, pqueue_size, &th_head);
+// 					printf("[th-%d]snapping node %d with priority %d from postion %d of priority_queue\n", omp_get_thread_num(), active_node.label, active_node.priorities[active_node.label], th_head-1);fflush(stdout);
 					QUEUE_enque(&priority_snapshot, num_nodes, &snap_tail, active_node.label);
 
 				}
@@ -1321,7 +1336,7 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 				{
 					if (status[vertex] != NUMBERED)
 					{
-						printf(">>>permut id: %d, vertex %d\n", next_id, vertex);fflush(stdout);
+// 						printf("[th-%d] >>>permut id: %d, vertex %d\n", omp_get_thread_num(), next_id, vertex);fflush(stdout);
 						
 						(*permutation)[next_id++] = vertex;
 						status[vertex] = NUMBERED;
@@ -1347,9 +1362,9 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 						if (status[vertex] == INACTIVE)
 						{
 							status[vertex] = dirty_node.status;
-							printf("adding node %d in priority queue at position %d\n", dirty_node.label, prior_tail);fflush(stdout);
 							
 							omp_set_lock(&queue_lock);
+// 							printf("[th-%d] adding node %d in priority queue at position %d\n", omp_get_thread_num(), dirty_node.label, prior_tail);fflush(stdout);
 							GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
 							omp_unset_lock(&queue_lock);
 						}
@@ -1384,7 +1399,7 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 		#pragma omp single
 		{
 			time = (omp_get_wtime() - time)/100.0;
-			printf("Time processing: %lf\n", time);fflush(stdout);
+			printf("[th-%d] Time processing: %lf\n", omp_get_thread_num(), time);fflush(stdout);
 		}
 		
 		free(priority_snapshot);
@@ -1400,6 +1415,9 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 		#pragma omp single
 		time_pos = omp_get_wtime();
 		
+// 		#pragma omp critical
+// 		printf("------------------------------->>>>>>>>>>>>>>>thread %d is over\n", omp_get_thread_num());fflush(stdout);
+		
 		#pragma omp barrier
 		
 		#pragma omp sections
@@ -1412,19 +1430,15 @@ double Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int 
 			
 			#pragma omp section
 			omp_destroy_lock(&queue_lock);
-			
-// 			#pragma omp section
-// 			free(size_priority);
 		}
 		
 		#pragma omp single
 		{
 			time_pos = (omp_get_wtime() - time_pos)/100.0;
-			printf("Time pos-processing: %lf\n", time_pos);fflush(stdout);
+			printf("[th-%d] Time pos-processing: %lf\n", omp_get_thread_num(), time_pos);fflush(stdout);
 		}
 		
-		#pragma omp critical
-		printf("thread %d is over\n", omp_get_thread_num());fflush(stdout);
+
 	}
 	
 	return time + time_pre + time_pos;
