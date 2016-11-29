@@ -29,7 +29,8 @@ typedef enum {
 	GRAPH_PARALLEL,
 	UTIL_FUNCIONS,
 	LINKED_LIST,
-	TEMA
+	TEMA,
+	WADS_RCM
 } test_suite;
 
 

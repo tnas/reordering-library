@@ -1060,8 +1060,7 @@ int COMPARE_priority_DESC(const void* st, const void* nd)
 
 void Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
-	int num_nodes, next_id, prior_head, prior_tail, num_priorities, curr_max_priority,
-	    pqueue_size;
+	int num_nodes, next_id, prior_head, prior_tail, pqueue_size;
 	int* status;
 	SLOAN_GRAPH* priority_queue;
 	omp_lock_t queue_lock;
@@ -1074,7 +1073,6 @@ void Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int en
 		int node, vertex, vertex_degree, neighbor_degree, ngb, far_ngb, neighbor, 
 		    far_neighbor, update_far, th_head, th_tail, size_chunk, 
 		    count_chunk, snap_head, snap_tail, dirty_head, dirty_tail;
-		int count;
 		SLOAN_GRAPH active_node, dirty_node;
 		int* neighbors;
 		int* far_neighbors;

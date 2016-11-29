@@ -171,8 +171,8 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
 			time = omp_get_wtime(); 
-			Bucket_RCM(mgraph, &permutation, defs.root);
-// 			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
+// 			Bucket_RCM(mgraph, &permutation, defs.root);
+			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -392,25 +392,20 @@ void execute_tests(const char** matrices, const int* nthreads, const reorder_alg
 }
 
 
-
-
 void run_tema_journal_tests()
 {
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
-// 		"../Matrices/dw8192.mtx",
-// 		"../Matrices/FEM_3D_thermal1.mtx",
-// 		"../Matrices/rail_79841.mtx",
+		"../Matrices/benzene.mtx",
+		"../Matrices/FEM_3D_thermal1.mtx",
+		"../Matrices/rail_79841.mtx",
 		"../Matrices/thermomech_TC.mtx",
-// 		"../Matrices/Dubcova3.mtx",
-		"../Big-Matrices/ins2.mtx",		
-// 		"../Big-Matrices/01-inline_1.mtx",		
-// 		"../Big-Matrices/02-audikw_1.mtx",
-// 		"../Big-Matrices/03-dielFilterV3real.mtx",
-// 		"../Big-Matrices/04-G3_circuit.mtx",
-// 		"../Big-Matrices/05-M6.mtx",
-// 		"../Big-Matrices/07-venturiLevel3.mtx"
+		"../Matrices/Dubcova3.mtx",
+		"../Big-Matrices/01-inline_1.mtx",		
+		"../Big-Matrices/02-audikw_1.mtx",
+		"../Big-Matrices/03-dielFilterV3real.mtx",
+		"../Big-Matrices/04-G3_circuit.mtx",
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
@@ -426,6 +421,36 @@ void run_tema_journal_tests()
 		      num_matrices, size_set_nthreads, num_algorithms);
 }
 
+
+void run_wads_conference_rcm_tests()
+{
+	int num_executions  = 5;
+	
+	const char* matrices[] = {
+		"../Big-Matrices/01-inline_1.mtx",		
+		"../Big-Matrices/02-audikw_1.mtx",
+		"../Big-Matrices/03-dielFilterV3real.mtx",
+		"../Big-Matrices/04-G3_circuit.mtx",
+		"../Big-Matrices/05-M6.mtx",
+		"../Big-Matrices/06-333SP.mtx",		
+		"../Big-Matrices/07-NLR.mtx",
+		"../Big-Matrices/08-hugetric-00020.mtx",
+		"../Big-Matrices/09-delaunay_n24.mtx",
+		"../Big-Matrices/10-road_usa.mtx",
+	};
+	
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12, 14, 16 };
+	
+	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, bucket_rcm };
+	
+	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
+	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
+	int num_algorithms    = sizeof(algorithms)/sizeof(algorithms[0]);
+	
+	// Running tests
+	execute_tests(matrices, nthreads, algorithms, num_executions, 
+		      num_matrices, size_set_nthreads, num_algorithms);
+}
 
 
 

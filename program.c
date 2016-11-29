@@ -54,6 +54,7 @@
  * 	5: util functions
  * 	6: linked list operations
  * 	7: TEMA journal
+ * 	8: WADS conference - RCM
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -141,6 +142,10 @@ int main (int argc, char* argv[]) {
 			
 			case TEMA :
 				run_tema_journal_tests();
+				break;
+			
+			case WADS_RCM :
+				run_wads_conference_rcm_tests();
 				break;
 		}
 	}
