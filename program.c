@@ -108,7 +108,7 @@ int main (int argc, char* argv[]) {
 		switch (test_suite) 
 		{
 			case ALL : 
-				run_all_reordering_tests();
+				run_reordering_tests();
 				test_prefix_sum();
 				run_all_test_matrix();
 				run_all_test_GRAPH_parallel();
@@ -116,7 +116,7 @@ int main (int argc, char* argv[]) {
 				break;
 				
 			case REORDERING :
-				run_all_reordering_tests();
+				run_reordering_tests();
 				break;
 			
 			case PREFIX_SUM:

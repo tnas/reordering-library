@@ -81,6 +81,6 @@ double get_total_time          		(test defs);
 test   test_reorder_algorithm  		(test defs);
 void   run_tema_journal_tests  		();
 void   run_wads_conference_rcm_tests	();
-void   run_all_reordering_tests		();
+void   run_reordering_tests		();
 
 #endif

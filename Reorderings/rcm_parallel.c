@@ -535,7 +535,7 @@ void Bucket_RCM(const METAGRAPH* mgraph, int** perm, int root)
 
 
 /*----------------------------------------------------------------------------
- * Evolution of the Bucket RCM. All algorithm steps are executed in a 
+ * Evolution of the Bucket RCM. All steps of the algorithm are executed in a 
  * same loop. The placement are executed node by node (parent) instead of
  * bucket by bucket as executed by original Bucket RCM.
  * 
