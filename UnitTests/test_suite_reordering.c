@@ -404,7 +404,7 @@ void run_reordering_tests()
 // 		"./Big-Matrices/07-venturiLevel3.mtx",
 // 		"./Big-Matrices/06-333SP.mtx",
 // 		"../Big-Matrices/05-M6.mtx",
-		"../Big-Matrices/04-G3_circuit.mtx",
+// 		"../Big-Matrices/04-G3_circuit.mtx",
 // 		"../Big-Matrices/03-dielFilterV3real.mtx",
 // 		"./Big-Matrices/02-audikw_1.mtx",
 // 		"../Big-Matrices/01-inline_1.mtx",	
@@ -418,7 +418,7 @@ void run_reordering_tests()
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/hsl.mtx",
 // 		"../Matrices/sample.mtx",
-// 		"../Matrices/bcspwr01.mtx",
+		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
@@ -427,9 +427,9 @@ void run_reordering_tests()
 // 		"../Matrices/thermomech_TC.mtx"
 	};
 	
-	int nthreads[] = { 1, 2, 4, 6, 8 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, bucket_rcm};
+	reorder_algorithm algorithms[] = { hsl_sloan, boost_sloan, parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
