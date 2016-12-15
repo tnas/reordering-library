@@ -95,10 +95,6 @@ double Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root)
 	for (boost::tie(ui, ui_end) = vertices(bgraph); ui != ui_end; ++ui)
 		node_degree[*ui] = degree(*ui, bgraph);
 
-// 	property_map<Graph, vertex_index_t>::type index_map = get(vertex_index, bgraph);
-
-// 	std::cout << "original bandwidth: " << bandwidth(bgraph) << std::endl;
-
 	std::vector<Vertex> inv_perm(num_vertices(bgraph));
 	std::vector<size_type> perm(num_vertices(bgraph));
 	
@@ -108,29 +104,8 @@ double Boost_RCM(const METAGRAPH* mgraph, int** permut, const int root)
 	cuthill_mckee_ordering(bgraph, root_vertex, inv_perm.rbegin(), 
 		get(vertex_color, bgraph), get(vertex_degree, bgraph));
 	
-// 	cout << "Reverse Cuthill-McKee ordering starting at: " << root_vertex << endl;
-// 	cout << "  ";    
-	
-// 	for (std::vector<Vertex>::const_iterator i = inv_perm.begin(); i != inv_perm.end(); ++i)
-// 		cout << index_map[*i] << " ";
-// 	cout << endl;
-
 	std::copy(inv_perm.begin(), inv_perm.end(), *permut);
 	
 	return (omp_get_wtime() - time)/100.0;
-	
-// 	for (size_type c = 0; c != inv_perm.size(); ++c)
-// 	{
-// 		perm[index_map[inv_perm[c]]] = c;
-// 	}
-
-// 	cout << "  ";
-// 	for (int no = 0; no < mgraph->size; ++no)
-// 		cout << (*permut)[no] << " ";
-// 	cout <<endl;
-	
-// 	std::cout << "  bandwidth: " 
-// 		  << bandwidth(bgraph, make_iterator_property_map(&perm[0], index_map, perm[0]))
-// 		  << std::endl;
 }
 

@@ -41,7 +41,8 @@ int inline is_serial_algorithm(reorder_algorithm algorithm)
 int inline is_parallel_algorithm(reorder_algorithm algorithm)
 {
 	if (algorithm == unordered_rcm || algorithm == leveled_rcm ||
-	    algorithm == bucket_rcm    || algorithm == parallel_sloan)
+	    algorithm == bucket_rcm    || algorithm == parallel_sloan ||
+		algorithm == logbag_sloan || algorithm == bag_sloan)
 		return 1;
 	
 	return 0;
@@ -51,7 +52,8 @@ int inline is_parallel_algorithm(reorder_algorithm algorithm)
 int inline is_sloan_algorithm(reorder_algorithm algorithm)
 {
 	if (algorithm == hsl_sloan || algorithm == parallel_sloan ||
-	    algorithm == serial_sloan || algorithm == boost_sloan)
+	    algorithm == serial_sloan || algorithm == boost_sloan ||
+		algorithm == logbag_sloan || algorithm == bag_sloan)
 		return 1;
 	
 	return 0;
@@ -171,8 +173,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "Bucket RCM";
 			defs.algorithm      = bucket_rcm;
 			time = omp_get_wtime(); 
-// 			Bucket_RCM(mgraph, &permutation, defs.root);
-			Bucket_RCM_shrinked(mgraph, &permutation, defs.root);
+			Bucket_RCM(mgraph, &permutation, defs.root);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -196,9 +197,35 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm       = boost_sloan;
 			defs.time_reordering = Boost_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			break;
+		
+		case logbag_sloan : // t = 11
+			defs.algorithm_name = "Parallel Logical Bag Sloan";
+			defs.algorithm      = logbag_sloan;
+			GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, defs.end_node, BFS_PERCENT_CHUNK);
+			time = omp_get_wtime();
+			Parallel_Logical_Bag_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			break;
+		
+		case bag_sloan : // t = 12
+			defs.algorithm_name = "Parallel Bag Sloan";
+			defs.algorithm      = bag_sloan;
+			GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, defs.end_node, BFS_PERCENT_CHUNK);
+			time = omp_get_wtime();
+			Parallel_Bag_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			break;
+			
+		case shrinked_rcm : // t = 13
+			defs.algorithm_name = "Shrinked RCM";
+			defs.algorithm      = shrinked_rcm;
+			time = omp_get_wtime(); 
+			Shrinked_RCM(mgraph, &permutation, defs.root);
+			defs.time_reordering = (omp_get_wtime() - time)/100.0;
+			break;
 			
 		default :
-			printf("*** [Error] Algorithm must be between 0 and 10 ***\n");
+			printf("*** [Error] Algorithm must be between 0 and 13 ***\n");
 			exit(1);
 	}
 	
@@ -424,14 +451,14 @@ void run_reordering_tests()
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
-		"../Matrices/Dubcova2.mtx",
+// 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
-// 		"../Matrices/thermomech_TC.mtx"
+		"../Matrices/thermomech_TC.mtx"
 	};
 	
-	int nthreads[] = { 1, 2, 4, 6 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { parallel_sloan };
+	reorder_algorithm algorithms[] = { hsl_sloan, logbag_sloan, bag_sloan, parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

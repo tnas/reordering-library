@@ -50,6 +50,9 @@ typedef enum {
 	parallel_sloan,
 	boost_rcm,
 	boost_sloan,
+	logbag_sloan,
+	bag_sloan,
+	shrinked_rcm
 } reorder_algorithm;
 
 

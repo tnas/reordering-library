@@ -541,7 +541,7 @@ void Bucket_RCM(const METAGRAPH* mgraph, int** perm, int root)
  * 
  * @since 21-10-2016
  *--------------------------------------------------------------------------*/
-void Bucket_RCM_shrinked(const METAGRAPH* mgraph, int** perm, int root) 
+void Shrinked_RCM(const METAGRAPH* mgraph, int** perm, int root) 
 { 
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads, generation_size;
 	
