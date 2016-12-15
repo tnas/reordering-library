@@ -61,13 +61,15 @@ SloanGraph build_boost_sloan_graph(const METAGRAPH* mgraph)
 	for (node = 0; node < num_nodes; ++node)
 	{
 		degree     = mgraph->graph[node].degree;
-		neighboors = mgraph->graph[node].neighboors;
+		neighboors = GRAPH_neighboors(mgraph->mat, node, degree);
 		
 		for (neigh = 0; neigh < degree; ++neigh)
 		{
 			edge = SloanPair(node, neighboors[neigh]);
 			add_edge(edge.first, edge.second, bgraph);
 		}
+		
+		free(neighboors);
 	}
 	
 	return bgraph;
@@ -90,31 +92,11 @@ double Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, i
 	for (boost::tie(ui, ui_end) = vertices(bgraph); ui != ui_end; ++ui)
 		deg[*ui] = degree(*ui, bgraph);
 
-	//Creating a property_map for the indices of a vertex
-// 	property_map<SloanGraph, vertex_index_t>::type index_map = get(vertex_index, bgraph);
-
-// 	std::cout << "original bandwidth: " << bandwidth(bgraph) << std::endl;
-// 	std::cout << "original profile: " << profile(bgraph) << std::endl;
-// 	std::cout << "original max_wavefront: " << max_wavefront(bgraph) << std::endl;
-// 	std::cout << "original aver_wavefront: " << aver_wavefront(bgraph) << std::endl;
-// 	std::cout << "original rms_wavefront: " << rms_wavefront(bgraph) << std::endl;
-  
 	//Creating a vector of vertices  
 	std::vector<SloanVertex> sloan_order(num_vertices(bgraph));
+	
 	//Creating a vector of size_type  
 	std::vector<sloan_size_type> perm(num_vertices(bgraph));
-
-//     //Setting the start node
-//     SloanVertex s = vertex(0, bgraph);
-//     int ecc;   //defining a variable for the pseudoperipheral radius
-//     
-//     //Calculating the pseudoeperipheral node and radius
-//     SloanVertex e = pseudo_peripheral_pair(bgraph, s, ecc, get(vertex_color, bgraph), get(vertex_degree, bgraph) );
-// 
-//     cout << endl;
-//     cout << "Starting vertex: " << s << endl;
-//     cout << "Pseudoperipheral vertex: " << e << endl;
-//     cout << "Pseudoperipheral radius: " << ecc << endl << endl;
 
 	// Sloan ordering
 	sloan_ordering(bgraph, start_node, end_node, sloan_order.begin(), get(vertex_color, bgraph), 
@@ -123,28 +105,4 @@ double Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, i
 	std::copy(sloan_order.begin(), sloan_order.end(), *permutation);
 	
 	return (omp_get_wtime() - time)/100.0;
-	
-// 	for (std::vector<SloanVertex>::const_iterator i = sloan_order.begin(); i != sloan_order.end(); ++i)
-// 		cout << index_map[*i] << " ";
-// 	cout << endl;
-
-//     for (sloan_size_type c = 0; c != sloan_order.size(); ++c)
-//       perm[index_map[sloan_order[c]]] = c;
-//     std::cout << "  bandwidth: " 
-//               << bandwidth(bgraph, make_iterator_property_map(&perm[0], index_map, perm[0]))
-//               << std::endl;
-//     std::cout << "  profile: " 
-//               << profile(bgraph, make_iterator_property_map(&perm[0], index_map, perm[0]))
-//               << std::endl;
-//     std::cout << "  max_wavefront: " 
-//               << max_wavefront(bgraph, make_iterator_property_map(&perm[0], index_map, perm[0]))
-//               << std::endl;
-//     std::cout << "  aver_wavefront: " 
-//               << aver_wavefront(bgraph, make_iterator_property_map(&perm[0], index_map, perm[0]))
-//               << std::endl;
-//     std::cout << "  rms_wavefront: " 
-//               << rms_wavefront(bgraph, make_iterator_property_map(&perm[0], index_map, perm[0]))
-//               << std::endl;
-    
-	
 }

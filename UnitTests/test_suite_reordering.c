@@ -219,10 +219,12 @@ test test_reorder_algorithm(test defs)
 			{
 				printf("%s: Wavefront => Time Reordering: [ %.6f ]\n", defs.algorithm_name, defs.time_reordering);fflush(stdout); 
 				
-				time = omp_get_wtime();
-				MATRIX_PARALLEL_permutation(matrix, permutation);
-				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
-				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+// 				time = omp_get_wtime();
+// 				MATRIX_PARALLEL_permutation(matrix, permutation);
+// 				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+// 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+				defs.wavefront        = -1;
+				defs.time_permutation = -1;
 			}
 			else
 			{
@@ -418,18 +420,18 @@ void run_reordering_tests()
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/hsl.mtx",
 // 		"../Matrices/sample.mtx",
-		"../Matrices/bcspwr01.mtx",
+// 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
-// 		"../Matrices/Dubcova2.mtx",
+		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/thermomech_TC.mtx"
 	};
 	
-	int nthreads[] = { 4 };
+	int nthreads[] = { 1, 2, 4, 6 };
 	
-	reorder_algorithm algorithms[] = { hsl_sloan, boost_sloan, parallel_sloan };
+	reorder_algorithm algorithms[] = { parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

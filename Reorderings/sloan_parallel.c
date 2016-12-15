@@ -677,15 +677,13 @@ double Parallel_Sloan_v1(const METAGRAPH* mgraph, int** permutation, int start_n
 
 
 
-double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
+void Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, num_threads, chunk_size, min_priority, max_priority, 
 	    num_prior_bags, size_max_bag, max_processed_priority;
 	bag* bags_priority;
 	int* status;
 	int* max_bag;
-	double time, time_pre, time_pos;
-// 	ARRAY_LIST* priority_queue;
 	
 	num_nodes = mgraph->size;
 	GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, end_node, BFS_PERCENT_CHUNK);
@@ -724,9 +722,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 			
 			#pragma omp section
 			max_priority = mgraph->max_sloan_priority;
-			
-// 			#pragma omp section
-// 			ARRAY_LIST_init(&priority_queue);
 		}
 		
 		/* ********************************
@@ -745,8 +740,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 		#pragma omp for 
 		for (n_bag = 0; n_bag < num_prior_bags; ++n_bag)
 		{
-// 			bags_priority[n_bag].elements = calloc(num_nodes, sizeof(int)); // so so so expensive
-// 			bags_priority[n_bag].head = bags_priority[n_bag].tail = 0;
 			ARRAY_LIST_init(&bags_priority[n_bag].list_elements);
 			omp_init_lock(&bags_priority[n_bag].lock);
 		}
@@ -758,10 +751,7 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 			status[node]   = INACTIVE;
 			mgraph->sloan_priority[node] -= min_priority;
 			omp_set_lock(&(bags_priority[mgraph->sloan_priority[node]].lock));
-// 			QUEUE_enque(&(bags_priority[mgraph->sloan_priority[node]].elements), num_nodes, 
-// 				    &(bags_priority[mgraph->sloan_priority[node]].tail), node);
 			ARRAY_LIST_insert(&bags_priority[mgraph->sloan_priority[node]].list_elements, node);
-// 			ARRAY_LIST_add_desc_order(&priority_queue, mgraph->sloan_priority[node]);
 			omp_unset_lock(&(bags_priority[mgraph->sloan_priority[node]].lock));
 		}
 		
@@ -780,12 +770,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 		// Bag that stores each node change per thread
 		bag_change = malloc((num_nodes/2) * sizeof(GRAPH));
 		
-		#pragma omp single
-		{
-			time_pre = (omp_get_wtime() - time_pre)/100.0;
-			printf("Time pre-processing: %lf\n", time_pre);fflush(stdout);
-		}
-		
 		/* ************************************
 		 * ********** Processing nodes ********
 		 * ************************************/
@@ -795,10 +779,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 		
 		while (next_id < num_nodes)
 		{
-			
-// 			#pragma omp atomic
-// 			++count_threads_on;
-			
 			// Cloning current max priority bag
 			#pragma omp single	
 			{
@@ -810,12 +790,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 					max_bag[c_node++] = 
 						ARRAY_LIST_remove_first(&bags_priority[max_priority].list_elements);
 				}
-				
-// 				printf("----------------Priority Bag [%d]: ", max_priority);fflush(stdout);
-// 				for (c_node = 0; c_node < size_max_bag; ++c_node)
-// 					printf("%d ", max_bag[c_node]);
-// 				printf("\n");fflush(stdout);
-				
 			}
 			
 			tail_bag_change = 0;
@@ -830,21 +804,14 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 				vertex = max_bag[index_vertex];
 				
 				if (status[vertex] == NUMBERED) 
-				{
-// 					printf("[th %d]descarding NUMBERED node %d\n", omp_get_thread_num(), vertex);fflush(stdout);
 					continue;
-				}
 				
 				vertex_degree = mgraph->graph[vertex].degree;
 				neighbors     = GRAPH_neighboors(mgraph->mat, vertex, vertex_degree);
 				
-// 				printf("[th %d]processing node %d(d=%d) with priority %d from position %d\n", omp_get_thread_num(), vertex, vertex_degree, mgraph->sloan_priority[vertex], index_vertex);fflush(stdout);
-				
 				for (ngb = 0; ngb < vertex_degree; ++ngb)
 				{
 					neighbor   = neighbors[ngb];
-// 					printf("[th %d]processing neighboor %d\n", omp_get_thread_num(), neighbor);fflush(stdout);
-					
 					update_far = OFF;
 					
 					if (status[vertex] == PREACTIVE)
@@ -892,7 +859,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 							
 							if (far_neighbor == vertex) continue;
 							
-// 							printf("[th %d]processing far_neighboor %d\n", omp_get_thread_num(), far_neighbor);fflush(stdout);
 							bag_change[tail_bag_change].label = far_neighbor;
 							
 							if (status[far_neighbor] == INACTIVE)
@@ -917,18 +883,14 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 				free(neighbors);
 				
 				// Placing vertex in permutation array
-// 				omp_set_lock(&mgraph->lock_node[vertex]);
 				#pragma omp critical
 				{
 					if (status[vertex] != NUMBERED)
 					{
-	// 					printf(">>>permut id: %d, vertex %d\n", th_next_id, vertex);fflush(stdout);
-						
 						(*permutation)[next_id++] = vertex;
 						status[vertex] = NUMBERED;
 					}
 				}
-// 				omp_unset_lock(&mgraph->lock_node[vertex]);
 			} // priority bag loop
 			
 			// Unloading each bag change
@@ -954,15 +916,9 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 				}
 			}
 			
-// 			#pragma omp single
-// 			max_priority = ARRAY_LIST_remove_first(&priority_queue);
-			
-// 			#pragma omp barrier
-			
 			// Defining next max priority bag
 			#pragma omp single
 			{
-// 				printf("------------------------------------------rrr\n");fflush(stdout);
 				if (max_processed_priority >= max_priority)
 				{
 					max_priority = max_processed_priority;
@@ -984,7 +940,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 		} // main loop - while
 		
 		free(bag_change);
-// 		free(th_max_bag);
 		
 		#pragma omp barrier
 		
@@ -992,21 +947,6 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 		 * ****** Post-processing *********
 		 * ********************************
 		 */
-		#pragma omp single
-		{
-			time = (omp_get_wtime() - time)/100.0;
-			printf("Time processing: %lf\n", time);fflush(stdout);
-		}
-		
-// 		#pragma omp single
-// 		{
-// 			printf("thead %d - permutation: ", omp_get_thread_num());fflush(stdout);
-// 			for (node = 0; node < num_nodes; ++node) printf("%d ", (*permutation)[node]);fflush(stdout);
-// 			printf("\n");
-// 		}
-		
-		#pragma omp single
-		time_pos = omp_get_wtime();
 		
 		#pragma omp for 
 		for (n_bag = 0; n_bag < num_prior_bags; ++n_bag)
@@ -1025,20 +965,7 @@ double Parallel_Sloan_fast(METAGRAPH* mgraph, int** permutation, int start_node,
 			
 			#pragma omp section
 			free(max_bag);
-			
-// 			#pragma omp section
-// 			ARRAY_LIST_destroy(&priority_queue);
 		}
-		
-		#pragma omp single
-		{
-			time_pos = (omp_get_wtime() - time_pos)/100.0;
-			printf("Time pos-processing: %lf\n", time_pos);fflush(stdout);
-		}
-	}
-	
-	return time + time_pre + time_pos;
-// 	printf("sloan is over!\n");fflush(stdout);
 }
 
 
@@ -1061,7 +988,7 @@ int COMPARE_priority_DESC(const void* st, const void* nd)
 
 
 
-void Parallel_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
+void Parallel_Sloan_wads(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, prior_head, prior_tail, pqueue_size;
 	int* status;

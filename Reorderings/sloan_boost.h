@@ -18,12 +18,12 @@
 #ifndef SLOAN_BOOST_H
 #define SLOAN_BOOST_H
 
-#include "../CommonFiles/graph_parallel.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "../CommonFiles/graph_parallel.h"
+	
 double Boost_Sloan(const METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
 
 #ifdef __cplusplus
