@@ -58,6 +58,7 @@
  * 	6: linked list operations
  * 	7: TEMA journal
  * 	8: WADS conference - RCM
+ * 	9: Dissertation Medium Matrices
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -149,6 +150,10 @@ int main (int argc, char* argv[]) {
 			
 			case WADS_RCM :
 				run_wads_conference_rcm_tests();
+				break;
+				
+			case DISSERTATION_MEDIUM :
+				run_dissertation_medium_matrices();
 				break;
 		}
 	}

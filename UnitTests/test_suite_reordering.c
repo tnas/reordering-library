@@ -505,21 +505,52 @@ void run_wads_conference_rcm_tests()
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
-		"../Big-Matrices/01-G3_circuit.mtx",
+// 		"../Big-Matrices/01-G3_circuit.mtx",
 		"../Big-Matrices/02-belgium_osm.mtx",
-		"../Big-Matrices/03-Serena.mtx"
+/*		"../Big-Matrices/03-Serena.mtx"
 		"../Big-Matrices/04-thermal2.mtx",
 		"../Big-Matrices/05-roadNet-PA.mtx",
 		"../Big-Matrices/06-ecology1.mtx",
 		"../Big-Matrices/07-audikw_1.mtx",
 		"../Big-Matrices/08-tmt_sym.mtx",
 		"../Big-Matrices/09-Fault_639.mtx",
-		"../Big-Matrices/10-inline_1.mtx",		
+		"../Big-Matrices/10-inline_1.mtx",*/		
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	
-	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, bucket_rcm };
+	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, shrinked_rcm };
+	
+	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
+	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
+	int num_algorithms    = sizeof(algorithms)/sizeof(algorithms[0]);
+	
+	// Running tests
+	execute_tests(matrices, nthreads, algorithms, num_executions, 
+		      num_matrices, size_set_nthreads, num_algorithms);
+}
+
+
+void run_dissertation_medium_matrices()
+{
+	int num_executions  = 5;
+	
+	const char* matrices[] = {
+ 		"../Big-Matrices/11-body2.mtx",
+		"../Big-Matrices/12-cage13.mtx",
+		"../Big-Matrices/13-amazon0312.mtx"
+		"../Big-Matrices/14-rajat24.mtx",
+		"../Big-Matrices/15-mario002.mtx",
+		"../Big-Matrices/16-F1.mtx",
+		"../Big-Matrices/17-ins2.mtx",
+		"../Big-Matrices/18-Stanford.mtx",
+		"../Big-Matrices/19-offshore.mtx",
+		"../Big-Matrices/20-CO.mtx",
+	};
+	
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	
+	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, shrinked_rcm, boost_rcm, bucket_rcm };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

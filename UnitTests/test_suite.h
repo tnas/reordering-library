@@ -30,7 +30,8 @@ typedef enum {
 	UTIL_FUNCIONS,
 	LINKED_LIST,
 	TEMA,
-	WADS_RCM
+	WADS_RCM,
+	DISSERTATION_MEDIUM,
 } test_suite;
 
 
