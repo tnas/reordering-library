@@ -57,8 +57,10 @@
  * 	5: util functions
  * 	6: linked list operations
  * 	7: TEMA journal
- * 	8: WADS conference - RCM
+ * 	8: Dissertation Biggest Matrices
  * 	9: Dissertation Medium Matrices
+ *     10: Dissertation Smallest Matrices
+ *     11: Karantasis matrices paper 
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -148,12 +150,20 @@ int main (int argc, char* argv[]) {
 				run_tema_journal_tests();
 				break;
 			
-			case WADS_RCM :
-				run_wads_conference_rcm_tests();
+			case DISSERTATION_BIGGEST :
+				run_dissertation_biggest_matrices();
 				break;
 				
 			case DISSERTATION_MEDIUM :
 				run_dissertation_medium_matrices();
+				break;
+				
+			case DISSERTATION_SMALLEST :
+				run_dissertation_smallest_matrices();
+				break;
+				
+			case KARANTASIS :
+				run_dissertation_karantasis_matrices();
 				break;
 		}
 	}
