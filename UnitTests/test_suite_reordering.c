@@ -548,7 +548,6 @@ void run_dissertation_medium_matrices()
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	
 	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, shrinked_rcm, boost_rcm, bucket_rcm };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
