@@ -7,7 +7,7 @@ Current Build Directory Index=0
 ProjectRootRelative=./
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=file:///home/thiago/Documents/git-projects/reordering-library.git/build
+Build Directory Path=file:///home/tnrodrigues/Documentos/git-projects/reordering-library.git/build
 Build Type=Debug
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=
@@ -20,7 +20,7 @@ Path=gcc
 Type=GCC
 
 [Filters]
-size=27
+size=28
 
 [Filters][0]
 inclusive=0
@@ -122,6 +122,11 @@ inclusive=0
 pattern=/Reorderings/rcm_octave.h
 targets=1
 
+[Filters][27]
+inclusive=0
+pattern=/Big-Matrices/05-ldoor.mtx
+targets=1
+
 [Filters][3]
 inclusive=0
 pattern=.svn
@@ -171,7 +176,7 @@ Arguments=-t 9
 Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x02\x00\x00\x00$\x00r\x00e\x00o\x00r\x00d\x00e\x00r\x00i\x00n\x00g\x00-\x00l\x00i\x00b\x00r\x00a\x00r\x00y\x00\x00\x00$\x00r\x00e\x00o\x00r\x00d\x00e\x00r\x00i\x00n\x00g\x00-\x00l\x00i\x00b\x00r\x00a\x00r\x00y)
 Dependency Action=Build
 EnvironmentGroup=
-Executable=file:///home/thiago/Documents/git-projects/reordering-library.git/build/reordering-library
+Executable=file:///home/tnrodrigues/Documentos/git-projects/reordering-library.git/build/reordering-library
 External Terminal=konsole --noclose --workdir %workdir -e %exe
 Project Target=reordering-library,reordering-library
 Use External Terminal=false

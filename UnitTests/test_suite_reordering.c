@@ -501,14 +501,14 @@ void run_tema_journal_tests()
 // t = 8
 void run_dissertation_biggest_matrices()
 {
-	int num_executions  = 5;
+	int num_executions  = 1;
 	
 	const char* matrices[] = {
-		"../Big-Matrices/01-G3_circuit.mtx",
-		"../Big-Matrices/02-Serena.mtx"
-		"../Big-Matrices/03-dielFilterV2real.mtx",
-		"../Big-Matrices/04-nlpkkt80.mtx",
-		"../Big-Matrices/05-ldoor.mtx",
+		"../Big-Matrices/01-kkt_power.mtx",
+		"../Big-Matrices/02-G3_circuit.mtx",
+		"../Big-Matrices/03-Serena.mtx"
+		"../Big-Matrices/04-dielFilterV2real.mtx",
+		"../Big-Matrices/05-nlpkkt80.mtx",
 		"../Big-Matrices/06-audikw_1.mtx",
 		"../Big-Matrices/07-boneS10.mtx",
 		"../Big-Matrices/08-tmt_sym.mtx",
@@ -517,8 +517,7 @@ void run_dissertation_biggest_matrices()
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	
-	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, shrinked_rcm };
+	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, shrinked_rcm, hsl_sloan, parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -532,7 +531,7 @@ void run_dissertation_biggest_matrices()
 // t = 9
 void run_dissertation_medium_matrices()
 {
-	int num_executions  = 5;
+	int num_executions  = 1;
 	
 	const char* matrices[] = {
 		"../Big-Matrices/11-msdoor.mtx",
@@ -542,13 +541,14 @@ void run_dissertation_medium_matrices()
 		"../Big-Matrices/15-offshore.mtx",
 		"../Big-Matrices/16-CO.mtx",
 		"../Big-Matrices/17-fcondp2.mtx",
-		"../Big-Matrices/18-cont-300.mtx"
+		"../Big-Matrices/18-d_pretok.mtx"
 		"../Big-Matrices/19-SiO2.mtx",
 		"../Big-Matrices/20-cop20k_A.mtx",
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, shrinked_rcm, boost_rcm, bucket_rcm };
+	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
+	
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -579,7 +579,7 @@ void run_dissertation_smallest_matrices()
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	
-	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, bucket_rcm, shrinked_rcm };
+	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
