@@ -536,10 +536,10 @@ void run_dissertation_medium_matrices()
 		"../Big-Matrices/14-Ga41As41H72.mtx",
 		"../Big-Matrices/15-offshore.mtx",
 		"../Big-Matrices/16-CO.mtx",
-		"../Big-Matrices/17-fcondp2.mtx",
-		"../Big-Matrices/18-d_pretok.mtx"
-		"../Big-Matrices/19-SiO2.mtx",
-		"../Big-Matrices/20-cop20k_A.mtx",
+		"../Big-Matrices/17-d_pretok.mtx"
+		"../Big-Matrices/18-SiO2.mtx",
+		"../Big-Matrices/19-cop20k_A.mtx",
+		"../Big-Matrices/20-filter3D.mtx",
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };

@@ -483,7 +483,7 @@ inline BFS* GRAPH_parallel_build_BFS(const METAGRAPH* mgraph, int root)
 	bfs     = malloc(sizeof(BFS));
 	levels  = calloc(n_nodes, sizeof(int));
 	
-	GRAPH_parallel_fixedpoint_BFS(mgraph, root, &levels, BFS_PERCENT_CHUNK);
+	GRAPH_parallel_fixedpoint_static_BFS(mgraph, root, &levels, BFS_PERCENT_CHUNK);
 	
 	max_level   = count_nodes_by_level(levels, n_nodes, &counts);
 	// decrementing two levels added to max_level by count_nodes_by_level
