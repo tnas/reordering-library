@@ -30,8 +30,8 @@ int inline is_hsl_algorithm(reorder_algorithm algorithm)
 
 int inline is_serial_algorithm(reorder_algorithm algorithm)
 {
-	if (algorithm == serial_rcm || 
-	    algorithm == serial_sloan || algorithm == boost_rcm ||
+	if (algorithm == serial_rcm || algorithm == serial_sloan || 
+	    algorithm == boost_rcm ||  algorithm == boost_sloan ||
 	    is_hsl_algorithm(algorithm))
 		return 1;
 	
@@ -40,11 +40,7 @@ int inline is_serial_algorithm(reorder_algorithm algorithm)
 
 int inline is_parallel_algorithm(reorder_algorithm algorithm)
 {
-	if (algorithm == unordered_rcm || algorithm == leveled_rcm ||
-	    algorithm == bucket_rcm    || algorithm == parallel_sloan ||
-		algorithm == logbag_sloan || algorithm == bag_sloan)
-		return 1;
-	
+	if (!is_serial_algorithm(algorithm)) return 1;
 	return 0;
 }
 
@@ -531,7 +527,7 @@ void run_dissertation_biggest_matrices()
 // t = 9
 void run_dissertation_medium_matrices()
 {
-	int num_executions  = 1;
+	int num_executions  = 5;
 	
 	const char* matrices[] = {
 		"../Big-Matrices/11-msdoor.mtx",
