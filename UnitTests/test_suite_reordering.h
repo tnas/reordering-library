@@ -84,7 +84,7 @@ double get_total_time          			(test defs);
 test   test_reorder_algorithm  			(test defs);
 void   run_reordering_tests			();
 void   run_tema_journal_tests  			();
-void   run_dissertation_biggest_matrices	();
+void   run_dissertation_largest_matrices	();
 void   run_dissertation_medium_matrices 	();
 void   run_dissertation_smallest_matrices	();
 void   run_dissertation_karantasis_matrices	();

@@ -242,12 +242,12 @@ test test_reorder_algorithm(test defs)
 			{
 // 				printf("%s: Wavefront => Time Reordering: [ %.6f ]\n", defs.algorithm_name, defs.time_reordering);fflush(stdout); 
 				
-// 				time = omp_get_wtime();
-// 				MATRIX_PARALLEL_permutation(matrix, permutation);
-// 				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
-// 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
-				defs.wavefront        = -1;
-				defs.time_permutation = -1;
+				time = omp_get_wtime();
+				MATRIX_PARALLEL_permutation(matrix, permutation);
+				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+// 				defs.wavefront        = -1;
+// 				defs.time_permutation = -1;
 			}
 			else
 			{
@@ -495,25 +495,26 @@ void run_tema_journal_tests()
 }
 
 // t = 8
-void run_dissertation_biggest_matrices()
+void run_dissertation_largest_matrices()
 {
 	int num_executions  = 1;
 	
 	const char* matrices[] = {
-		"../Big-Matrices/01-kkt_power.mtx",
-		"../Big-Matrices/02-G3_circuit.mtx",
-		"../Big-Matrices/03-Serena.mtx",
-		"../Big-Matrices/04-dielFilterV2real.mtx",
-		"../Big-Matrices/05-nlpkkt80.mtx",
-		"../Big-Matrices/06-audikw_1.mtx",
-		"../Big-Matrices/07-boneS10.mtx",
-		"../Big-Matrices/08-tmt_sym.mtx",
-		"../Big-Matrices/09-Fault_639.mtx",
+		"../Big-Matrices/01-G3_circuit.mtx",
+		"../Big-Matrices/02-Serena.mtx",
+		"../Big-Matrices/03-dielFilterV2real.mtx",
+		"../Big-Matrices/04-nlpkkt80.mtx",
+		"../Big-Matrices/05-audikw_1.mtx",
+		"../Big-Matrices/06-boneS10.mtx",
+		"../Big-Matrices/07-tmt_sym.mtx",
+		"../Big-Matrices/08-Fault_639.mtx",
+		"../Big-Matrices/09-gsm_106857.mtx",
 		"../Big-Matrices/10-inline_1.mtx",		
 	};
 	
-	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	reorder_algorithm algorithms[] = { hsl_rcm, unordered_rcm, shrinked_rcm, hsl_sloan, parallel_sloan };
+// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	int nthreads[] = { 8 };
+	reorder_algorithm algorithms[] = { hsl_sloan, logbag_sloan, parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

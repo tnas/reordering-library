@@ -150,8 +150,8 @@ int main (int argc, char* argv[]) {
 				run_tema_journal_tests();
 				break;
 			
-			case DISSERTATION_BIGGEST :
-				run_dissertation_biggest_matrices();
+			case DISSERTATION_LARGEST :
+				run_dissertation_largest_matrices();
 				break;
 				
 			case DISSERTATION_MEDIUM :
