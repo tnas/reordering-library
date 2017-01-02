@@ -560,17 +560,15 @@ void run_dissertation_medium_matrices()
 void run_dissertation_smallest_matrices()
 {
 	int num_executions  = 5;
+// 	int num_executions  = 1;
 	
 	const char* matrices[] = {
-// 		"../Big-Matrices/22-boyd1.mtx*",
-// 		"../Big-Matrices/23-olesnik0.mtx*",
-// 		"../Big-Matrices/24-consph.mtx*",
 		"../Big-Matrices/21-m_t1.mtx",
-		"../Big-Matrices/22-tandem_dual.mtx",
-		"../Big-Matrices/23-net4-1.mtx",
-		"../Big-Matrices/24-c-72.mtx",
-		"../Big-Matrices/25-t3dh_a.mtx",
-		"../Big-Matrices/26-finan512.mtx",
+		"../Big-Matrices/22-ncvxqp7.mtx",
+		"../Big-Matrices/23-c-72.mtx",
+		"../Big-Matrices/24-t3dh_a.mtx",
+		"../Big-Matrices/25-finan512.mtx",
+		"../Big-Matrices/26-cfd1.mtx",
 		"../Big-Matrices/27-qa8fm.mtx",
 		"../Big-Matrices/28-Andrews.mtx",
 		"../Big-Matrices/29-copter2.mtx",
@@ -578,8 +576,10 @@ void run_dissertation_smallest_matrices()
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+// 	int nthreads[] = { 1 };
 	
 	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
+// 	reorder_algorithm algorithms[] = { hsl_rcm };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
