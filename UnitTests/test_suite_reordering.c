@@ -502,7 +502,7 @@ void run_dissertation_biggest_matrices()
 	const char* matrices[] = {
 		"../Big-Matrices/01-kkt_power.mtx",
 		"../Big-Matrices/02-G3_circuit.mtx",
-		"../Big-Matrices/03-Serena.mtx"
+		"../Big-Matrices/03-Serena.mtx",
 		"../Big-Matrices/04-dielFilterV2real.mtx",
 		"../Big-Matrices/05-nlpkkt80.mtx",
 		"../Big-Matrices/06-audikw_1.mtx",
@@ -561,10 +561,13 @@ void run_dissertation_smallest_matrices()
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
+// 		"../Big-Matrices/22-boyd1.mtx*",
+// 		"../Big-Matrices/23-olesnik0.mtx*",
+// 		"../Big-Matrices/24-consph.mtx*",
 		"../Big-Matrices/21-m_t1.mtx",
-		"../Big-Matrices/22-boyd1.mtx",
-		"../Big-Matrices/23-olesnik0.mtx",
-		"../Big-Matrices/24-consph.mtx",
+		"../Big-Matrices/22-tandem_dual.mtx",
+		"../Big-Matrices/23-net4-1.mtx",
+		"../Big-Matrices/24-c-72.mtx",
 		"../Big-Matrices/25-t3dh_a.mtx",
 		"../Big-Matrices/26-finan512.mtx",
 		"../Big-Matrices/27-qa8fm.mtx",
