@@ -80,7 +80,11 @@ test test_reorder_algorithm(test defs)
 	mgraph = GRAPH_parallel_build_METAGRAPH(matrix);
 	
 	MATRIX_write_gnuplot(matrix, "original_matrix");
-	defs.original_band = MATRIX_bandwidth(matrix);
+	
+	if (is_sloan_algorithm(defs.algorithm))
+		defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+	else
+		defs.original_band = MATRIX_bandwidth(matrix);
 		
 	// Getting pseudo peripheral nodes
 	if (is_hsl_algorithm(defs.algorithm))
@@ -144,7 +148,7 @@ test test_reorder_algorithm(test defs)
 			defs.algorithm_name = "HSL Sloan";
 			defs.algorithm      = hsl_sloan;
 			time = omp_get_wtime();
-			defs.wavefront = REORDERING_SLOAN_pseudodiameter_HSL(matrix, defs.start_node, defs.end_node);
+			defs.reorder_wavefront = REORDERING_SLOAN_pseudodiameter_HSL(matrix, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			defs.time_permutation = 0;
 			break;
@@ -232,33 +236,29 @@ test test_reorder_algorithm(test defs)
 	{
 		if (is_hsl_algorithm(defs.algorithm))
 		{
-			printf("%s: Wavefront [ %ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", defs.algorithm_name, 
-			       defs.wavefront, defs.time_reordering, defs.time_reordering, get_total_time(defs)); 
+			printf("%s: (Before/After) [ %ld/%ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", defs.algorithm_name, 
+			       defs.original_wavefront, defs.reorder_wavefront, defs.time_reordering, defs.time_reordering, get_total_time(defs)); 
 			fflush(stdout);
 		}
 		else
 		{
 			if (is_parallel_algorithm(defs.algorithm))
 			{
-// 				printf("%s: Wavefront => Time Reordering: [ %.6f ]\n", defs.algorithm_name, defs.time_reordering);fflush(stdout); 
-				
 				time = omp_get_wtime();
 				MATRIX_PARALLEL_permutation(matrix, permutation);
-				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
-// 				defs.wavefront        = -1;
-// 				defs.time_permutation = -1;
+				defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 			}
 			else
 			{
 				time = omp_get_wtime();
 				MATRIX_permutation(matrix, permutation);
-				defs.wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+				defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 			}
 			
-			printf("%s: Wavefront [ %ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
-				defs.algorithm_name, defs.wavefront, 
+			printf("%s: (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+				defs.algorithm_name, defs.original_wavefront, defs.reorder_wavefront, 
 				defs.time_peripheral, defs.time_reordering, defs.time_permutation, get_total_time(defs)); 
 			fflush(stdout);
 			
@@ -279,15 +279,15 @@ test test_reorder_algorithm(test defs)
 			{
 				time = omp_get_wtime();
 				MATRIX_PARALLEL_permutation(matrix, permutation);
-				defs.reorder_band = MATRIX_PARALLEL_bandwidth(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+				defs.reorder_band = MATRIX_PARALLEL_bandwidth(matrix);
 			}
 			else
 			{
 				time = omp_get_wtime();
 				MATRIX_permutation(matrix, permutation);
-				defs.reorder_band = MATRIX_bandwidth(matrix);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
+				defs.reorder_band = MATRIX_bandwidth(matrix);
 			}
 		
 			printf("%s: Bandwidth (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
@@ -357,7 +357,7 @@ void execute_tests(const char** matrices, const int* nthreads, const reorder_alg
 					time_peripherals[exec]  = result.time_peripheral;
 					time_permutations[exec] = result.time_permutation;
 					bandwidths[exec]        = result.reorder_band;
-					wavefronts[exec]        = result.wavefront;
+					wavefronts[exec]        = result.reorder_wavefront;
 				}
 				
 				normalize_results(time_peripherals, exec_times, &norm_values);
@@ -373,21 +373,21 @@ void execute_tests(const char** matrices, const int* nthreads, const reorder_alg
 				result.reorder_band = norm_values.average_value; 
 				
 				normalize_int_results(wavefronts, exec_times, &norm_values);
-				result.wavefront = norm_values.average_value; 
+				result.reorder_wavefront = norm_values.average_value; 
 				
 				if (is_sloan_algorithm(result.algorithm))
 				{
 					if (is_hsl_algorithm(result.algorithm))
 					{
 						fprintf(out_file, "%s: Wavefront [ %ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", result.algorithm_name, 
-							result.wavefront, result.time_reordering, result.time_reordering, get_total_time(result)); 
+							result.reorder_wavefront, result.time_reordering, result.time_reordering, get_total_time(result)); 
 						fflush(out_file);
 					}
 					else
 					{
 						fprintf(out_file, "[%s] Threads: %d -- Wavefront [ %ld ] -- Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
 							result.algorithm_name, is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads],
-							result.wavefront, result.time_peripheral, result.time_reordering, result.time_permutation, get_total_time(result)); 
+							result.reorder_wavefront, result.time_peripheral, result.time_reordering, result.time_permutation, get_total_time(result)); 
 						fflush(out_file);
 					}
 				}
@@ -453,7 +453,7 @@ void run_reordering_tests()
 	
 	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { hsl_sloan, logbag_sloan, parallel_sloan };
+	reorder_algorithm algorithms[] = { hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -497,7 +497,7 @@ void run_tema_journal_tests()
 // t = 8
 void run_dissertation_largest_matrices()
 {
-	int num_executions  = 1;
+	int num_executions  = 5;
 	
 	const char* matrices[] = {
 		"../Big-Matrices/01-G3_circuit.mtx",
@@ -512,9 +512,9 @@ void run_dissertation_largest_matrices()
 		"../Big-Matrices/10-inline_1.mtx",		
 	};
 	
-// 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	int nthreads[] = { 8 };
-	reorder_algorithm algorithms[] = { hsl_sloan, logbag_sloan, parallel_sloan };
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	
+	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -560,7 +560,6 @@ void run_dissertation_medium_matrices()
 void run_dissertation_smallest_matrices()
 {
 	int num_executions  = 5;
-// 	int num_executions  = 1;
 	
 	const char* matrices[] = {
 		"../Big-Matrices/21-m_t1.mtx",
@@ -576,10 +575,8 @@ void run_dissertation_smallest_matrices()
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-// 	int nthreads[] = { 1 };
 	
 	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
-// 	reorder_algorithm algorithms[] = { hsl_rcm };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

@@ -61,8 +61,9 @@ typedef struct {
 	double time_reordering;
 	double time_permutation;
 	long int original_band;
+	long int original_wavefront;
 	long int reorder_band;
-	long int wavefront;
+	long int reorder_wavefront;
 	const char* path_matrix_file;
 	int root;
 	int start_node;
