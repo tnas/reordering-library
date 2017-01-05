@@ -379,15 +379,16 @@ void execute_tests(const char** matrices, const int* nthreads, const reorder_alg
 				{
 					if (is_hsl_algorithm(result.algorithm))
 					{
-						fprintf(out_file, "%s: Wavefront [ %ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", result.algorithm_name, 
-							result.reorder_wavefront, result.time_reordering, result.time_reordering, get_total_time(result)); 
+						fprintf(out_file, "%s: Wavefront [ %ld/%ld ] Time => (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n", result.algorithm_name, 
+							result.original_wavefront, result.reorder_wavefront, result.time_reordering, result.time_reordering, get_total_time(result)); 
 						fflush(out_file);
 					}
 					else
 					{
-						fprintf(out_file, "[%s] Threads: %d -- Wavefront [ %ld ] -- Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
+						fprintf(out_file, "[%s] Threads: %d -- Wavefront [ %ld/%ld ] -- Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
 							result.algorithm_name, is_serial_algorithm(algorithm[count_alg]) ? 1 : nthreads[count_nthreads],
-							result.reorder_wavefront, result.time_peripheral, result.time_reordering, result.time_permutation, get_total_time(result)); 
+							result.original_wavefront, result.reorder_wavefront, result.time_peripheral, result.time_reordering, result.time_permutation, 
+							get_total_time(result)); 
 						fflush(out_file);
 					}
 				}
