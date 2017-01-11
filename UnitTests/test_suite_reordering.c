@@ -82,9 +82,20 @@ test test_reorder_algorithm(test defs)
 	MATRIX_write_gnuplot(matrix, "original_matrix");
 	
 	if (is_sloan_algorithm(defs.algorithm))
-		defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+	{
+		if (is_hsl_algorithm(defs.algorithm))
+		{
+			defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+		}
+		else 
+		{
+		defs.original_wavefront = -1;
+		}
+	}
 	else
+	{
 		defs.original_band = MATRIX_bandwidth(matrix);
+	}
 		
 	// Getting pseudo peripheral nodes
 	if (is_hsl_algorithm(defs.algorithm))
@@ -248,6 +259,7 @@ test test_reorder_algorithm(test defs)
 				MATRIX_PARALLEL_permutation(matrix, permutation);
 				defs.time_permutation = (omp_get_wtime() - time)/100.0;
 				defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+// 				defs.reorder_wavefront = -1;
 			}
 			else
 			{
@@ -529,23 +541,24 @@ void run_dissertation_largest_matrices()
 // t = 9
 void run_dissertation_medium_matrices()
 {
-	int num_executions  = 5;
+	int num_executions  = 1;
 	
 	const char* matrices[] = {
-		"../Big-Matrices/11-msdoor.mtx",
-		"../Big-Matrices/12-mario002.mtx",
-		"../Big-Matrices/13-F1.mtx",
-		"../Big-Matrices/14-Ga41As41H72.mtx",
-		"../Big-Matrices/15-offshore.mtx",
-		"../Big-Matrices/16-CO.mtx",
-		"../Big-Matrices/17-d_pretok.mtx"
-		"../Big-Matrices/18-SiO2.mtx",
-		"../Big-Matrices/19-cop20k_A.mtx",
+// 		"../Big-Matrices/11-msdoor.mtx",
+// 		"../Big-Matrices/12-mario002.mtx",
+// 		"../Big-Matrices/13-F1.mtx",
+// 		"../Big-Matrices/14-Ga41As41H72.mtx",
+// 		"../Big-Matrices/15-offshore.mtx",
+// 		"../Big-Matrices/16-CO.mtx",
+// 		"../Big-Matrices/17-d_pretok.mtx",
+// 		"../Big-Matrices/18-SiO2.mtx",
+		"../Big-Matrices/19-m_t1.mtx",
 		"../Big-Matrices/20-filter3D.mtx",
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
+// 	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
+	reorder_algorithm algorithms[] = { logbag_sloan, parallel_sloan };
 	
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
