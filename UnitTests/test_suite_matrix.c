@@ -103,9 +103,51 @@ void test_parallel_rms_wavefront()
 	}
 }
 
+void test_parallel_max_wavefront_apothen()
+{
+	MAT* matrix;
+	int num_matrices, size_set_threads, mat, th;
+	long int calculated_wavefront;
+	
+	int nthreads[] = { 1 };
+	
+	char* matrices[] = {
+		"../Matrices/apothen.mtx",
+	};
+	
+	long int expected_wavefront[] = {
+		5
+	};
+	
+	num_matrices     = sizeof(matrices)/sizeof(matrices[0]);
+	size_set_threads = sizeof(nthreads)/sizeof(nthreads[0]);
+	
+	for (mat = 0; mat < num_matrices; ++mat)
+	{
+		MATRIX_read_from_path(matrices[mat], &matrix);
+		
+		for (th = 0; th < size_set_threads; ++th)
+		{
+			omp_set_num_threads(nthreads[th]);
+			
+			calculated_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+			
+			printf("Calculated wavefront for matrix %s: %ld\n", 
+			       matrices[mat], calculated_wavefront);fflush(stdout);
+			       
+			assert(calculated_wavefront == expected_wavefront[mat]);
+			
+			printf("Test of wavefront of matrix %s and %d threads ----- OK\n", 
+			       matrices[mat], nthreads[th]);fflush(stdout);
+		}
+		
+		MATRIX_clean(matrix);
+	}
+}
 
 void run_all_test_matrix()
 {
-	test_parallel_max_wavefront();
-	test_parallel_rms_wavefront();
+// 	test_parallel_max_wavefront();
+// 	test_parallel_rms_wavefront();
+	test_parallel_max_wavefront_apothen();
 }

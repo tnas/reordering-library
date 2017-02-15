@@ -136,7 +136,7 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 				count_threads_on = 0;
 			}
 			
-			#pragma omp for schedule(static, chunk_size)
+			#pragma omp for schedule(static, chunk_size) 
 			for (vertex = 0; vertex < num_nodes; ++vertex)
 			{
 				// Processing Logical Bag
