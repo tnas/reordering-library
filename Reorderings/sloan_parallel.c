@@ -34,6 +34,7 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 	num_nodes = mgraph->size;
 	distance  = calloc(num_nodes, sizeof (int));
 	GRAPH_parallel_fixedpoint_static_BFS(mgraph, end_node, &distance, BFS_PERCENT_CHUNK);
+// 	GRAPH_bfs(mgraph->mat, end_node, distance);
 	
 	#pragma omp parallel 
 	{
@@ -73,6 +74,7 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 			degree[node]   = mgraph->graph[node].degree;
 			priority[node] = calloc(2, sizeof(int));
 			priority[node][SLOAN_CURR_PRIOR] = SLOAN_W1*distance[node] - SLOAN_W2*(degree[node] + 1);
+// 			priority[node][SLOAN_CURR_PRIOR] = SLOAN_W2*distance[node] - SLOAN_W1*degree[node];
 				
 			#pragma omp critical
 			if (priority[node][SLOAN_CURR_PRIOR] < min_priority) 
@@ -136,6 +138,20 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 				count_threads_on = 0;
 			}
 			
+// 			#pragma omp single
+// 			{
+// 				printf("max_priority: %d\n", max_priority);fflush(stdout);
+// 				
+// 				for (prior_bag = num_prior_bags - 1; prior_bag >= 0; --prior_bag)
+// 				{
+// 					if (size_bags[prior_bag] > 0)
+// 					{
+// 						printf("%d, ", prior_bag);
+// 					}
+// 				}
+// 				printf("\n------------------------\n");fflush(stdout);
+// 			}
+			
 			#pragma omp for schedule(static, chunk_size) 
 			for (vertex = 0; vertex < num_nodes; ++vertex)
 			{
@@ -153,23 +169,49 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 						update_far = OFF;
 						neighbor   = neighbors[ngb];
 						
-						if (status[vertex] == PREACTIVE)
+// 						if (status[vertex] == PREACTIVE)
+// 						{
+// 							if (status[neighbor] == ACTIVE)
+// 							{
+// 								#pragma omp atomic
+// 								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+// 							}
+// 							else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
+// 							{
+// 								#pragma omp atomic
+// 								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+// 								
+// 								#pragma omp critical
+// 								status[neighbor] = ACTIVE;
+// 								
+// 								update_far = ON;
+// 							}
+// 						}
+// 						else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
+// 						{
+// 							#pragma omp atomic
+// 							priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+// 							
+// 							#pragma omp critical
+// 							status[neighbor] = ACTIVE;
+// 							
+// 							update_far = ON;
+// 						}
+						
+						if (status[vertex] == PREACTIVE && (status[neighbor] == INACTIVE || status[neighbor] == PREACTIVE))
 						{
-							if (status[neighbor] == ACTIVE)
-							{
-								#pragma omp atomic
-								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-							}
-							else if ((status[neighbor] == INACTIVE) || (status[neighbor] == PREACTIVE))
-							{
-								#pragma omp atomic
-								priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
-								
-								#pragma omp critical
-								status[neighbor] = ACTIVE;
-								
-								update_far = ON;
-							}
+							#pragma omp atomic
+							priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
+							
+							#pragma omp critical
+							status[neighbor] = ACTIVE;
+							
+							update_far = ON;
+						}
+						else if (status[vertex] == PREACTIVE && status[neighbor] == ACTIVE)
+						{
+							#pragma omp atomic
+							priority[neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
 						}
 						else if ((status[vertex] == ACTIVE) && (status[neighbor] == PREACTIVE))
 						{
@@ -181,6 +223,7 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 							
 							update_far = ON;
 						}
+						
 				
 						if (update_far)
 						{
@@ -200,9 +243,6 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 								{
 									#pragma omp critical
 									status[far_neighbor] = PREACTIVE;
-									
-									#pragma omp atomic
-									priority[far_neighbor][SLOAN_NEW_PRIOR] += SLOAN_W2;
 								}
 								
 								#pragma omp atomic

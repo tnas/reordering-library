@@ -203,12 +203,11 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 				
 				neighboors  = GRAPH_adjacent(mgraph->mat, active_node);
 				node_degree = mgraph->graph[active_node].degree;
+				level       = (*levels)[active_node] + 1;
 				
 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
 				{
 					adj_node = neighboors[count_nodes];
-					//TODO: Move command below to outside of loop (Prof. Mariano)
-					level    = (*levels)[active_node] + 1;
 					
 					if (level < (*levels)[adj_node])
 					{

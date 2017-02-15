@@ -112,6 +112,9 @@ test test_reorder_algorithm(test defs)
 	{
 		time = omp_get_wtime();
 		diameter = GRAPH_parallel_pseudodiameter(mgraph, VERTEX_BY_DEGREE);
+// 		diameter = GRAPH_parallel_pseudodiameter(mgraph, HALF_SORTED);
+// 		diameter = GRAPH_parallel_pseudodiameter(mgraph, FIVE_NON_ADJACENT);
+		
 		defs.time_peripheral = (omp_get_wtime() - time)/100.0;
 		
 		defs.root       = diameter->start;
@@ -212,7 +215,6 @@ test test_reorder_algorithm(test defs)
 		case logbag_sloan : // t = 11
 			defs.algorithm_name = "Parallel Logical Bag Sloan";
 			defs.algorithm      = logbag_sloan;
-			GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, defs.end_node, BFS_PERCENT_CHUNK);
 			time = omp_get_wtime();
 			Parallel_Logical_Bag_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
@@ -456,9 +458,9 @@ void run_reordering_tests()
 // 		"../Matrices/hsl.mtx",
 // 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
-		"../Matrices/can24.mtx",
+// 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx",
+		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/thermomech_TC.mtx"
