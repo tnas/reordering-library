@@ -83,7 +83,8 @@ test test_reorder_algorithm(test defs)
 	
 	if (is_sloan_algorithm(defs.algorithm))
 	{
-		defs.original_wavefront = MATRIX_envelope(matrix);
+// 		defs.original_wavefront = MATRIX_envelope(matrix);
+		defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 	}
 	else
 	{
@@ -251,7 +252,8 @@ test test_reorder_algorithm(test defs)
 			time = omp_get_wtime();
 			MATRIX_permutation(matrix, permutation);
 			defs.time_permutation = (omp_get_wtime() - time)/100.0;
-			defs.reorder_wavefront = MATRIX_envelope(matrix);
+// 			defs.reorder_wavefront = MATRIX_envelope(matrix);
+			defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 			
 			printf("%s: (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
 				defs.algorithm_name, defs.original_wavefront, defs.reorder_wavefront, 
@@ -442,9 +444,9 @@ void run_reordering_tests()
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-// 		"../Matrices/FEM_3D_thermal1.mtx",
+		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/thermomech_TC.mtx"
 // 		"../Matrices/apothen.mtx",
 	};

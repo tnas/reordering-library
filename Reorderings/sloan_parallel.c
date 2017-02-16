@@ -33,14 +33,8 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 	
 	num_nodes = mgraph->size;
 	distance  = calloc(num_nodes, sizeof (int));
-	
-// 	start_node = 2; end_node = 8;
-	num_nodes = mgraph->size;
-	distance  = calloc(num_nodes, sizeof (int));
 	GRAPH_parallel_fixedpoint_static_BFS(mgraph, end_node, &distance, BFS_PERCENT_CHUNK);
 	
-// 	printf(">>start_node, end_node: %d(%d), %d(%d)\n", start_node, distance[start_node], end_node, distance[end_node]);fflush(stdout);
-
 	#pragma omp parallel 
 	{
 		int node, vertex, vertex_degree, neighbor, ngb, prior_bag, 
@@ -97,7 +91,6 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 			num_prior_bags = SLOAN_PRIORITY_FACTOR * 
 				(priority[start_node][SLOAN_CURR_PRIOR] - min_priority);
 			size_bags = calloc(num_prior_bags, sizeof(LIST*));
-// 			printf("-------->>>>>>>>>>>>min_priority: %d\n", min_priority);fflush(stdout);
 		}
 		
 		#pragma omp for schedule(static, chunk_size)
@@ -125,8 +118,6 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 		
 		while (next_id < num_nodes)
 		{
-// 			printf("searching max priority...\n");fflush(stdout);
-			
 			#pragma omp sections
 			{
 				// Chosing maximum priority == Defining the Logical Bag
@@ -137,7 +128,6 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 						if (size_bags[prior_bag] > 0)
 						{
 							max_priority = prior_bag;
-// 							printf("setting max priority as %d\n", max_priority);fflush(stdout);
 							prior_bag = 0; // stop seaching
 						}
 					}
