@@ -37,6 +37,7 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 	int* status = calloc (n,sizeof (int));
 	
 	/* start vertex s and end vertex e */
+// 	node_s = 2; node_e = 8;
 	GRAPH_bfs (A,node_e,d);
 	
 	/* INACTIVE status and priority P(i) = W1*d(i,e) - W2*(degree(i)+1) */
@@ -51,6 +52,8 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 	L = LIST_insert_IF_NOT_EXIST (L,node_s);
 	status[node_s] = -1;
 
+// 	printf(">>start_node, end_node: %d(%d), %d(%d)\n", node_s, d[node_s], node_e, d[node_e]);fflush(stdout);
+	
 	for (I = 0; I < n; ++I)
 	{
 		max_P = -9999999;
@@ -62,7 +65,23 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 				i = q->data;
 			}
 		}
-
+		
+// 		printf("Priorities: ");
+// 		for (J = 0; J < n; ++J)
+// 		{
+// 			if ((status[J] == -1) || (status[J] == 0))
+// 			{
+// 				printf("%d(*%d), ", J, P[J]);fflush(stdout);
+// 			}
+// 			else 
+// 			{
+// 				printf("%d(%d), ", J, P[J]);fflush(stdout);
+// 			}
+// 		}
+// 		printf("\n");fflush(stdout);
+// 		
+// 		printf("---->>>>processed vertex/priority: %d/%d\n", i, max_P);fflush(stdout);
+		
 		L = LIST_remove (L,i);
 		
 		if (status[i] == -1) // PREACTIVE

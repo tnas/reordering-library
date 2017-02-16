@@ -83,14 +83,7 @@ test test_reorder_algorithm(test defs)
 	
 	if (is_sloan_algorithm(defs.algorithm))
 	{
-		if (is_hsl_algorithm(defs.algorithm))
-		{
-			defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
-		}
-		else 
-		{
-		defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
-		}
+		defs.original_wavefront = MATRIX_envelope(matrix);
 	}
 	else
 	{
@@ -255,21 +248,10 @@ test test_reorder_algorithm(test defs)
 		}
 		else
 		{
-			if (is_parallel_algorithm(defs.algorithm))
-			{
-				time = omp_get_wtime();
-				MATRIX_PARALLEL_permutation(matrix, permutation);
-				defs.time_permutation = (omp_get_wtime() - time)/100.0;
-				defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
-// 				defs.reorder_wavefront = -1;
-			}
-			else
-			{
-				time = omp_get_wtime();
-				MATRIX_permutation(matrix, permutation);
-				defs.time_permutation = (omp_get_wtime() - time)/100.0;
-				defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
-			}
+			time = omp_get_wtime();
+			MATRIX_permutation(matrix, permutation);
+			defs.time_permutation = (omp_get_wtime() - time)/100.0;
+			defs.reorder_wavefront = MATRIX_envelope(matrix);
 			
 			printf("%s: (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Permut/Total) [ %.6f || %.6f || %.6f || %.6f ]\n",
 				defs.algorithm_name, defs.original_wavefront, defs.reorder_wavefront, 
@@ -467,7 +449,7 @@ void run_reordering_tests()
 // 		"../Matrices/apothen.mtx",
 	};
 	
-	int nthreads[] = { 1 };
+	int nthreads[] = { 4 };
 	
 	reorder_algorithm algorithms[] = { boost_sloan, logbag_sloan };
 	
