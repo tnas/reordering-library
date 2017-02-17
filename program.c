@@ -40,12 +40,11 @@
  * 	5: Unordered RCM
  * 	6: Leveled RCM
  * 	7: Bucket RCM
- * 	8: Parallel Sloan
+ * 	8: Relaxed Order Sloan
  * 	9: Boost RCM
  *     10: Boost Sloan
  *     11: Logical Bag Sloan
- *     12: Bag Sloan
- *     13: Shrinked RCM
+ *     12: Shrinked RCM
  * -p <number of threads>
  * -b <percent of chunk for Unordered RCM>
  * -t <test suite>:

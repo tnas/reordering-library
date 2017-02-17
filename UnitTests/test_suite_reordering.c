@@ -47,9 +47,9 @@ int inline is_parallel_algorithm(reorder_algorithm algorithm)
 
 int inline is_sloan_algorithm(reorder_algorithm algorithm)
 {
-	if (algorithm == hsl_sloan || algorithm == parallel_sloan ||
+	if (algorithm == hsl_sloan || algorithm == relaxed_order_sloan ||
 	    algorithm == serial_sloan || algorithm == boost_sloan ||
-		algorithm == logbag_sloan || algorithm == bag_sloan)
+		algorithm == logbag_sloan)
 		return 1;
 	
 	return 0;
@@ -185,12 +185,11 @@ test test_reorder_algorithm(test defs)
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
-		case parallel_sloan : // t = 8
-			defs.algorithm_name = "Parallel Sloan";
-			defs.algorithm      = parallel_sloan;
-			GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, defs.end_node, BFS_PERCENT_CHUNK);
+		case relaxed_order_sloan : // t = 8
+			defs.algorithm_name = "Relaxed Order Sloan";
+			defs.algorithm      = relaxed_order_sloan;
 			time = omp_get_wtime();
-			Parallel_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
+			Parallel_Relaxed_Order_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 			
@@ -214,16 +213,7 @@ test test_reorder_algorithm(test defs)
 			defs.time_reordering = (omp_get_wtime() - time)/100.0;
 			break;
 		
-		case bag_sloan : // t = 12
-			defs.algorithm_name = "Parallel Bag Sloan";
-			defs.algorithm      = bag_sloan;
-			GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, defs.end_node, BFS_PERCENT_CHUNK);
-			time = omp_get_wtime();
-			Parallel_Bag_Sloan(mgraph, &permutation, defs.start_node, defs.end_node);
-			defs.time_reordering = (omp_get_wtime() - time)/100.0;
-			break;
-			
-		case shrinked_rcm : // t = 13
+		case shrinked_rcm : // t = 12
 			defs.algorithm_name = "Shrinked RCM";
 			defs.algorithm      = shrinked_rcm;
 			time = omp_get_wtime(); 
@@ -421,22 +411,7 @@ void run_reordering_tests()
 	int num_executions  = 1;
 	
 	const char* matrices[] = {
-// 		"./Big-Matrices/10-hugetric-00000.mtx",
-// 		"./Big-Matrices/09-channel-500x100x100-b050.mtx",
-// 		"../Big-Matrices/08-NLR.mtx",
-// 		"./Big-Matrices/07-venturiLevel3.mtx",
-// 		"./Big-Matrices/06-333SP.mtx",
-// 		"../Big-Matrices/05-M6.mtx",
-// 		"../Big-Matrices/04-G3_circuit.mtx",
-// 		"../Big-Matrices/03-dielFilterV3real.mtx",
-// 		"./Big-Matrices/02-audikw_1.mtx",
-// 		"../Big-Matrices/01-inline_1.mtx",	
-// 		"../Big-Matrices/hugetric-00020.mtx"
-// 		"../Big-Matrices/great-britain_osm.mtx"
-		
-// 		"../Big-Matrices/delaunay_n24.mtx",
-// 		"../Big-Matrices/10-road_usa.mtx"
-// 		"../Matrices/fidap001.mtx",
+		"../Matrices/fidap001.mtx",
 // 		"../Matrices/fidapm08.mtx",
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/hsl.mtx",
@@ -444,16 +419,16 @@ void run_reordering_tests()
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/thermomech_TC.mtx"
 // 		"../Matrices/apothen.mtx",
 	};
 	
-	int nthreads[] = { 1 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { boost_sloan, logbag_sloan };
+	reorder_algorithm algorithms[] = { boost_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -514,7 +489,7 @@ void run_dissertation_largest_matrices()
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	
-	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
+	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -544,7 +519,7 @@ void run_dissertation_smallest_matrices()
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
-	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, parallel_sloan };
+	reorder_algorithm algorithms[] = { hsl_rcm, boost_rcm, unordered_rcm, shrinked_rcm, bucket_rcm, hsl_sloan, boost_sloan, logbag_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

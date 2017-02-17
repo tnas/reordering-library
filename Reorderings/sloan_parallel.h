@@ -62,6 +62,5 @@ inline static SLOAN_GRAPH GRAPH_deque(SLOAN_GRAPH** queue, int size, int* head_i
 	return value;
 }
 
-void Parallel_Logical_Bag_Sloan (METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
-void Parallel_Bag_Sloan	        (METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
-void Parallel_Sloan	        (METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
+void Parallel_Logical_Bag_Sloan   (METAGRAPH* mgraph, int** permutation, int start_node, int end_node);
+void Parallel_Relaxed_Order_Sloan (METAGRAPH* mgraph, int** permutation, int start_node, int end_node);

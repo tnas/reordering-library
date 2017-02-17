@@ -47,11 +47,10 @@ typedef enum {
 	unordered_rcm,
 	leveled_rcm,
 	bucket_rcm,
-	parallel_sloan,
+	relaxed_order_sloan,
 	boost_rcm,
 	boost_sloan,
 	logbag_sloan,
-	bag_sloan,
 	shrinked_rcm
 } reorder_algorithm;
 
