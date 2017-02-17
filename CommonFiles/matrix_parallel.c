@@ -104,7 +104,6 @@ long int MATRIX_PARALLEL_max_wavefront(MAT* A)
 					max_wavefront = wf_per_row[row];
 			}
 		}
-		
 	}
 	
 	free(wf_per_row);
