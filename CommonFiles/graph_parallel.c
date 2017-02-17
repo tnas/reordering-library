@@ -438,7 +438,6 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 			meta_graph->graph[node].chnum      = 0;
 			meta_graph->graph[node].label      = node;
 			meta_graph->graph[node].degree     = GRAPH_degree(mat, node);
-// 			meta_graph->graph[node].neighboors = GRAPH_adjacent(mat, node);
 			omp_init_lock(&meta_graph->lock_node[node]); 
 			
 			if (meta_graph->graph[node].degree < local_min_degree)

@@ -58,9 +58,8 @@
  * 	6: linked list operations
  * 	7: TEMA journal
  * 	8: Dissertation Biggest Matrices
- * 	9: Dissertation Medium Matrices
- *     10: Dissertation Smallest Matrices
- *     11: Karantasis matrices paper 
+ *      9: Dissertation Smallest Matrices
+ *     10: SBPO-2017 conference test
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -154,16 +153,12 @@ int main (int argc, char* argv[]) {
 				run_dissertation_largest_matrices();
 				break;
 				
-			case DISSERTATION_MEDIUM :
-				run_dissertation_medium_matrices();
-				break;
-				
 			case DISSERTATION_SMALLEST :
 				run_dissertation_smallest_matrices();
 				break;
 				
-			case KARANTASIS :
-				run_dissertation_karantasis_matrices();
+			case SBPO2017 :
+				run_sbpo2017_tests();
 				break;
 		}
 	}

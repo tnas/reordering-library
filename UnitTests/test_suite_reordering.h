@@ -88,7 +88,7 @@ void   run_tema_journal_tests  			();
 void   run_dissertation_largest_matrices	();
 void   run_dissertation_medium_matrices 	();
 void   run_dissertation_smallest_matrices	();
-void   run_dissertation_karantasis_matrices	();
+void   run_sbpo2017_tests			();
 
 
 #endif

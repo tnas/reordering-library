@@ -99,7 +99,10 @@ long int MATRIX_PARALLEL_max_wavefront(MAT* A)
 		if (wf_per_row[row] > max_wavefront)
 		{
 			#pragma omp critical
-			max_wavefront = wf_per_row[row];
+			{
+				if (wf_per_row[row] > max_wavefront)
+					max_wavefront = wf_per_row[row];
+			}
 		}
 		
 	}
