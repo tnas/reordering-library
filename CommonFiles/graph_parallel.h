@@ -14,13 +14,14 @@
  * limitations under the License.
  *
  */
+#ifndef __GRAPH_PARALLEL_H__
+#define __GRAPH_PARALLEL_H__
+
 #include <omp.h>
 #include "graph.h"
 #include "util_parallel.h"
 #include "../Reorderings/reordering.h"
 
-#ifndef __GRAPH_PARALLEL_H__
-#define __GRAPH_PARALLEL_H__
 
 #define BFS_WORK_CHUNK 1024
 #define BFS_PERCENT_CHUNK 0.5
@@ -50,9 +51,9 @@ typedef struct
 	int size;
 	int edges;
 	omp_lock_t* lock_node;
-	int* sloan_priority;
-	int min_sloan_priority;
-	int max_sloan_priority;
+	int min_sloan_priority; // temp
+	int max_sloan_priority; // temp
+	int max_degree;
 } METAGRAPH; 
 
 typedef struct 

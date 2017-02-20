@@ -59,6 +59,7 @@
  * 	8: Dissertation Biggest Matrices
  *      9: Dissertation Smallest Matrices
  *     10: SBPO-2017 conference test
+ *     11: CNMAC-2017 conference test
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -158,6 +159,10 @@ int main (int argc, char* argv[]) {
 				
 			case SBPO2017 :
 				run_sbpo2017_tests();
+				break;
+			
+			case CNMAC2017 :
+				run_cnmac2017_tests();
 				break;
 		}
 	}

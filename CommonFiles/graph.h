@@ -34,6 +34,7 @@ typedef struct
 	int status;
 	int chnum;
 	int index;
+	int priority;
 } GRAPH;
 
 

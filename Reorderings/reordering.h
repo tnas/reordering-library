@@ -23,8 +23,17 @@
 
 #define MIN_PRIORITY -9999999
 
-#define SLOAN_W1 1
-#define SLOAN_W2 2
+#define SLOAN_W1 2
+#define SLOAN_W2 1
+
+#define BAG_SLOAN_W1 1
+#define BAG_SLOAN_W2 2
+
+typedef enum 
+{ 
+	INACTIVE, PREACTIVE, ACTIVE, NUMBERED 
+	
+} SLOAN_STATE;
 
 typedef enum { OFF, ON } UPDATE;
 

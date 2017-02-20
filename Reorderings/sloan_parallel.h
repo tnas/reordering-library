@@ -22,11 +22,6 @@
 #define SLOAN_CURR_PRIOR 0
 #define SLOAN_NEW_PRIOR 1
 
-typedef enum 
-{ 
-	INACTIVE, PREACTIVE, ACTIVE, NUMBERED 
-	
-} SLOAN_STATE;
 
 typedef struct 
 {
@@ -42,8 +37,8 @@ typedef struct
 {
 	int label;
 	int status;
-	int distance;
-	int* priorities;
+	int priority;
+	int distance; // temp
 } SLOAN_GRAPH;
 
 

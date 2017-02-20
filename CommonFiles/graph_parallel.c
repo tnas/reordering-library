@@ -251,11 +251,11 @@ void GRAPH_parallel_fixedpoint_static_BFS(const METAGRAPH* mgraph, int root, int
 
 
 
-void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const float percent_chunk)
+void GRAPH_parallel_fixedpoint_sloan_BFS_old(METAGRAPH* mgraph, int root, const float percent_chunk)
 {
 	int node, n_nodes, ws_size, has_unreached_nodes, tail, head;
 	int* work_set;
-	int* levels;
+	int* distance;
 	omp_lock_t lock;
 	n_nodes = mgraph->size;
 	ws_size = (omp_get_max_threads() + 1) * n_nodes; // oversizing estimate
@@ -272,10 +272,7 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 		#pragma omp sections
 		{
 			#pragma omp section
-			levels = calloc(n_nodes, sizeof(int));
-			
-			#pragma omp section
-			mgraph->sloan_priority = calloc(n_nodes, sizeof(int));
+			distance = calloc(n_nodes, sizeof(int));
 			
 			#pragma omp section
 			mgraph->min_sloan_priority = INFINITY_LEVEL;
@@ -286,12 +283,20 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 		
 		#pragma omp for private(node)
 		for (node = 0; node < n_nodes; ++node) 
-			levels[node] = INFINITY_LEVEL;
+		{
+			distance[node] = INFINITY_LEVEL;
+			
+			// Setting initial status
+			mgraph->graph[node].status = INACTIVE;
+		}
 		
 		#pragma omp sections 
 		{
 			#pragma omp section
-			levels[root] = 0;
+			distance[root] = 0;
+			
+			#pragma omp section
+			mgraph->graph[root].distance = -SLOAN_W2*(mgraph->graph[root].degree + 1);
 			
 			#pragma omp section
 			{
@@ -336,6 +341,7 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 			while (!QUEUE_empty(active_chunk_ws, active_head, active_tail))
 			{
 				active_node = QUEUE_deque(&active_chunk_ws, n_nodes, &active_head);
+				level       = distance[active_node] + 1;
 				
 				neighboors  = GRAPH_adjacent(mgraph->mat, active_node);
 				node_degree = mgraph->graph[active_node].degree;
@@ -343,29 +349,28 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
 				{
 					adj_node = neighboors[count_nodes];
-					level    = levels[active_node] + 1;
 					
-					if (level < levels[adj_node])
+					if (level < distance[adj_node])
 					{
-						if (levels[adj_node] == INFINITY_LEVEL) 
+						if (distance[adj_node] == INFINITY_LEVEL) 
 						{
 							#pragma omp atomic
 							--has_unreached_nodes;
 						}
 						
 						#pragma omp critical
-						if (level < levels[adj_node])
+						if (level < distance[adj_node])
 						{
-							levels[adj_node] = level;
+							distance[adj_node] = level;
 							
-							mgraph->sloan_priority[adj_node] = 
-								SLOAN_W1*levels[adj_node] - SLOAN_W2*(mgraph->graph[adj_node].degree + 1);
+							mgraph->graph[adj_node].distance = 
+								SLOAN_W1*level - SLOAN_W2*(mgraph->graph[adj_node].degree + 1);
 								
-							if (mgraph->sloan_priority[adj_node] > mgraph->max_sloan_priority)
-								mgraph->max_sloan_priority = mgraph->sloan_priority[adj_node];
+							if (mgraph->graph[adj_node].distance > mgraph->max_sloan_priority)
+								mgraph->max_sloan_priority = mgraph->graph[adj_node].distance;
 							
-							if (mgraph->sloan_priority[adj_node] < mgraph->min_sloan_priority)
-								mgraph->min_sloan_priority = mgraph->sloan_priority[adj_node];
+							if (mgraph->graph[adj_node].distance < mgraph->min_sloan_priority)
+								mgraph->min_sloan_priority = mgraph->graph[adj_node].distance;
 						}
 						
 						QUEUE_enque(&cache_work_set, n_nodes, &cache_tail, adj_node);
@@ -394,11 +399,149 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 	}
 	
 	omp_destroy_lock(&lock);
-	free(levels);
+	free(distance);
 	free(work_set);
 }
 
 
+
+void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const float percent_chunk)
+{
+	int node, n_nodes, ws_size, has_unreached_nodes, tail, head;
+	int* work_set;
+	omp_lock_t lock;
+	n_nodes = mgraph->size;
+	ws_size = (omp_get_max_threads() + 1) * n_nodes; // oversizing estimate
+	
+	mgraph->max_degree = -INFINITY_LEVEL;
+	
+	#pragma omp parallel 
+	{
+		int active_node, adj_node, node_degree, count_nodes, level, 
+		    count_chunk, size_chunk, th_max_degree;
+		int* neighboors;
+		int* cache_work_set;
+		int* active_chunk_ws;
+		int th_head, th_tail, active_head, active_tail, cache_head, cache_tail;
+		
+		th_max_degree = -INFINITY_LEVEL;
+		
+		#pragma omp for private(node)
+		for (node = 0; node < n_nodes; ++node) 
+		{
+			mgraph->graph[node].distance = INFINITY_LEVEL;
+			
+			// Setting initial status
+			mgraph->graph[node].status = INACTIVE;
+			
+			if (mgraph->graph[node].degree > th_max_degree)
+				th_max_degree = mgraph->graph[node].degree;
+		}
+		
+		#pragma omp critical
+		if (th_max_degree > mgraph->max_degree)
+			mgraph->max_degree = th_max_degree;
+		
+		#pragma omp sections 
+		{
+			#pragma omp section
+			mgraph->max_degree = -INFINITY_LEVEL;
+			
+			#pragma omp section
+			mgraph->graph[root].distance = 0;
+			
+			#pragma omp section
+			{
+				work_set = calloc(ws_size, sizeof(int)); 
+				tail = head = 0;
+				QUEUE_enque(&work_set, ws_size, &tail, root);
+			}
+			
+			#pragma omp section
+			has_unreached_nodes = n_nodes - 1;
+			
+			#pragma omp section
+			omp_init_lock(&lock);
+		}
+		
+		active_chunk_ws = calloc(n_nodes, sizeof(int));
+		active_head = active_tail = 0;
+		
+		cache_work_set = calloc(n_nodes, sizeof(int));
+		cache_head = cache_tail = 0;
+		
+		while ((!QUEUE_empty(work_set, head, tail)) || has_unreached_nodes > 0) 
+		{
+			if (!QUEUE_empty(work_set, head, tail)) 
+			{
+				#pragma omp critical
+				{
+					th_tail = tail;
+					th_head = head;	
+					size_chunk = ceil(percent_chunk * (th_tail - th_head));
+					head += size_chunk;
+				}
+					
+				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
+				{
+					active_node = QUEUE_deque(&work_set, ws_size, &th_head);
+					QUEUE_enque(&active_chunk_ws, n_nodes, &active_tail, active_node);
+				}
+			}
+			
+			// Fixed Point Iteration
+			while (!QUEUE_empty(active_chunk_ws, active_head, active_tail))
+			{
+				active_node = QUEUE_deque(&active_chunk_ws, n_nodes, &active_head);
+				level       = mgraph->graph[active_node].distance + 1;
+				
+				neighboors  = GRAPH_adjacent(mgraph->mat, active_node);
+				node_degree = mgraph->graph[active_node].degree;
+				
+				for (count_nodes = 0; count_nodes < node_degree; ++count_nodes)
+				{
+					adj_node = neighboors[count_nodes];
+					
+					if (level < mgraph->graph[adj_node].distance)
+					{
+						if (mgraph->graph[adj_node].distance == INFINITY_LEVEL) 
+						{
+							#pragma omp atomic
+							--has_unreached_nodes;
+						}
+						
+						#pragma omp critical
+						if (level < mgraph->graph[adj_node].distance)
+							mgraph->graph[adj_node].distance = level;
+						
+						QUEUE_enque(&cache_work_set, n_nodes, &cache_tail, adj_node);
+					}
+				}
+				
+				free(neighboors);
+			}
+			
+			if (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
+			{
+				omp_set_lock(&lock);
+				
+				while (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
+				{
+					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
+					QUEUE_enque(&work_set, ws_size, &tail, active_node);
+				}
+				
+				omp_unset_lock(&lock);
+			}
+		}
+		
+		free(active_chunk_ws);
+		free(cache_work_set);
+	}
+	
+	omp_destroy_lock(&lock);
+	free(work_set);
+}
 
 
 /**
@@ -420,7 +563,7 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 	meta_graph->mat            = mat;
 	meta_graph->edges          = mat->nz;
 	meta_graph->lock_node      = malloc(size_graph * sizeof(omp_lock_t));
-	meta_graph->sloan_priority = NULL;
+// 	meta_graph->sloan_priority = NULL;
 	
 	#pragma omp parallel 
 	{
@@ -785,9 +928,6 @@ void inline GRAPH_parallel_destroy_METAGRAPH(METAGRAPH* mgraph)
 	#pragma omp parallel for schedule(static) private(node)
 	for (node = 0; node < size_graph; ++node) 
 		omp_destroy_lock(&mgraph->lock_node[node]);
-	
-	if (mgraph->sloan_priority != NULL)
-		free(mgraph->sloan_priority);
 	
 	MATRIX_clean(mgraph->mat);
 	free(mgraph->graph);

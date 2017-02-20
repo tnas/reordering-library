@@ -21,6 +21,8 @@
 #ifndef __MATRIX_PARALLEL_H__
 #define __MATRIX_PARALLEL_H__
 
+#define MATRIX_NUM_THREADS 8
+
 long int MATRIX_PARALLEL_bandwidth   	(MAT* A);
 long int MATRIX_PARALLEL_max_wavefront  (MAT* A);
 long int MATRIX_PARALLEL_rms_wavefront  (MAT* A);

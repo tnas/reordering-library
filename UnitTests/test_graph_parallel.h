@@ -23,7 +23,7 @@
 #include "../CommonFiles/graph_hsl.h"
 #include "../CommonFiles/graph_parallel.h"
 
-#define NUM_THREADS 4
+#define NUM_THREADS 8
 
 
 void run_all_test_GRAPH_parallel();

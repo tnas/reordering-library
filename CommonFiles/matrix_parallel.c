@@ -30,7 +30,7 @@ void inline MATRIX_PARALLEL_wavefront(const MAT* A, int** wf_per_row)
 	nnz  = A->nz;
 	ext_IA = calloc(size+1, sizeof(int));
 	
-	#pragma omp parallel
+	#pragma omp parallel num_threads(MATRIX_NUM_THREADS)
 	{
 		int row, ja, cand_col, virtual_row;
 		int* computed_colu_per_row;
@@ -49,7 +49,7 @@ void inline MATRIX_PARALLEL_wavefront(const MAT* A, int** wf_per_row)
 		
 		computed_colu_per_row = calloc(size, sizeof(int));
 		
-		#pragma omp for schedule(static)
+		#pragma omp for 
 		for (row = 0; row < size; ++row)
 		{
 			memset(computed_colu_per_row, 0, size * sizeof(int));
@@ -89,11 +89,11 @@ long int MATRIX_PARALLEL_max_wavefront(MAT* A)
 	int* wf_per_row;
 	
 	size = A->n;
-	max_wavefront = 0;
+	max_wavefront = 0; 
 	
 	MATRIX_PARALLEL_wavefront(A, &wf_per_row);
 	
-	#pragma omp parallel for schedule(static) private(row)
+	#pragma omp parallel for schedule(static) private(row) num_threads(MATRIX_NUM_THREADS)
 	for (row = 0; row < size; ++row)
 	{
 		if (wf_per_row[row] > max_wavefront)
@@ -127,7 +127,7 @@ long int MATRIX_PARALLEL_rms_wavefront(MAT* A)
 	
 	MATRIX_PARALLEL_wavefront(A, &wf_per_row);
 	
-	#pragma omp parallel for schedule(static) private(row) reduction(+:rms_wavefront)
+	#pragma omp parallel for schedule(static) private(row) reduction(+:rms_wavefront) num_threads(MATRIX_NUM_THREADS)
 	for (row = 0; row < size; ++row)
 	{
 		wf_per_row[row] = pow(wf_per_row[row], 2);
@@ -150,13 +150,13 @@ long int MATRIX_PARALLEL_bandwidth (MAT* A)
 	int size = A->n;
 	unsigned long int bandwidth = 0;
 	
-	#pragma omp parallel
+	#pragma omp parallel num_threads(MATRIX_NUM_THREADS)
 	{
 		int row, band, max_band;
 		
 		max_band = 0;
 		
-		#pragma omp for schedule(static)
+		#pragma omp for schedule(static) 
 		for (row = 0; row < size; ++row)
 		{
 			band = row - A->JA[A->IA[row]];
@@ -190,7 +190,7 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 	nz = A->nz;  
 	B  = malloc(sizeof(MAT));
 	
-	#pragma omp parallel 
+	#pragma omp parallel num_threads(MATRIX_NUM_THREADS)
 	{
 		int i;
 		
@@ -236,7 +236,7 @@ void MATRIX_PARALLEL_permutation (MAT* A, int* p)
 	
 	prefix_sum(counts, &B->IA, n + 1);
 	
-	#pragma omp parallel
+	#pragma omp parallel num_threads(MATRIX_NUM_THREADS)
 	{
 		int i, j, k, index;
 		

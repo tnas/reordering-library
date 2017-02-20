@@ -411,7 +411,7 @@ void run_reordering_tests()
 	int num_executions  = 1;
 	
 	const char* matrices[] = {
-		"../Matrices/fidap001.mtx",
+// 		"../Matrices/fidap001.mtx",
 // 		"../Matrices/fidapm08.mtx",
 // 		"../Matrices/aft01.mtx",
 // 		"../Matrices/hsl.mtx",
@@ -419,16 +419,16 @@ void run_reordering_tests()
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx",
+		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/thermomech_TC.mtx"
 // 		"../Matrices/apothen.mtx",
 	};
 	
-	int nthreads[] = { 4 };
+	int nthreads[] = { 1 };
 	
-	reorder_algorithm algorithms[] = { boost_sloan, relaxed_order_sloan };
+	reorder_algorithm algorithms[] = { hsl_sloan, logbag_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -536,10 +536,10 @@ void run_sbpo2017_tests()
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
-		"../Big-Matrices/20-m_t1.mtx",
-		"../Big-Matrices/19-filter3D.mtx",
-		"../Big-Matrices/18-SiO2.mtx",
-		"../Big-Matrices/17-d_pretok.mtx",
+// 		"../Big-Matrices/20-m_t1.mtx",
+// 		"../Big-Matrices/19-filter3D.mtx",
+// 		"../Big-Matrices/18-SiO2.mtx",
+// 		"../Big-Matrices/17-d_pretok.mtx",
 		"../Big-Matrices/16-CO.mtx",
 		"../Big-Matrices/15-offshore.mtx",
 		"../Big-Matrices/14-Ga41As41H72.mtx",
@@ -561,6 +561,48 @@ void run_sbpo2017_tests()
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
 	
 	reorder_algorithm algorithms[] = { boost_sloan, logbag_sloan };
+	
+	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
+	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
+	int num_algorithms    = sizeof(algorithms)/sizeof(algorithms[0]);
+	
+	// Running tests
+	execute_test_suite(matrices, nthreads, algorithms, num_executions, 
+		      num_matrices, size_set_nthreads, num_algorithms);
+}
+
+
+// t = 11
+void run_cnmac2017_tests()
+{
+	int num_executions  = 5;
+	
+	const char* matrices[] = {
+// 		"../Big-Matrices/20-m_t1.mtx",
+// 		"../Big-Matrices/19-filter3D.mtx",
+// 		"../Big-Matrices/18-SiO2.mtx",
+// 		"../Big-Matrices/17-d_pretok.mtx",
+// 		"../Big-Matrices/16-CO.mtx",
+// 		"../Big-Matrices/15-offshore.mtx",
+// 		"../Big-Matrices/14-Ga41As41H72.mtx",
+// 		"../Big-Matrices/13-F1.mtx",
+// 		"../Big-Matrices/12-mario002.mtx",
+// 		"../Big-Matrices/11-msdoor.mtx",
+		"../Big-Matrices/10-inline_1.mtx",
+		"../Big-Matrices/09-gsm_106857.mtx",
+		"../Big-Matrices/08-Fault_639.mtx",
+		"../Big-Matrices/07-tmt_sym.mtx",
+		"../Big-Matrices/06-boneS10.mtx",
+		"../Big-Matrices/05-audikw_1.mtx",
+		"../Big-Matrices/04-nlpkkt80.mtx",
+		"../Big-Matrices/03-dielFilterV2real.mtx",
+		"../Big-Matrices/02-Serena.mtx",
+		"../Big-Matrices/01-G3_circuit.mtx",
+	};
+	
+	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
+	
+	reorder_algorithm algorithms[] = { hsl_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
