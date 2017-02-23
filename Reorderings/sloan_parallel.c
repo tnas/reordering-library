@@ -522,11 +522,11 @@ int COMPARE_priority_DESC(const void* st, const void* nd)
 	volatile SLOAN_GRAPH* g_st = (SLOAN_GRAPH*) st;
 	volatile SLOAN_GRAPH* g_nd = (SLOAN_GRAPH*) nd;
 		       
-	if (g_st->distance > g_nd->distance) 
+	if (g_st->priority > g_nd->priority) 
 	{
 		return -1;
 	}
-	if (g_st->distance < g_nd->distance)
+	if (g_st->priority < g_nd->priority)
 	{
 		return 1;
 	}
@@ -656,9 +656,8 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 						* Updating far neighbors
 						* ***********************
 						*/
-						
-						far_neighbors   = GRAPH_adjacent(mgraph->mat, neighbor);
 						neighbor_degree = mgraph->graph[neighbor].degree;
+						far_neighbors   = GRAPH_neighboors(mgraph->mat, neighbor, neighbor_degree);
 						
 						for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
 						{
@@ -718,6 +717,13 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 							}
 						}
 					}
+// 					if (dirty_node.status > mgraph->graph[vertex].status)
+// 					{
+// 						mgraph->graph[vertex].status = dirty_node.status;
+// 						
+// 						#pragma omp critical
+// 						GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
+// 					}
 				}
 				
 				dirty_tail = dirty_head = 0;
