@@ -83,8 +83,8 @@ test test_reorder_algorithm(test defs)
 	
 	if (is_sloan_algorithm(defs.algorithm))
 	{
-// 		defs.original_wavefront = MATRIX_envelope(matrix);
-		defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+		defs.original_wavefront = MATRIX_envelope(matrix);
+// 		defs.original_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 	}
 	else
 	{
@@ -242,8 +242,8 @@ test test_reorder_algorithm(test defs)
 			time = omp_get_wtime();
 			MATRIX_permutation(matrix, permutation);
 			defs.time_permutation = (omp_get_wtime() - time)/100.0;
-// 			defs.reorder_wavefront = MATRIX_envelope(matrix);
-			defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
+			defs.reorder_wavefront = MATRIX_envelope(matrix);
+// 			defs.reorder_wavefront = MATRIX_PARALLEL_max_wavefront(matrix);
 			
 			printf("%s: (Before/After) [ %ld/%ld ] => Time (Periph/Reorder/Total) [ %.6f || %.6f || %.6f ]\n",
 				defs.algorithm_name, defs.original_wavefront, defs.reorder_wavefront, 
@@ -411,6 +411,7 @@ void run_reordering_tests()
 	int num_executions  = 1;
 	
 	const char* matrices[] = {
+// 		"../Matrices/apothen.mtx",
 // 		"../Matrices/fidap001.mtx",
 // 		"../Matrices/fidapm08.mtx",
 // 		"../Matrices/aft01.mtx",
@@ -419,16 +420,16 @@ void run_reordering_tests()
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"../Matrices/bcspwr02.mtx",
-		"../Matrices/rail_5177.mtx",
+// 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
-// 		"../Matrices/thermomech_TC.mtx"
-// 		"../Matrices/apothen.mtx",
+// 		"../Matrices/thermomech_TC.mtx",
+		"../Big-Matrices/10-inline_1.mtx",
 	};
 	
-	int nthreads[] = { 1 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { hsl_sloan, logbag_sloan };
+	reorder_algorithm algorithms[] = { hsl_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

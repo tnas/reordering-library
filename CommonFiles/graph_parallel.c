@@ -409,9 +409,8 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 {
 	int node, n_nodes, ws_size, has_unreached_nodes, tail, head;
 	int* work_set;
-	omp_lock_t lock;
 	n_nodes = mgraph->size;
-	ws_size = (omp_get_max_threads() + 1) * n_nodes; // oversizing estimate
+	ws_size = (omp_get_max_threads() + 10) * n_nodes; // oversizing estimate
 	
 	mgraph->max_degree = -INFINITY_LEVEL;
 	
@@ -459,9 +458,6 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 			
 			#pragma omp section
 			has_unreached_nodes = n_nodes - 1;
-			
-			#pragma omp section
-			omp_init_lock(&lock);
 		}
 		
 		active_chunk_ws = calloc(n_nodes, sizeof(int));
@@ -510,9 +506,12 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 							--has_unreached_nodes;
 						}
 						
-						#pragma omp critical
 						if (level < mgraph->graph[adj_node].distance)
-							mgraph->graph[adj_node].distance = level;
+						{
+							#pragma omp critical
+							if (level < mgraph->graph[adj_node].distance)
+								mgraph->graph[adj_node].distance = level;
+						}
 						
 						QUEUE_enque(&cache_work_set, n_nodes, &cache_tail, adj_node);
 					}
@@ -521,17 +520,20 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 				free(neighboors);
 			}
 			
+			active_head = active_tail = 0;
+			
 			if (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
 			{
-				omp_set_lock(&lock);
-				
-				while (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
+				#pragma omp critical
 				{
-					active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
-					QUEUE_enque(&work_set, ws_size, &tail, active_node);
+					while (!QUEUE_empty(cache_work_set, cache_head, cache_tail))
+					{
+						active_node = QUEUE_deque(&cache_work_set, n_nodes, &cache_head);
+						QUEUE_enque(&work_set, ws_size, &tail, active_node);
+					}
 				}
 				
-				omp_unset_lock(&lock);
+				cache_head = cache_tail = 0;
 			}
 		}
 		
@@ -539,7 +541,6 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 		free(cache_work_set);
 	}
 	
-	omp_destroy_lock(&lock);
 	free(work_set);
 }
 

@@ -535,297 +535,13 @@ int COMPARE_priority_DESC(const void* st, const void* nd)
 }
 
 
-
-void Parallel_Relaxed_Order_Sloan_old(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
-{
-	int num_nodes, next_id, prior_head, prior_tail, pqueue_size;
-	int* status;
-	SLOAN_GRAPH* priority_queue;
-	omp_lock_t queue_lock;
-	
-	GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, end_node, BFS_PERCENT_CHUNK);
-	num_nodes = mgraph->size;
-	pqueue_size = (omp_get_max_threads() + 1) * num_nodes; // oversizing estimate
-	
-// 	printf("Initial nodes: %d, %d\n", start_node, end_node);fflush(stdout);
-	
-	#pragma omp parallel 
-	{
-		int vertex, vertex_degree, neighbor_degree, ngb, far_ngb, neighbor, 
-		    far_neighbor, update_far, th_head, th_tail, size_chunk, 
-		    count_chunk, snap_head, snap_tail, dirty_head, dirty_tail;
-		SLOAN_GRAPH active_node, dirty_node;
-		int* neighbors;
-		int* far_neighbors;
-		int* priority_snapshot;
-		SLOAN_GRAPH* dirty_priority;
-		
-		/* ********************************
-		 * ****** Pre-processing **********
-		 * ********************************
-		 */
-		
-		#pragma omp sections
-		{
-			#pragma omp section
-			*permutation = calloc(num_nodes, sizeof(int));
-			
-			#pragma omp section
-			status = calloc(num_nodes, sizeof(int));
-			
-			#pragma omp section
-			priority_queue = calloc(pqueue_size, sizeof(SLOAN_GRAPH));
-			
-			#pragma omp section
-			next_id = prior_head = prior_tail = 0;
-			
-			#pragma omp section
-			omp_init_lock(&queue_lock);
-		}
-		
-		#pragma omp single nowait
-		status[start_node] = PREACTIVE;
-		
-		#pragma omp single
-		{
-			dirty_node.label      = start_node;
-			dirty_node.status     = PREACTIVE;
-			dirty_node.distance   = mgraph->graph[start_node].distance;
-			GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
-		}
-		
-		priority_snapshot = calloc(num_nodes, sizeof(int));
-		snap_head = snap_tail = 0;
-		
-		dirty_priority = calloc(num_nodes, sizeof(SLOAN_GRAPH));
-		dirty_head = dirty_tail = 0;
-		
-// 		printf("Initial Priorities: ");fflush(stdout);
-// 		for (vertex = 0; vertex < num_nodes; ++vertex)
-// 		{
-// 			printf("%d(%d) ", vertex, mgraph->graph[vertex].distance);fflush(stdout);
-// 		}
-// 		printf("\n");fflush(stdout);
-		
-		/* ************************************
-		 * ********** Processing nodes ********
-		 * ************************************/
-		
-		while ((!QUEUE_empty(priority_queue, prior_head, prior_tail)) && next_id < num_nodes)
-		{
-			if (!QUEUE_empty(priority_queue, prior_head, prior_tail)) 
-			{
-				omp_set_lock(&queue_lock);
-				
-// 				printf("Unsorted Priorities: ");fflush(stdout);
-// 				for (vertex = prior_head; vertex < prior_tail; ++vertex)
-// 				{
-// 					printf("%d(%d) ", priority_queue[vertex].label, priority_queue[vertex].distance);fflush(stdout);
-// 				}
-// 				printf("\n");fflush(stdout);
-				
-				if (prior_head < prior_tail)
-					qsort(&priority_queue[prior_head], prior_tail-prior_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC);
-				
-// 				printf("SORTED Priorities: ");fflush(stdout);
-// 				for (vertex = prior_head; vertex < prior_tail; ++vertex)
-// 				{
-// 					printf("%d(%d) ", priority_queue[vertex].label, priority_queue[vertex].distance);fflush(stdout);
-// 				}
-// 				printf("\n------------------------\n");fflush(stdout);
-				
-				th_tail = prior_tail;
-				th_head = prior_head;	
-				size_chunk = ceil(BFS_PERCENT_CHUNK * (th_tail - th_head));
-				prior_head += size_chunk;
-				
-				omp_unset_lock(&queue_lock);
-					
-				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
-				{
-					active_node = GRAPH_deque(&priority_queue, pqueue_size, &th_head);
-					QUEUE_enque(&priority_snapshot, num_nodes, &snap_tail, active_node.label);
-				}
-			}
-			
-			// Processing snapshot of maximum priority nodes
-			while (!QUEUE_empty(priority_snapshot, snap_head, snap_tail))
-			{
-				vertex        = QUEUE_deque(&priority_snapshot, num_nodes, &snap_head);
-				vertex_degree = mgraph->graph[vertex].degree;
-				neighbors     = GRAPH_neighboors(mgraph->mat, vertex, vertex_degree);
-				
-				for (ngb = 0; ngb < vertex_degree; ++ngb)
-				{
-					neighbor   = neighbors[ngb];
-					update_far = OFF;
-					
-					if (status[vertex] == PREACTIVE && (status[neighbor] == INACTIVE || status[neighbor] == PREACTIVE))
-					{
-						dirty_node.label    = neighbor;
-						dirty_node.status   = ACTIVE;
-						dirty_node.distance = mgraph->graph[neighbor].distance + SLOAN_W2;
-						GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
-						
-						update_far = ON;
-					}
-					else if (status[vertex] == PREACTIVE && status[neighbor] == ACTIVE)
-					{
-						dirty_node.label    = neighbor;
-						dirty_node.status   = ACTIVE;
-						dirty_node.distance = mgraph->graph[neighbor].distance + SLOAN_W2;
-						GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
-					}
-					else if (status[vertex] == ACTIVE && status[neighbor] == PREACTIVE)
-					{
-						dirty_node.label    = neighbor;
-						dirty_node.status   = ACTIVE;
-						dirty_node.distance = mgraph->graph[neighbor].distance + SLOAN_W2;
-						GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
-						
-						update_far = ON;
-					}
-			
-					if (update_far)
-					{
-						/* ***********************
-						* Updating far neighbors
-						* ***********************
-						*/
-						
-						far_neighbors   = GRAPH_adjacent(mgraph->mat, neighbor);
-						neighbor_degree = mgraph->graph[neighbor].degree;
-						
-						for (far_ngb = 0; far_ngb < neighbor_degree; ++far_ngb) 
-						{
-							far_neighbor = far_neighbors[far_ngb];
-							
-							if (far_neighbor == vertex) continue;
-							
-							dirty_node.label = far_neighbor;
-							dirty_node.status = status[far_neighbor] == INACTIVE ? PREACTIVE : status[far_neighbor];
-							dirty_node.distance = mgraph->graph[far_neighbor].distance + SLOAN_W2;;
-							GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
-						}
-						
-						free(far_neighbors);
-					}
-				}
-				
-				free(neighbors);
-				
-				// Placing vertex in permutation array
-				#pragma omp critical
-				{
-					if (status[vertex] != NUMBERED)
-					{
-						(*permutation)[next_id++] = vertex;
-						status[vertex] = NUMBERED;
-					}
-				}
-			} // priority snapshot loop
-			
-			snap_head = snap_tail = 0;
-			
-			// Updating priorities and status from dirty nodes
-			if (!QUEUE_empty(dirty_priority, dirty_head, dirty_tail))
-			{
-				while (!QUEUE_empty(dirty_priority, dirty_head, dirty_tail))
-				{
-					dirty_node = GRAPH_deque(&dirty_priority, num_nodes, &dirty_head);
-					vertex     = dirty_node.label;
-					
-					if (status[vertex] == NUMBERED) continue;
-					
-					// Updating priority
-					mgraph->graph[vertex].distance += SLOAN_W2;
-					
-					// Updating status
-					if (dirty_node.status > status[vertex]) 
-					{
-						#pragma omp critical
-						{
-							if (dirty_node.status > status[vertex])
-								status[vertex] = dirty_node.status;
-							GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
-						}
-					}
-// 					if (status[vertex] == INACTIVE)
-// 					{
-// 						#pragma omp critical
-// 						{
-// 							if (status[vertex] == INACTIVE)
-// 							{
-// 								status[vertex] = dirty_node.status;
-// 								GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
-// 							}
-// 						}
-// 					}
-// 					else if (dirty_node.status > status[vertex]) 
-// 					{
-// 						#pragma omp critical
-// 						if (dirty_node.status > status[vertex])
-// 							status[vertex] = dirty_node.status;
-// 						GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
-// 					}
-					
-					
-					
-// 					if (dirty_node.status >= status[vertex])
-// 					{
-// 						status[vertex] = dirty_node.status;
-// 						mgraph->sloan_priority[vertex] = dirty_node.distance;
-// 						#pragma omp critical
-// 						GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
-// 					}
-					
-					
-				}
-			}
-			
-		} // main loop - while
-		
-		/* ********************************
-		 * ****** Post-processing *********
-		 * ********************************
-		 */
-		
-// 		printf("Permutation: ");
-// 		for (vertex = 0; vertex < num_nodes; ++vertex)
-// 		{
-// 			printf("%d ", (*permutation)[vertex]);
-// 		}
-// 		printf("\n");fflush(stdout);
-		
-		free(priority_snapshot);
-		free(dirty_priority);
-		
-		#pragma omp barrier
-		
-		#pragma omp sections
-		{
-			#pragma omp section
-			free(priority_queue);
-			
-			#pragma omp section
-			free(status);
-			
-			#pragma omp section
-			omp_destroy_lock(&queue_lock);
-		}
-	}
-}
-
-
-
 void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, prior_head, prior_tail, pqueue_size, norm;
 	SLOAN_GRAPH* priority_queue;
-	omp_lock_t queue_lock;
 	
 	num_nodes   = mgraph->size;
-	pqueue_size = (omp_get_max_threads() + 1) * num_nodes; // oversizing estimate
+	pqueue_size = (omp_get_max_threads() + 10) * num_nodes; // oversizing estimate
 	GRAPH_parallel_fixedpoint_sloan_BFS(mgraph, start_node, BFS_PERCENT_CHUNK);
 	
 	norm = floor((mgraph->graph[end_node].distance - mgraph->graph[start_node].distance) / 
@@ -835,11 +551,10 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 	{
 		int vertex, vertex_degree, neighbor_degree, ngb, far_ngb, neighbor, 
 		    far_neighbor, update_far, th_head, th_tail, size_chunk, 
-		    count_chunk, snap_head, snap_tail, dirty_head, dirty_tail;
-		SLOAN_GRAPH active_node, dirty_node;
+		    count_chunk, dirty_head, dirty_tail;
+		SLOAN_GRAPH dirty_node;
 		int* neighbors;
 		int* far_neighbors;
-		int* priority_snapshot;
 		SLOAN_GRAPH* dirty_priority;
 		
 		/* ********************************
@@ -857,9 +572,6 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 			
 			#pragma omp section
 			next_id = prior_head = prior_tail = 0;
-			
-			#pragma omp section
-			omp_init_lock(&queue_lock);
 		}
 		
 		#pragma omp for
@@ -881,43 +593,31 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 			GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
 		}
 		
-		priority_snapshot = calloc(num_nodes, sizeof(int));
-		snap_head = snap_tail = 0;
-		
-		dirty_priority = calloc(num_nodes, sizeof(SLOAN_GRAPH));
+		dirty_priority = calloc(pqueue_size, sizeof(SLOAN_GRAPH));
 		dirty_head = dirty_tail = 0;
 		
 		/* ************************************
 		 * ********** Processing nodes ********
 		 * ************************************/
 		
-		while ((!QUEUE_empty(priority_queue, prior_head, prior_tail)) && next_id < num_nodes)
+		while ((!QUEUE_empty(priority_queue, prior_head, prior_tail)) || next_id < num_nodes)
 		{
 			if (!QUEUE_empty(priority_queue, prior_head, prior_tail)) 
 			{
-				omp_set_lock(&queue_lock);
-				
-				if (prior_head < prior_tail)
-					qsort(&priority_queue[prior_head], prior_tail-prior_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC);
-				
-				th_tail = prior_tail;
-				th_head = prior_head;	
-				size_chunk = ceil(BFS_PERCENT_CHUNK * (th_tail - th_head));
-				prior_head += size_chunk;
-				
-				omp_unset_lock(&queue_lock);
-					
-				for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
+				#pragma omp critical
 				{
-					active_node = GRAPH_deque(&priority_queue, pqueue_size, &th_head);
-					QUEUE_enque(&priority_snapshot, num_nodes, &snap_tail, active_node.label);
+					th_tail = prior_tail;
+					th_head = prior_head;
+					qsort(&priority_queue[th_head], th_tail-th_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC);
+					size_chunk = ceil(BFS_PERCENT_CHUNK * (th_tail - th_head));
+					prior_head += size_chunk;
 				}
 			}
 			
 			// Processing snapshot of maximum priority nodes
-			while (!QUEUE_empty(priority_snapshot, snap_head, snap_tail))
+			for (count_chunk = 0; count_chunk < size_chunk; ++count_chunk)
 			{
-				vertex        = QUEUE_deque(&priority_snapshot, num_nodes, &snap_head);
+				vertex        = GRAPH_deque(&priority_queue, pqueue_size, &th_head).label;
 				vertex_degree = mgraph->graph[vertex].degree;
 				neighbors     = GRAPH_neighboors(mgraph->mat, vertex, vertex_degree);
 				
@@ -931,7 +631,7 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 					{
 						dirty_node.label    = neighbor;
 						dirty_node.status   = ACTIVE;
-						GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
+						GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 						
 						update_far = ON;
 					}
@@ -939,13 +639,13 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 					{
 						dirty_node.label    = neighbor;
 						dirty_node.status   = ACTIVE;
-						GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
+						GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 					}
 					else if (mgraph->graph[vertex].status == ACTIVE && mgraph->graph[neighbor].status == PREACTIVE)
 					{
 						dirty_node.label    = neighbor;
 						dirty_node.status   = ACTIVE;
-						GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
+						GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 						
 						update_far = ON;
 					}
@@ -969,7 +669,7 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 							dirty_node.label = far_neighbor;
 							dirty_node.status = mgraph->graph[far_neighbor].status == INACTIVE ? 
 								PREACTIVE : mgraph->graph[far_neighbor].status;
-							GRAPH_enque(&dirty_priority, num_nodes, &dirty_tail, dirty_node);
+							GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 						}
 						
 						free(far_neighbors);
@@ -979,30 +679,32 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 				free(neighbors);
 				
 				// Placing vertex in permutation array
-				#pragma omp critical
+				if (mgraph->graph[vertex].status != NUMBERED)
 				{
-					if (mgraph->graph[vertex].status != NUMBERED)
+					#pragma omp critical
 					{
-						(*permutation)[next_id++] = vertex;
-						mgraph->graph[vertex].status = NUMBERED;
+						if (mgraph->graph[vertex].status != NUMBERED)
+						{
+							(*permutation)[next_id++] = vertex;
+							mgraph->graph[vertex].status = NUMBERED;
+						}
 					}
 				}
+				
 			} // priority snapshot loop
-			
-			snap_head = snap_tail = 0;
 			
 			// Updating priorities and status from dirty nodes
 			if (!QUEUE_empty(dirty_priority, dirty_head, dirty_tail))
 			{
 				while (!QUEUE_empty(dirty_priority, dirty_head, dirty_tail))
 				{
-					dirty_node = GRAPH_deque(&dirty_priority, num_nodes, &dirty_head);
+					dirty_node = GRAPH_deque(&dirty_priority, pqueue_size, &dirty_head);
 					vertex     = dirty_node.label;
 					
 					if (mgraph->graph[vertex].status == NUMBERED) continue;
 					
 					// Updating priority
-					mgraph->graph[vertex].priority += SLOAN_W2;
+					mgraph->graph[vertex].priority += SLOAN_W1;
 					
 					// Updating status
 					if (dirty_node.status > mgraph->graph[vertex].status) 
@@ -1010,11 +712,15 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 						#pragma omp critical
 						{
 							if (dirty_node.status > mgraph->graph[vertex].status)
+							{
 								mgraph->graph[vertex].status = dirty_node.status;
-							GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
+								GRAPH_enque(&priority_queue, pqueue_size, &prior_tail, dirty_node);
+							}
 						}
 					}
 				}
+				
+				dirty_tail = dirty_head = 0;
 			}
 			
 		} // main loop - while
@@ -1023,18 +729,11 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 		 * ****** Post-processing *********
 		 * ********************************
 		 */
-		free(priority_snapshot);
 		free(dirty_priority);
 		
 		#pragma omp barrier
 		
-		#pragma omp sections
-		{
-			#pragma omp section
-			free(priority_queue);
-			
-			#pragma omp section
-			omp_destroy_lock(&queue_lock);
-		}
+		#pragma omp single
+		free(priority_queue);
 	}
 }

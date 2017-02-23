@@ -179,6 +179,7 @@ long int REORDERING_SLOAN_pseudodiameter_HSL(MAT* A, int start_node, int end_nod
 	free(svar);
 	free(pair);
 	
-	return rinfo[MAX_WAVEFRONT];
+// 	return rinfo[MAX_WAVEFRONT];
+	return rinfo[PROFILE];
 }
 
