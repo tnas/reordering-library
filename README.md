@@ -5,7 +5,7 @@ The related algorithms are:
 * Reverse Cuthill McKee - RCM (Bandwidth Reduction)
 * Sloan (Wavefront Reduction)
 
-Three parallelized algorithms were builded from the serial RCM:
+Three parallel algorithms were developed from the serial RCM:
 * Unordered RCM
 * Bucket RCM
 * Shrinked RCM
