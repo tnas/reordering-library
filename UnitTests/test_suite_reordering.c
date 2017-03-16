@@ -419,17 +419,17 @@ void run_reordering_tests()
 // 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
-// 		"../Matrices/bcspwr02.mtx",
+		"../Matrices/bcspwr02.mtx",
 // 		"../Matrices/rail_5177.mtx",
 // 		"../Matrices/Dubcova2.mtx",
 // 		"../Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/thermomech_TC.mtx",
-		"../Big-Matrices/10-inline_1.mtx",
+// 		"../Big-Matrices/10-inline_1.mtx",
 	};
 	
-	int nthreads[] = { 4 };
+	int nthreads[] = { 1 };
 	
-	reorder_algorithm algorithms[] = { hsl_sloan, relaxed_order_sloan };
+	reorder_algorithm algorithms[] = { boost_sloan, logbag_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -537,10 +537,10 @@ void run_sbpo2017_tests()
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
-// 		"../Big-Matrices/20-m_t1.mtx",
-// 		"../Big-Matrices/19-filter3D.mtx",
-// 		"../Big-Matrices/18-SiO2.mtx",
-// 		"../Big-Matrices/17-d_pretok.mtx",
+		"../Big-Matrices/20-m_t1.mtx",
+		"../Big-Matrices/19-filter3D.mtx",
+		"../Big-Matrices/18-SiO2.mtx",
+		"../Big-Matrices/17-d_pretok.mtx",
 		"../Big-Matrices/16-CO.mtx",
 		"../Big-Matrices/15-offshore.mtx",
 		"../Big-Matrices/14-Ga41As41H72.mtx",

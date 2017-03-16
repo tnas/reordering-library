@@ -21,9 +21,9 @@
  * SLOAN Reordering
  *--------------------------------------------------------------------------*/
 
-void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
+void Parallel_Logical_Bag_Sloan_new(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
-	int num_nodes, next_id, min_priority, max_priority, num_prior_bags, 
+	int num_nodes, next_id, max_priority, num_prior_bags, 
 	    num_threads, chunk_size, count_threads_on;
 	int** priority;
 	int* size_bags;
@@ -34,7 +34,7 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 	#pragma omp parallel 
 	{
 		int node, vertex, vertex_degree, neighbor, ngb, prior_bag, 
-		    neighbor_degree, far_ngb, far_neighbor, update_far, th_min_priority;
+		    neighbor_degree, far_ngb, far_neighbor, update_far;
 		int* neighbors;
 		int* far_neighbors;
 		
@@ -46,58 +46,28 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 		}
 		
 		#pragma omp single nowait
-		*permutation = calloc(num_nodes, sizeof (int));
+		*permutation = calloc (num_nodes, sizeof (int));
 		
 		#pragma omp single nowait
-		priority = calloc(num_nodes, sizeof (int*));
-		
-		#pragma omp single nowait
-		min_priority = INFINITY_LEVEL;
-		
-		th_min_priority = INFINITY_LEVEL;
+		priority = calloc (num_nodes, sizeof (int*));
 		
 		#pragma omp barrier
-		
-		#pragma omp for schedule(static, chunk_size)
-		for (node = 0; node < num_nodes; ++node)
-		{
-			priority[node] = calloc(2, sizeof(int));
-			priority[node][SLOAN_CURR_PRIOR] = BAG_SLOAN_W1*mgraph->graph[node].distance - 
-				BAG_SLOAN_W2*(mgraph->graph[node].degree + 1);
-			
-			if (priority[node][SLOAN_CURR_PRIOR] < th_min_priority) 
-				th_min_priority = priority[node][SLOAN_CURR_PRIOR];
-		}
-		
-		#pragma omp critical
-		if (th_min_priority < min_priority)
-			min_priority = th_min_priority;
-		
-		#pragma omp barrier
-		
-		#pragma omp single nowait
-		if (min_priority > 0) 
-		{
-			printf("*** [Error] Sloan minimum initial priority is higher than 0 ***\n");
-			exit(1);
-		}
 		
 		#pragma omp single
 		{
 			num_prior_bags = SLOAN_PRIORITY_FACTOR * 
-				(priority[start_node][SLOAN_CURR_PRIOR] - min_priority);
+				(mgraph->graph[start_node].priority - mgraph->min_sloan_priority);
 			size_bags = calloc(num_prior_bags, sizeof(LIST*));
 		}
 		
 		#pragma omp for schedule(static, chunk_size)
 		for (node = 0; node < num_nodes; ++node) 
 		{
-			priority[node][SLOAN_CURR_PRIOR] -= min_priority;
-			priority[node][SLOAN_NEW_PRIOR]   = priority[node][SLOAN_CURR_PRIOR];
+			priority[node] = calloc(2, sizeof(int));
+			priority[node][SLOAN_CURR_PRIOR] = mgraph->graph[node].priority - mgraph->min_sloan_priority;
+			priority[node][SLOAN_NEW_PRIOR]  = priority[node][SLOAN_CURR_PRIOR];
+			printf("node %d priority %d\n", node, priority[node][SLOAN_CURR_PRIOR]);fflush(stdout);
 		}
-		
-		#pragma omp single nowait
-		mgraph->graph[start_node].status = PREACTIVE;
 		
 		#pragma omp single nowait
 		++size_bags[priority[start_node][SLOAN_CURR_PRIOR]];
@@ -132,8 +102,6 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 				count_threads_on = 0;
 			}
 			
-			printf("max_priority: %d\n", max_priority);fflush(stdout);
-			
 			#pragma omp for schedule(static, chunk_size) 
 			for (vertex = 0; vertex < num_nodes; ++vertex)
 			{
@@ -151,7 +119,8 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 						update_far = OFF;
 						neighbor   = neighbors[ngb];
 						
-						if (mgraph->graph[vertex].status == PREACTIVE && (mgraph->graph[neighbor].status == INACTIVE || mgraph->graph[neighbor].status == PREACTIVE))
+						if (mgraph->graph[vertex].status == PREACTIVE && 
+							(mgraph->graph[neighbor].status == INACTIVE || mgraph->graph[neighbor].status == PREACTIVE))
 						{
 							#pragma omp atomic
 							priority[neighbor][SLOAN_NEW_PRIOR] += BAG_SLOAN_W2;
@@ -263,7 +232,7 @@ void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_
 }
 
 
-void Parallel_Logical_Bag_Sloan_old(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
+void Parallel_Logical_Bag_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
 	int num_nodes, next_id, min_priority, max_priority, num_prior_bags, 
 	    num_threads, chunk_size, count_threads_on;
