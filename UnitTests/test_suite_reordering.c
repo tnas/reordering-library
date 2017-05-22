@@ -418,17 +418,17 @@ void run_reordering_tests()
 // 		"../Matrices/hsl.mtx",
 // 		"../Matrices/sample.mtx",
 // 		"../Matrices/bcspwr01.mtx",
-// 		"../Matrices/can24.mtx",
-// 		"../Matrices/bcspwr02.mtx",
-// 		"../Matrices/rail_5177.mtx",
-// 		"../Matrices/FEM_3D_thermal1.mtx",
+// 		"./Matrices/can24.mtx",
+// 		"./Matrices/bcspwr02.mtx",
+// 		"./Matrices/rail_5177.mtx",
+// 		"./Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-		"../Matrices/thermomech_TC.mtx",
+		"./Matrices/thermomech_TC.mtx",
 	};
 	
-	int nthreads[] = { 4 };
+	int nthreads[] = { 1, 2, 4 };
 	
-	reorder_algorithm algorithms[] = { hsl_sloan, relaxed_order_sloan };
+	reorder_algorithm algorithms[] = { shrinked_rcm };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -445,15 +445,26 @@ void run_tema_journal_tests()
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
-		"../Matrices/benzene.mtx",
-		"../Matrices/FEM_3D_thermal1.mtx",
-		"../Matrices/rail_79841.mtx",
-		"../Matrices/thermomech_TC.mtx",
-		"../Matrices/Dubcova3.mtx",
-		"../Big-Matrices/01-inline_1.mtx",		
-		"../Big-Matrices/02-audikw_1.mtx",
-		"../Big-Matrices/03-dielFilterV3real.mtx",
-		"../Big-Matrices/04-G3_circuit.mtx",
+// 		"../Matrices/benzene.mtx",
+// 		"../Matrices/FEM_3D_thermal1.mtx",
+// 		"../Matrices/rail_79841.mtx",
+// 		"../Matrices/thermomech_TC.mtx",
+// 		"../Matrices/Dubcova3.mtx",
+// 		"../Big-Matrices/01-inline_1.mtx",		
+// 		"../Big-Matrices/02-audikw_1.mtx",
+// 		"../Big-Matrices/03-dielFilterV3real.mtx",
+// 		"../Big-Matrices/04-G3_circuit.mtx",
+		"../Big-Matrices/boneS10.mtx",
+		"../Big-Matrices/dielFilterV2real.mtx",
+		"../Big-Matrices/F1.mtx",
+		"../Big-Matrices/Fault_639.mtx",
+		"../Big-Matrices/Ga41As41H72.mtx",
+		"../Big-Matrices/gsm_106857.mtx",
+		"../Big-Matrices/mario002.mtx",
+		"../Big-Matrices/msdoor.mtx",
+		"../Big-Matrices/nlpkkt80.mtx",
+		"../Big-Matrices/Serena.mtx",
+		"../Big-Matrices/tmt_sym.mtx"
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };

@@ -541,6 +541,109 @@ void Bucket_RCM(const METAGRAPH* mgraph, int** perm, int root)
  * 
  * @since 21-10-2016
  *--------------------------------------------------------------------------*/
+void Shrinked_RCM_original(const METAGRAPH* mgraph, int** perm, int root) 
+{ 
+	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads, generation_size;
+	
+	graph_size = mgraph->size;
+	perm_size  = perm_offset = total_size_children = 0;
+	
+	#pragma omp parallel
+	{
+		int node, n_par, n_ch, degree, num_children;
+		int* neighbors;
+		genealogy generation;
+		
+		#pragma omp single nowait
+		num_threads = omp_get_num_threads();
+		
+		#pragma omp single nowait
+		{
+			*perm  = calloc(graph_size, sizeof(int));
+			(*perm)[0] = root;
+		}
+		
+		#pragma omp single nowait
+		mgraph->graph[root].distance = 0;
+		
+		#pragma omp single nowait
+		mgraph->graph[root].status = LABELED;
+		
+		#pragma omp single nowait
+		perm_size++;
+		
+		#pragma omp barrier
+	
+		while (perm_size < graph_size)
+		{
+			#pragma omp single
+			generation_size = perm_size - perm_offset;
+			
+			#pragma omp single nowait
+			chunk_size = ceil((float) generation_size / num_threads);
+			
+			#pragma omp single nowait
+			total_size_children = 0;
+			
+			#pragma omp for schedule(static, chunk_size) ordered 
+			for (n_par = perm_offset; n_par < perm_size; ++n_par)
+			{
+				degree    = mgraph->graph[(*perm)[n_par]].degree;
+				neighbors = GRAPH_adjacent(mgraph->mat, (*perm)[n_par]);
+				
+				generation.num_children = 0;
+				generation.children = calloc(degree, sizeof(GRAPH));
+				
+				// Processing children from a parent
+				for (n_ch = 0; n_ch < degree; ++n_ch)
+				{
+					if (mgraph->graph[neighbors[n_ch]].parent == NON_VERTEX)
+						mgraph->graph[neighbors[n_ch]].parent = (*perm)[n_par];
+					
+					if (mgraph->graph[neighbors[n_ch]].distance > mgraph->graph[(*perm)[n_par]].distance)
+					{
+						if (mgraph->graph[neighbors[n_ch]].distance > mgraph->graph[(*perm)[n_par]].distance + 1)
+						{
+							#pragma omp ordered
+							{
+								mgraph->graph[neighbors[n_ch]].distance = mgraph->graph[(*perm)[n_par]].distance + 1;
+									
+								if (mgraph->graph[neighbors[n_ch]].status == UNREACHED)
+								{
+									mgraph->graph[neighbors[n_ch]].status = LABELED;
+									generation.children[generation.num_children++] =  mgraph->graph[neighbors[n_ch]];
+								}
+							}
+						}
+					}
+				}
+				
+				free(neighbors);
+				
+				// Placement
+				#pragma omp ordered
+				{
+					num_children = generation.num_children;
+					
+					for (node = 0; node < num_children; ++node)
+						(*perm)[perm_size + total_size_children + node] = generation.children[node].label;
+					
+					total_size_children += num_children;
+				}
+				
+				free(generation.children);
+			}
+			
+			#pragma omp single
+			perm_size += total_size_children;
+			
+			#pragma omp single
+			perm_offset = perm_size - total_size_children;
+		}
+	}
+}
+
+
 void Shrinked_RCM(const METAGRAPH* mgraph, int** perm, int root) 
 { 
 	int graph_size, perm_size, perm_offset, chunk_size, total_size_children, num_threads, generation_size;
@@ -585,7 +688,7 @@ void Shrinked_RCM(const METAGRAPH* mgraph, int** perm, int root)
 			#pragma omp single nowait
 			total_size_children = 0;
 			
-			#pragma omp for schedule(static, chunk_size) ordered
+			#pragma omp for schedule(static, chunk_size) ordered 
 			for (n_par = perm_offset; n_par < perm_size; ++n_par)
 			{
 				degree    = mgraph->graph[(*perm)[n_par]].degree;
