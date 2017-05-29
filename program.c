@@ -55,11 +55,11 @@
  * 	4: graph parallel
  * 	5: util functions
  * 	6: linked list operations
- * 	7: TEMA journal
+ * 	7: TEMA journal test
  * 	8: Dissertation Biggest Matrices
  *      9: Dissertation Smallest Matrices
  *     10: SBPO-2017 conference test
- *     11: CNMAC-2017 conference test
+ *     11: IJCA-2017 journal test
  * *****************************************************
  */
 int main (int argc, char* argv[]) {
@@ -161,8 +161,8 @@ int main (int argc, char* argv[]) {
 				run_sbpo2017_tests();
 				break;
 			
-			case CNMAC2017 :
-				run_cnmac2017_tests();
+			case IJCA2017 :
+				run_ijca2017_tests();
 				break;
 		}
 	}

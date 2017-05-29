@@ -423,12 +423,12 @@ void run_reordering_tests()
 // 		"./Matrices/rail_5177.mtx",
 // 		"./Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-		"../Matrices/thermomech_TC.mtx",
+		"./Matrices/thermomech_TC.mtx",
 	};
 	
-	int nthreads[] = { 1, 2, 4 };
+	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { shrinked_rcm };
+	reorder_algorithm algorithms[] = { hsl_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
@@ -584,31 +584,16 @@ void run_sbpo2017_tests()
 
 
 // t = 11
-void run_cnmac2017_tests()
+void run_ijca2017_tests()
 {
 	int num_executions  = 5;
 	
 	const char* matrices[] = {
-// 		"../Big-Matrices/20-m_t1.mtx",
-// 		"../Big-Matrices/19-filter3D.mtx",
-// 		"../Big-Matrices/18-SiO2.mtx",
-// 		"../Big-Matrices/17-d_pretok.mtx",
-// 		"../Big-Matrices/16-CO.mtx",
-// 		"../Big-Matrices/15-offshore.mtx",
-// 		"../Big-Matrices/14-Ga41As41H72.mtx",
-// 		"../Big-Matrices/13-F1.mtx",
-// 		"../Big-Matrices/12-mario002.mtx",
-// 		"../Big-Matrices/11-msdoor.mtx",
-		"../Big-Matrices/10-inline_1.mtx",
-		"../Big-Matrices/09-gsm_106857.mtx",
-		"../Big-Matrices/08-Fault_639.mtx",
-		"../Big-Matrices/07-tmt_sym.mtx",
-		"../Big-Matrices/06-boneS10.mtx",
-		"../Big-Matrices/05-audikw_1.mtx",
-		"../Big-Matrices/04-nlpkkt80.mtx",
-		"../Big-Matrices/03-dielFilterV2real.mtx",
-		"../Big-Matrices/02-Serena.mtx",
-		"../Big-Matrices/01-G3_circuit.mtx",
+		"../Big-Matrices/inline_1.mtx",
+		"../Big-Matrices/audikw_1.mtx",
+		"../Big-Matrices/dielFilterV3real.mtx",
+		"../Big-Matrices/G3_circuit.mtx",
+		"../Big-Matrices/333SP.mtx",
 	};
 	
 	int nthreads[] = { 1, 2, 4, 6, 8, 10, 12 };
