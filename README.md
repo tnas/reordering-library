@@ -13,19 +13,14 @@ sudo apt-get install cmake libboost-all-dev gfortran libblas-dev
 </code>
 
 ### Profiling
-For memory check, Valgrind has been used.
-
+* For memory check, Valgrind has been used.
 <code>
 valgrind --leak-check=yes myprog arg1 arg2
 </code>
 
-For performance profiling, Callgrind/KCachegrind has been used.
-
+* For performance profiling, Callgrind/KCachegrind has been used.
 <code>
 valgrind --tool=callgrind program [program_options]
-</code>
-The result is stored in a callgrind.out.XXX file where XXX will be the process identifier. 
-
-<code>
+// The result is stored in a callgrind.out.XXX file where XXX will be the process identifier. 
 kcachegrind callgrind.out.XXX
 </code>
