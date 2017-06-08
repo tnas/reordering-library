@@ -29,4 +29,4 @@ valgrind --tool=callgrind program [program_options]
 kcachegrind callgrind.out.XXX
 </code>
 
-* For graphical performance visualization KCachegrind has been used.
+* For graphical performance visualization, KCachegrind has been used. The file callgrind.out.XXX is yielded by Callgrind, and XXX is the process identifier. 
