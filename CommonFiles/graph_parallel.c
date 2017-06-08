@@ -291,9 +291,6 @@ void GRAPH_parallel_fixedpoint_sloan_BFS(METAGRAPH* mgraph, int root, const floa
 		#pragma omp sections 
 		{
 			#pragma omp section
-			mgraph->max_degree = -INFINITY_LEVEL;
-			
-			#pragma omp section
 			mgraph->graph[root].distance = 0;
 			
 			#pragma omp section
