@@ -870,11 +870,13 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 						if (mgraph->graph[neighbor].status == INACTIVE)
 						{
 							dirty_node.status = PREACTIVE;
+// 							GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 							
 						}	
 						else if (mgraph->graph[neighbor].status == PREACTIVE) 
 						{
 							dirty_node.status = ACTIVE;
+// 							GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 						}
 						
 						GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);

@@ -423,7 +423,7 @@ void run_reordering_tests()
 // 		"./Matrices/rail_5177.mtx",
 // 		"./Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-		"../Matrices/thermomech_TC.mtx",
+		"./Matrices/thermomech_TC.mtx",
 	};
 	
 	int nthreads[] = { 4 };

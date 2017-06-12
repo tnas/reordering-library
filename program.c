@@ -99,15 +99,6 @@ int main (int argc, char* argv[]) {
 		}
 	}
 	
-	// Disabling dynamic adjustment of the number of threads
-	omp_set_dynamic(DYNAMIC_OFF);
-	
-	// Hinting idle threads to slep rather than spin
-	setenv("OMP_WAIT_POLICY", "PASSIVE", OVERWRITE_VARIABLE);
-	
-	// Prevent threads migrating between cores
-	setenv("OMP_PROC_BIND", "TRUE", OVERWRITE_VARIABLE);
-	
 	if (scope == TEST_SUITE)
 	{
 		switch (test_suite) 
