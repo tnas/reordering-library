@@ -420,15 +420,15 @@ void run_reordering_tests()
 // 		"../Matrices/bcspwr01.mtx",
 // 		"../Matrices/can24.mtx",
 // 		"./Matrices/bcspwr02.mtx",
-// 		"./Matrices/rail_5177.mtx",
+		"../Matrices/rail_5177.mtx",
 // 		"./Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-		"./Matrices/thermomech_TC.mtx",
+// 		"./Matrices/thermomech_TC.mtx",
 	};
 	
 	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { hsl_sloan, relaxed_order_sloan };
+	reorder_algorithm algorithms[] = { relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);

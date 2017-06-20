@@ -911,8 +911,12 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 									GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 								}
 							}
+							
+							free(far_neighbors);
 						}
 					}
+					
+					free(neighbors);
 				}
 				
 				// Placing vertex in permutation array

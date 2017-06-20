@@ -2,6 +2,29 @@ cmake_minimum_required(VERSION 2.8)
 
 project(reordering-library)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(PROFILER_ENABLED ON)
+
+set(SCOREP_PROFILER "scorep")
+set(COMPILER_FLAGS "-Wall -fopenmp -o3")
+set(CXX_COMPILER_FLAGS "g++ ${COMPILER_FLAGS}")
+set(C_COMPILER_FLAGS "gcc ${COMPILER_FLAGS}")
+
+if(PROFILER_ENABLED)
+	foreach(LANG C CXX)
+		message(STATUS "Enabling scorep for ${LANG}")
+		set(CMAKE_${LANG}_COMPILER "${SCOREP_PROFILER}")
+		set(CMAKE_${LANG}_FLAGS "${${LANG}_COMPILER_FLAGS}")
+	endforeach()
+else()
+	message(STATUS "Default compilers")
+	foreach(LANG C CXX)
+		set(CMAKE_${LANG}_FLAGS "${COMPILER_FLAGS}")
+	endforeach()
+endif()
+
+
 add_executable(reordering-library program.c 
 	./CommonFiles/util.c 
 	./CommonFiles/matrix.c 
@@ -37,9 +60,6 @@ target_link_libraries(reordering-library ${CMAKE_CURRENT_SOURCE_DIR}/Reorderings
 target_link_libraries(reordering-library m gfortran blas)
 
 install(TARGETS reordering-library RUNTIME DESTINATION bin)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -o3")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fopenmp -o3")
 
 add_subdirectory(CommonFiles)
 add_subdirectory(Matrices)

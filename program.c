@@ -27,6 +27,11 @@
 #define DYNAMIC_OFF 0
 #define OVERWRITE_VARIABLE 1
 
+#define OMP_DYNAMIC_TRUE 1
+#define OMP_DYNAMIC_FALSE 0
+
+
+
 /* *****************************************************
  * Program Parameters:
  * 
