@@ -734,7 +734,7 @@ int get_current_degree(int node, int* adjacents, METAGRAPH* mgraph)
 
 void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int start_node, int end_node)
 {
-	int num_nodes, next_id, prior_head, prior_tail, pqueue_size, norm;
+	int num_nodes, next_id, prior_head, prior_tail, pqueue_size;
 	SLOAN_GRAPH* priority_queue;
 	
 	num_nodes   = mgraph->size;
@@ -761,7 +761,7 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 	#pragma omp parallel 
 	{
 		int vertex, vertex_degree, neighbor_degree, ngb, far_ngb, neighbor, 
-		    far_neighbor, update_far, th_head, th_tail, size_chunk, 
+		    far_neighbor, th_head, th_tail, size_chunk, 
 		    count_chunk, dirty_head, dirty_tail;
 		SLOAN_GRAPH dirty_node;
 		int* neighbors;
@@ -840,7 +840,7 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 // 					printf("\n");fflush(stdout);
 					
 					// Nodes sorting does not impact on the reordering quality???
-					qsort(&priority_queue[th_head], th_tail-th_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC); 
+// 					qsort(&priority_queue[th_head], th_tail-th_head, sizeof(SLOAN_GRAPH), COMPARE_priority_DESC); 
 					
 					prior_head += size_chunk;
 					

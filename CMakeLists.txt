@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(reordering-library)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-set(PROFILER_ENABLED ON)
+set(PROFILER_ENABLED OFF)
 
 set(SCOREP_PROFILER "scorep")
 set(COMPILER_FLAGS "-Wall -fopenmp -o3")
