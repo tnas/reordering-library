@@ -63,6 +63,7 @@ void REORDERING_SLOAN (MAT* A, int** Fp, int node_s, int node_e)
 			}
 		}
 		
+// 		i = L->data; // testing unordered priorities
 		L = LIST_remove (L,i);
 		
 		if (status[i] == -1) // PREACTIVE

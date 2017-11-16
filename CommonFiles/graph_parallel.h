@@ -71,16 +71,17 @@ typedef enum {
 	FIVE_NON_ADJACENT
 } Shrinking_Strategy;
 
-void 		  GRAPH_parallel_fixedpoint_BFS		    (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
-void 		  GRAPH_parallel_fixedpoint_static_BFS	    (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
-void 		  GRAPH_parallel_fixedpoint_sloan_BFS	    (METAGRAPH* mgraph, int root, const float percent_chunk);
-METAGRAPH* 	  GRAPH_parallel_build_METAGRAPH            (MAT* mat);
-void  	  	  GRAPH_parallel_destroy_METAGRAPH          (METAGRAPH* mgraph);
-GRAPH*  	  GRAPH_shrinking_strategy_half_sorted      (GRAPH* nodes, int* length);
-GRAPH* 	  	  GRAPH_shrinking_strategy_vertex_by_degree (GRAPH* nodes, int* length);
-GRAPH* 	  	  GRAPH_shrinking_strategy_five_non_adjacent(GRAPH* nodes, int* length);
-BFS*    	  GRAPH_parallel_build_BFS	       	    (const METAGRAPH* mgraph, int root);
-void 	 	  GRAPH_parallel_destroy_BFS	            (BFS* bfs);
+void 		      GRAPH_parallel_fixedpoint_BFS		        (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
+void 		      GRAPH_parallel_fixedpoint_static_BFS	    (const METAGRAPH* mgraph, int root, int** levels, const float percent_chunk);
+void              GRAPH_parallel_fixedpoint_static_sloan_BFS(const METAGRAPH* mgraph, int root, const float percent_chunk);
+void 		      GRAPH_parallel_fixedpoint_sloan_BFS	    (METAGRAPH* mgraph, int root, const float percent_chunk);
+METAGRAPH* 	      GRAPH_parallel_build_METAGRAPH            (MAT* mat);
+void  	  	      GRAPH_parallel_destroy_METAGRAPH          (METAGRAPH* mgraph);
+GRAPH*  	      GRAPH_shrinking_strategy_half_sorted      (GRAPH* nodes, int* length);
+GRAPH* 	  	      GRAPH_shrinking_strategy_vertex_by_degree (GRAPH* nodes, int* length);
+GRAPH* 	  	      GRAPH_shrinking_strategy_five_non_adjacent(GRAPH* nodes, int* length);
+BFS*    	      GRAPH_parallel_build_BFS	       	        (const METAGRAPH* mgraph, int root);
+void 	 	      GRAPH_parallel_destroy_BFS	            (BFS* bfs);
 graph_diameter*   GRAPH_parallel_pseudodiameter             (const METAGRAPH* meta_graph, Shrinking_Strategy type);
 
 
