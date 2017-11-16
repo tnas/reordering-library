@@ -423,11 +423,11 @@ void run_reordering_tests()
 // 		"../Matrices/rail_5177.mtx",
 // 		"./Matrices/FEM_3D_thermal1.mtx",
 // 		"../Matrices/Dubcova2.mtx",
-		"../Matrices/thermomech_TC.mtx",
-//         "../Matrices/inline_1.mtx"
+// 		"../Matrices/thermomech_TC.mtx",
+        "../Matrices/inline_1.mtx"
 	};
 	
-	int nthreads[] = { 6 };
+	int nthreads[] = { 4 };
 	
 	reorder_algorithm algorithms[] = {hsl_sloan, relaxed_order_sloan};
 	

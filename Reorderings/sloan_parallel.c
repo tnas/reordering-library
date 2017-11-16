@@ -834,13 +834,10 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 						if (mgraph->graph[neighbor].status == INACTIVE)
 						{
 							dirty_node.status = PREACTIVE;
-// 							GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
-							
 						}	
 						else if (mgraph->graph[neighbor].status == PREACTIVE) 
 						{
 							dirty_node.status = ACTIVE;
-// 							GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 						}
 						
 						GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
@@ -871,8 +868,7 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 								}
 								else if (mgraph->graph[far_neighbor].status == INACTIVE)
 								{
-// 									dirty_node.status = PREACTIVE;
-//                                     dirty_node.status = ACTIVE;
+                                    dirty_node.status = ACTIVE;
 									GRAPH_enque(&dirty_priority, pqueue_size, &dirty_tail, dirty_node);
 								}
 							}
@@ -893,24 +889,19 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 						{
 							(*permutation)[next_id++] = vertex;
 							mgraph->graph[vertex].status = NUMBERED;
-// 							printf("Node numbered: %d\n", vertex);fflush(stdout);
 						}
 					}
 				}
 				
 			} // priority snapshot loop
 			
-			// Updating priorities and status from dirty nodes
+			// Updating status of dirty nodes
 			while (!QUEUE_empty(dirty_priority, dirty_head, dirty_tail))
 			{
 				dirty_node = GRAPH_deque(&dirty_priority, pqueue_size, &dirty_head);
 				vertex     = dirty_node.label;
 				
 				if (mgraph->graph[vertex].status == NUMBERED) continue;
-				
-				// Updating priority
-// 				mgraph->graph[vertex].priority += SLOAN_W1;
-// 				dirty_node.priority = mgraph->graph[vertex].priority;
 				
 				// Updating status and adding to priority queue
 				if (dirty_node.status == PREACTIVE) 
