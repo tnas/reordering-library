@@ -739,13 +739,13 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 	
 	num_nodes   = mgraph->size;
 	pqueue_size = (omp_get_max_threads() + 10) * num_nodes; // oversizing estimate
-	GRAPH_parallel_fixedpoint_static_sloan_BFS(mgraph, end_node, BFS_PERCENT_CHUNK);
+// 	GRAPH_parallel_fixedpoint_static_sloan_BFS(mgraph, end_node, BFS_PERCENT_CHUNK);
 	
 	#pragma omp parallel 
 	{
 		int vertex, vertex_degree, neighbor_degree, ngb, far_ngb, neighbor, 
 		    far_neighbor, th_head, th_tail, size_chunk, 
-		    count_chunk, dirty_head, dirty_tail;
+		    count_chunk, dirty_head, dirty_tail, node;
 		SLOAN_GRAPH dirty_node;
 		int* neighbors;
 		int* far_neighbors;
@@ -756,14 +756,21 @@ void Parallel_Relaxed_Order_Sloan(METAGRAPH* mgraph, int** permutation, int star
 		 * ********************************
 		 */
 		
+        #pragma omp single nowait
+        *permutation = calloc(num_nodes, sizeof(int));
+        
+        #pragma omp single nowait
+        next_id = prior_head = 0;
+        
+        #pragma omp for private(node) 
+        for (node = 0; node < num_nodes; ++node) 
+        {
+            // Setting initial status
+            mgraph->graph[node].status = INACTIVE;
+        }
+        
 		#pragma omp sections
 		{
-			#pragma omp section
-			*permutation = calloc(num_nodes, sizeof(int));
-			
-			#pragma omp section
-			next_id = prior_head = 0;
-            
             #pragma omp section
             mgraph->graph[start_node].status = PREACTIVE;
             
