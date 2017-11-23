@@ -16,6 +16,7 @@
  */
 
 #include "../CommonFiles/graph_parallel.h"
+#include "../CommonFiles/linked_list.h"
 #include "reordering.h"
 
 #define SLOAN_PRIORITY_FACTOR 10

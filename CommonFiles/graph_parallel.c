@@ -549,7 +549,6 @@ inline METAGRAPH* GRAPH_parallel_build_METAGRAPH(MAT* mat)
 	meta_graph->mat            = mat;
 	meta_graph->edges          = mat->nz;
 	meta_graph->lock_node      = malloc(size_graph * sizeof(omp_lock_t));
-// 	meta_graph->sloan_priority = NULL;
 	
 	#pragma omp parallel 
 	{

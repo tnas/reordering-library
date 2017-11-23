@@ -428,7 +428,7 @@ void run_reordering_tests()
 	
 	int nthreads[] = { 4 };
 	
-	reorder_algorithm algorithms[] = { relaxed_order_sloan };
+	reorder_algorithm algorithms[] = { hsl_sloan, relaxed_order_sloan };
 	
 	int num_matrices      = sizeof(matrices)/sizeof(matrices[0]);
 	int size_set_nthreads = sizeof(nthreads)/sizeof(nthreads[0]);
